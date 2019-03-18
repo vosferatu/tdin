@@ -33,6 +33,10 @@ namespace Restaurant {
             }
             return new SimpleOrder(desc, table, type, items);
         }
+
+        public Tuple<long, string> ToTuple() {
+            return new Tuple<long, string>(this.id, this.desc);
+        }
     }
 
 

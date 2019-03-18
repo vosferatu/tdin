@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Restaurant {
     public static class ProductReader {
-        private const string STR_START = "products/";
+        private const string STR_START = "./assets/products/";
         private const string DISHES_FILE = STR_START + "dishes.csv";
         private const string DRINKS_FILE = STR_START + "drinks.csv";
 

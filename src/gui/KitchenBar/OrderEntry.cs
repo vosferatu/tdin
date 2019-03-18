@@ -4,13 +4,13 @@ using Gdk;
 
 namespace Restaurant {
     public class OrderEntry: Gtk.HBox {
-        Order order;
+        long order_id;
         Gtk.EventBox label;
         Gtk.EventBox img;
 
-        public OrderEntry(Order order, bool picked): base(false, 0) {
-            this.order = order;
-            this.label = new OrderLabel(order.desc);
+        public OrderEntry(long order_id, string order_desc, bool picked): base(false, 0) {
+            this.order_id = order_id;
+            this.label = new OrderLabel(order_desc);
             if (!picked) {
                 this.img = new PrepareOrder();
             }

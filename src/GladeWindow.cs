@@ -10,10 +10,6 @@ namespace Restaurant {
         [Glade.Widget]
         VBox PreparingBox;
 
-        public static void Main(string[] args) {
-            GladeWindow window = new GladeWindow(args);
-        }
-
         public GladeWindow(string[] args) {
             Application.Init();
             Glade.XML gxml = new Glade.XML("windows/test.glade", "kitchen", null);
