@@ -5,11 +5,11 @@ namespace Restaurant {
     public enum Target {Kitchen, Bar, Both};
     public enum State {NotPicked, Preparing, Ready, Paid};
     
-    public abstract class Order{
+    public abstract class Order: IEquatable<Order> {
         protected static long curr_id = 0;
-        protected long id {get; set;}
-        public string desc {get;}
-        protected string table {get;}
+        public long id {get; set;}
+        public string desc {get; private set;}
+        public int table_n {get; private set;}
 
         protected Target type {get;}
         protected State state;
@@ -20,22 +20,26 @@ namespace Restaurant {
 
         public abstract Dictionary<Product, uint> GetProducts(Target target);
 
-        protected Order(string desc, string table, Target type) {
+        protected Order(string desc, int table_n, Target type) {
             this.desc = desc;
-            this.table = table;
+            this.table_n = table_n;
             this.type = type;
             this.state = State.NotPicked;
         }
     
-        public static Order NewOrder(string desc, string table, Target type, Dictionary<Product, uint> items) {
+        public static Order NewOrder(string desc, int table_n, Target type, Dictionary<Product, uint> items) {
             if (type == Target.Both) {
-                return new CompositeOrder(desc, table, type, items);
+                return new CompositeOrder(desc, table_n, type, items);
             }
-            return new SimpleOrder(desc, table, type, items);
+            return new SimpleOrder(desc, table_n, type, items);
         }
 
         public Tuple<long, string> ToTuple() {
             return new Tuple<long, string>(this.id, this.desc);
+        }
+    
+        public bool Equals(Order other) {
+            return this.id == other.id;
         }
     }
 
@@ -44,8 +48,8 @@ namespace Restaurant {
         Order bar_order;
         Order kit_order;
 
-        internal CompositeOrder(string desc, string table, Target type, Dictionary<Product, uint> items)
-            :base (desc, table, type) 
+        internal CompositeOrder(string desc, int table_n, Target type, Dictionary<Product, uint> items)
+            :base (desc, table_n, type) 
         {
             this.id =  Order.curr_id;
             Order.curr_id++;
@@ -61,8 +65,8 @@ namespace Restaurant {
                 }
             }
 
-            this.bar_order = new SimpleOrder(this.id, this.desc, this.table, Target.Bar, drinks);
-            this.kit_order = new SimpleOrder(this.id, this.desc, this.table, Target.Kitchen, dishes);
+            this.bar_order = new SimpleOrder(this.id, this.desc, this.table_n, Target.Bar, drinks);
+            this.kit_order = new SimpleOrder(this.id, this.desc, this.table_n, Target.Kitchen, dishes);
         }
 
         public override Dictionary<Product, uint> GetProducts(Target target) {
@@ -92,13 +96,13 @@ namespace Restaurant {
     public class SimpleOrder: Order {
         Dictionary<Product, uint> items {get;}
 
-        internal SimpleOrder(long id, string desc, string table, Target type, Dictionary<Product, uint> items)
-            :base (desc, table, type) 
+        internal SimpleOrder(long id, string desc, int table_n, Target type, Dictionary<Product, uint> items)
+            :base (desc, table_n, type) 
         {
             this.id = id;
         }
 
-        internal SimpleOrder(string desc, string table, Target type, Dictionary<Product, uint> items)
+        internal SimpleOrder(string desc, int table, Target type, Dictionary<Product, uint> items)
             :base (desc, table, type) 
         {
             this.id = Order.curr_id;

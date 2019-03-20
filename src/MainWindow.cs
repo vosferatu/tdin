@@ -1,13 +1,14 @@
 using Gtk;
 using Glade;
 using System;
+using System.Threading;
 using System.Collections.Generic;
 
 namespace Restaurant {
     class MainWindow {
+        
         [Glade.Widget]
         Window root;
-
         [Glade.Widget]
         Gtk.EventBox starter;
 
@@ -35,9 +36,15 @@ namespace Restaurant {
         public void OnStartClicked(object o, ButtonReleaseEventArgs e) {
             Console.WriteLine("About to start!");
             this.StartOrders();
-            KitchenBarWindow bar_window = this.NewKitchenBar();
             root.HideAll();
-            bar_window.Show();
+            KitchenBarController bar_window = this.NewKitchenBar();
+            Thread.Sleep(100);
+            foreach(Order order in this.not_picked) {
+                bar_window.NewOrder(order);
+            }
+            foreach(Order order in this.preparing) {
+                bar_window.NewOrder(order);
+            }
         }
 
         private void StartOrders() {
@@ -48,11 +55,11 @@ namespace Restaurant {
             order1_p.Add(new Product("Coke", 1.0, 0.5, false), 3);
 
             order2_p.Add(new Product("Coke", 1.0, 0.5, false), 3);
-            this.not_picked.Add(Order.NewOrder("SADAD", "Mesa 1", Target.Both, order1_p));
-            this.preparing.Add(Order.NewOrder("MMMCM", "Mesa 3", Target.Both, order2_p));
+            this.not_picked.Add(Order.NewOrder("SADAD", 1, Target.Both, order1_p));
+            this.preparing.Add(Order.NewOrder("MMMCM", 3, Target.Both, order2_p));
         }
 
-        private KitchenBarWindow NewKitchenBar() {
+        private KitchenBarController NewKitchenBar() {
             List<Tuple<long, string>> n_picked = new List<Tuple<long, string>>(this.not_picked.Count);
             List<Tuple<long, string>> prep = new List<Tuple<long, string>>(this.preparing.Count);
             foreach(Order order in this.not_picked) {
@@ -63,7 +70,7 @@ namespace Restaurant {
                 prep.Add(order.ToTuple());
             }
 
-            return new KitchenBarWindow(n_picked, prep);
+            return new KitchenBarController();
         }
 
         public void OnDelete(object o, DeleteEventArgs e) {
