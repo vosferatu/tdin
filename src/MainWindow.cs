@@ -55,7 +55,7 @@ namespace Restaurant {
             order1_p.Add(new Product("Coke", 1.0, 0.5, false), 3);
 
             order2_p.Add(new Product("Coke", 1.0, 0.5, false), 3);
-            this.not_picked.Add(Order.NewOrder("SADAD", 1, Target.Both, order1_p));
+            this.not_picked.Add(Order.NewOrder("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 1, Target.Both, order1_p));
             this.preparing.Add(Order.NewOrder("MMMCM", 3, Target.Both, order2_p));
         }
 

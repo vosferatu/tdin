@@ -1,21 +1,22 @@
 using Gtk;
-using Glade;
 using System;
 using System.Collections.Generic;
 
-namespace Restaurant {
+namespace Restaurant
+{
     public delegate void ButtonFunc(long order_id);
 
     public class OrderListWindow {
         private const string WINDOW_FILE = GuiConstants.WINDOWS_DIR + "KitchenBar.glade";
         private const string WINDOW_NAME = "root";
+        private const string PROP_NAME = "empty";
 
         [Glade.Widget]
         public Gtk.Window root;
         [Glade.Widget]
-        VBox NotPickedBox;
+        Gtk.Table NotPickedBox;
         [Glade.Widget]
-        VBox PreparingBox;
+        Gtk.Table PreparingBox;
 
         ButtonFunc view_handler;
         ButtonFunc prepare_handler;
@@ -35,7 +36,7 @@ namespace Restaurant {
         }
 
         public void AddOrders(List<Tuple<long, string>> orders, bool picked) {
-            VBox box = (picked ? this.PreparingBox : this.NotPickedBox);
+            Gtk.Table box = (picked ? this.PreparingBox : this.NotPickedBox);
             foreach(Tuple<long, string> order in orders) {
                 this.AddOrderToBox(order, box, picked);
             }
@@ -43,11 +44,9 @@ namespace Restaurant {
         }
 
         public void AddOrder(Tuple<long, string> order) {
-            Console.WriteLine("Adding Order");
             this.AddOrderToBox(order, this.NotPickedBox, false);
             this.root.ShowNow();
             Application.RunIteration(false);
-            Console.WriteLine("Ran iteration");
         }
 
         public bool RemoveOrder(long order_id) {
@@ -69,7 +68,8 @@ namespace Restaurant {
                 OrderEntry widget = (OrderEntry)child;
                 if (widget.order_id == order_id) {
                     NotPickedBox.Remove(child);
-                    PreparingBox.PackEnd(child);
+                    uint child_n = (uint)this.PreparingBox.Children.Length;
+                    PreparingBox.Attach(child, 0, 1, 0+child_n, 1+child_n, Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 3);
                     picked = true;
                 }
             });
@@ -77,11 +77,13 @@ namespace Restaurant {
             return picked;
         }
 
-        private void AddOrderToBox(Tuple<long, string> order, Gtk.VBox box, bool picked) {
-            OrderEntry new_entry = new OrderEntry(order.Item1, order.Item2, picked);
+        private void AddOrderToBox(Tuple<long, string> order, Gtk.Table box, bool picked) {
+            uint child_n = (uint)box.Children.Length;
+            OrderEntry new_entry = new OrderEntry();
+            new_entry.SetProperties(order.Item1, order.Item2, picked);
             new_entry.SetHandlers(this.view_handler, (picked ? this.done_handler : this.prepare_handler));
-            box.PackStart(new_entry);
-            new_entry.ShowAll();
+            box.Attach(new_entry, 0, 1, 0+child_n, 1+child_n, Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 3);
+            box.ShowAll();
         }
     
         public void OnDelete(object o, DeleteEventArgs e) {
@@ -91,15 +93,22 @@ namespace Restaurant {
     }
 }
 
-namespace Restaurant {
-    public class OrderEntry: Gtk.HBox {
-        public long order_id {get; private set;}
+namespace Restaurant
+{
+    internal class OrderEntry: Gtk.HBox {
+        public bool empty {get; private set;}
+        internal long order_id {get; private set;}
         ButtonFunc label_handler;
         ButtonFunc img_handler;
         Gtk.EventBox label;
         Gtk.EventBox img;
 
-        public OrderEntry(long order_id, string order_desc, bool picked): base(false, 0) {
+        internal OrderEntry(): base(false, 0) {
+            this.empty = true;
+        }
+
+        internal void SetProperties(long order_id, string order_desc, bool picked) {
+            this.empty = false;
             this.order_id = order_id;
             this.label = new OrderLabel(order_desc);
             if (!picked) {
@@ -108,23 +117,23 @@ namespace Restaurant {
             else {
                 this.img = new OrderImage(Gtk.Stock.Apply, Gtk.IconSize.Button);
             }
-
+            this.SetSizeRequest(150, 50);
             this.Add(this.label);
             this.Add(this.img);
             this.label.ButtonReleaseEvent += this.LabelReleaseFunc;
-            this.label.ButtonReleaseEvent += this.ImgReleaseFunc;
+            this.img.ButtonReleaseEvent += this.ImgReleaseFunc;
         }
     
-        public void SetHandlers(ButtonFunc label_handler, ButtonFunc img_handler) {
+        internal void SetHandlers(ButtonFunc label_handler, ButtonFunc img_handler) {
             this.label_handler = label_handler;
             this.img_handler = img_handler;
         }
 
-        public void LabelReleaseFunc(object e, Gtk.ButtonReleaseEventArgs args) {
+        internal void LabelReleaseFunc(object e, Gtk.ButtonReleaseEventArgs args) {
             this.label_handler(this.order_id);
         }
 
-        public void ImgReleaseFunc(object e, Gtk.ButtonReleaseEventArgs args) {
+        internal void ImgReleaseFunc(object e, Gtk.ButtonReleaseEventArgs args) {
             this.img_handler(this.order_id);
         }
 
@@ -136,6 +145,7 @@ namespace Restaurant {
         internal OrderLabel(string text) {
             this.label = new Gtk.Label(text);
             this.Add(this.label);
+            this.SetSizeRequest(120, 0);
         }
     }
 
@@ -145,6 +155,7 @@ namespace Restaurant {
         internal OrderImage(string stock, Gtk.IconSize type) {
             this.image = new Gtk.Image(stock, type);
             this.Add(this.image);
+            this.SetSizeRequest(30, 0);
         }
     }
 }

@@ -29,18 +29,22 @@ gui: $(GUI_DLL)
 products: $(PROD_DLL)
 
 $(CONTROLLER_DLL): $(CONTROLLER_SRC)
+	@mkdir -p libs
 	@$(MCS) $(DLL) $(CONTROLLER_LIBS) $^ -out:$@
 	@echo "Controllers compiled!"
 
 $(GUI_DLL): $(GUI_SRC)
+	@mkdir -p libs
 	@$(MCS) $(DLL) $(GUI_LIBS) $^ -out:$@
 	@echo "GUI compiled!"
 
 $(PROD_DLL): $(PROD_SRC)
+	@mkdir -p libs
 	@$(MCS) $(DLL) $^ -out:$@
 	@echo "Products compiled!"
 
 $(SRC_EXE): $(GUI_DLL) $(PROD_DLL) $(CONTROLLER_DLL) $(SRC_SRC)
+	@mkdir -p libs
 	@$(MCS) $(SRC_SRC) $(SRC_LIBS) $(SRC_PKGS) -out:$@
 	@echo "App compiled!"
 

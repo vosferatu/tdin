@@ -18,6 +18,7 @@ namespace Restaurant {
             this.list_window = new OrderListWindow(this.ViewOrderDetails, this.MoveOrder, this.FinishOrder);
             Thread thr = new Thread(new ThreadStart(this.list_window.StartThread));
             thr.Start();
+            // TODO: Initialize network listening/speaking tasks
         }
 
         public void NewOrder(Order order) {
