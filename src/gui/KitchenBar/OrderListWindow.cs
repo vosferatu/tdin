@@ -67,6 +67,8 @@ namespace Restaurant
             NotPickedBox.Foreach((child) => {
                 OrderEntry widget = (OrderEntry)child;
                 if (widget.order_id == order_id) {
+                    widget.OrderMoved();
+                    widget.SetHandlers(this.view_handler, this.done_handler);
                     NotPickedBox.Remove(child);
                     uint child_n = (uint)this.PreparingBox.Children.Length;
                     PreparingBox.Attach(child, 0, 1, 0+child_n, 1+child_n, Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 3);
@@ -93,15 +95,14 @@ namespace Restaurant
     }
 }
 
-namespace Restaurant
-{
+namespace Restaurant {
     internal class OrderEntry: Gtk.HBox {
         public bool empty {get; private set;}
         internal long order_id {get; private set;}
         ButtonFunc label_handler;
         ButtonFunc img_handler;
-        Gtk.EventBox label;
-        Gtk.EventBox img;
+        OrderLabel label;
+        OrderImage img;
 
         internal OrderEntry(): base(false, 0) {
             this.empty = true;
@@ -123,10 +124,14 @@ namespace Restaurant
             this.label.ButtonReleaseEvent += this.LabelReleaseFunc;
             this.img.ButtonReleaseEvent += this.ImgReleaseFunc;
         }
-    
+
         internal void SetHandlers(ButtonFunc label_handler, ButtonFunc img_handler) {
             this.label_handler = label_handler;
             this.img_handler = img_handler;
+        }
+
+        internal void OrderMoved() {
+            this.img.SetImage(Gtk.Stock.Apply, Gtk.IconSize.Button);
         }
 
         internal void LabelReleaseFunc(object e, Gtk.ButtonReleaseEventArgs args) {
@@ -156,6 +161,13 @@ namespace Restaurant
             this.image = new Gtk.Image(stock, type);
             this.Add(this.image);
             this.SetSizeRequest(30, 0);
+        }
+
+        internal void SetImage(string stock, Gtk.IconSize type) {
+            this.Remove(this.image);
+            this.image = new Gtk.Image(stock, type);
+            this.Add(this.image);
+            this.ShowAll();
         }
     }
 }

@@ -621,6 +621,7 @@
                 <property name="can_focus">False</property>
                 <child>
                   <widget class="GtkTable" id="NotPickedBox">
+                    <property name="width_request">160</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="n_rows">8</property>
@@ -675,6 +676,7 @@
                 <property name="can_focus">False</property>
                 <child>
                   <widget class="GtkTable" id="PreparingBox">
+                    <property name="width_request">160</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="n_rows">8</property>

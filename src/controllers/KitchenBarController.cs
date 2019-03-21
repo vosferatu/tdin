@@ -22,12 +22,14 @@ namespace Restaurant {
         }
 
         public void NewOrder(Order order) {
+            this.not_picked.Add(order);
             Application.Invoke(delegate {
                 this.list_window.AddOrder(new Tuple<long, string>(order.id, order.desc));
             });
         }
 
         public void ViewOrderDetails(long order_id) {
+            Console.WriteLine("Cliked on order #{0}, ViewOrderDetails", order_id);
             Order order = this.FindOrder(order_id);
             if (order != null) {
                 this.detail_window = new OrderDetailWindow(this.GoBack, order.id, order.desc, order.table_n);
@@ -37,6 +39,7 @@ namespace Restaurant {
         }
 
         public void MoveOrder(long order_id) {
+            Console.WriteLine("Cliked on order #{0}, MoveOrder", order_id);
             Order order = this.FindOrder(order_id);
             if (order != null && this.list_window.PickOrder(order_id)) {
                 this.preparing.Add(order);
@@ -47,6 +50,7 @@ namespace Restaurant {
         }
 
         public void FinishOrder(long order_id) {
+            Console.WriteLine("Cliked on order #{0}, FinishOrder", order_id);
             Order order = this.FindOrder(order_id);
             if (order != null && this.list_window.RemoveOrder(order_id)) {
                 this.preparing.Remove(order);
