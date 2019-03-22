@@ -59,7 +59,7 @@ namespace Restaurant {
             return products;
         }
 
-        public static List<Product> readDishes() {
+        public static List<Product> ReadDishes() {
             string[][] words = readFile(DISHES_FILE);
             if (words != null) {
                 return toProducts(words, true);
@@ -67,7 +67,7 @@ namespace Restaurant {
             return null;
         }
 
-        public static List<Product> readDrinks() {
+        public static List<Product> ReadDrinks() {
             string[][] words = readFile(DRINKS_FILE);
             if (words != null) {
                 return toProducts(words, false);

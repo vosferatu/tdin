@@ -14,7 +14,7 @@ namespace Restaurant {
         private const string WINDOW_NAME = "root";
         
         [Glade.Widget]
-        Gtk.Window root;
+        public Gtk.Window root;
 
         [Glade.Widget]
         Gtk.Table DishProductList;
@@ -41,40 +41,75 @@ namespace Restaurant {
         }
         
         public void StartThread() {
+            Application.Init();
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
-            this.root.ShowAll();
+            Application.Run();
         }
     
         public void SetProducts(List<string> dishes, List<string> drinks) {
+            Console.WriteLine("Adding products");
+            uint child_n = (uint)this.DishOrderList.Children.Length;
             foreach(string dish in dishes) {
-                uint child_n = (uint)this.DishOrderList.Children.Length;
                 ProductEntry new_entry = new ProductEntry(dish, this.add_p);
                 this.DishProductList.Attach(new_entry, 0, 1, 0 + child_n, 1 + child_n,
-                    Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 0);
+                    Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink, 0, 2);
+                child_n++;
             }
+            child_n = (uint)this.DishOrderList.Children.Length;
             foreach(string drink in drinks) {
-                uint child_n = (uint)this.DishOrderList.Children.Length;
                 ProductEntry new_entry = new ProductEntry(drink, this.add_p);
                 this.DrinkProductList.Attach(new_entry, 0, 1, 0 + child_n, 1 + child_n,
-                    Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 0);
+                    Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink, 0, 2);
+                child_n++;
             }
+            this.root.ShowAll();
         }
 
-        public void AddProduct(string p_name) {
-            Console.WriteLine("Adding product '{0}'", p_name);
+        public void AddProduct(string name, bool is_dish) {
+            Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
+            uint child_n = (uint)table.Children.Length;
+            ProductEntry entry = new ProductEntry(name, 1, this.rem_p);
+            table.Attach(entry, 0, 1, 0 + child_n, 1 + child_n,
+                Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink, 0, 2);
+            this.root.ShowAll();
         }
 
-        public void RemProduct(string p_name) {
-            Console.WriteLine("Removing product '{1}'", p_name);
+        public void RemoveProduct(string name, bool is_dish) {
+            Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
+            table.Foreach((Gtk.Widget widget) => {
+                ProductEntry entry = (ProductEntry)widget;
+                if (entry.p_name == name) {
+                    table.Remove(widget);
+                }
+            });
+            this.root.ShowAll();
+        } 
+        
+        public void ChangeAmount(string name, int change, bool is_dish) {
+            Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
+            table.Foreach((Gtk.Widget widget) => {
+                ProductEntry entry = (ProductEntry)widget;
+                if (entry.p_name == name) {
+                    entry.ChangeAmount(change);
+                }
+            });
+            this.root.ShowAll();
         }
 
         public void OnUndo(object o, EventArgs args) {
             this.undo();
+            this.root.ShowAll();
         }
 
         public void OnSubmit(object o, EventArgs args) {
             this.submit();
+            this.root.ShowAll();
+        }
+    
+        public void OnDelete(object o, DeleteEventArgs e) {
+            Console.WriteLine("Quitting!!");
+            Application.Quit();
         }
     }
 }

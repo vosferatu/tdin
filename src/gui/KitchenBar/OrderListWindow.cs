@@ -43,7 +43,6 @@ namespace Restaurant {
         public void AddOrder(Tuple<long, string> order) {
             this.AddOrderToBox(order, this.NotPickedBox, false);
             this.root.ShowNow();
-            Application.RunIteration(false);
         }
 
         public bool RemoveOrder(long order_id) {

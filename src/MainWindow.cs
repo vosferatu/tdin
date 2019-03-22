@@ -20,38 +20,17 @@ namespace Restaurant {
 
         public static void Main(string[] args) {
             MainWindow win = new MainWindow();
-            win.StartLoop();
         }
 
         public MainWindow() {
-            Application.Init();
-            Gtk.Settings.Default.SetLongProperty ("gtk-button-images", 1, "");
-            Glade.XML gxml = new Glade.XML("./assets/windows/starter.glade", "root", null);
-            gxml.Autoconnect(this);
-            this.not_picked = new List<Order>();
-            this.preparing = new List<Order>();
-            this.icons = new Gtk.StatusIcon(new Gdk.Pixbuf("./assets/icons/ovo.jpg"));
-            this.icons.Tooltip = "Restaurant System";
-            this.icons.Activate += delegate { this.root.UrgencyHint = true; };
-        }
-
-        public void StartLoop() {
-            starter.ButtonReleaseEvent += OnStartClicked;
-            Application.Run();
+            DiningRoomController cont = this.NewDiningRoom();
         }
 
         public void OnStartClicked(object o, ButtonReleaseEventArgs e) {
             Console.WriteLine("About to start!");
             this.StartOrders();
             root.HideAll();
-            KitchenBarController bar_window = this.NewKitchenBar();
-            Thread.Sleep(100);
-            foreach(Order order in this.not_picked) {
-                bar_window.NewOrder(order);
-            }
-            foreach(Order order in this.preparing) {
-                bar_window.NewOrder(order);
-            }
+            DiningRoomController bar_window = this.NewDiningRoom();
         }
 
         private void StartOrders() {
@@ -78,6 +57,13 @@ namespace Restaurant {
             }
 
             return new KitchenBarController();
+        }
+
+        private DiningRoomController NewDiningRoom() {
+            List<Product> drinks = ProductReader.ReadDrinks();
+            List<Product> dishes = ProductReader.ReadDishes();
+            DiningRoomController controller = new DiningRoomController(dishes, drinks);
+            return controller;
         }
 
         public void OnDelete(object o, DeleteEventArgs e) {

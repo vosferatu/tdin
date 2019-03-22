@@ -3,7 +3,7 @@ using System;
 
 namespace Restaurant {
     internal class ProductEntry: Gtk.HBox {
-        private string p_name;
+        internal string p_name {get; private set;}
         Gtk.Label name_label;
         Gtk.Label amount_label = null;
         ImageAction image;
@@ -15,7 +15,9 @@ namespace Restaurant {
             this.p_name = p_name;
             this.add_product = add_handler;
             this.name_label = new Gtk.Label(p_name);
+            this.name_label.SetSizeRequest(200, 25);
             this.image = new ImageAction(Gtk.Stock.Add, Gtk.IconSize.Button);
+            this.image.SetSizeRequest(50, 25);
 
             this.Add(this.name_label);
             this.Add(this.image);
