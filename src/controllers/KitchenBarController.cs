@@ -22,6 +22,7 @@ namespace Restaurant {
         }
 
         public void NewOrder(Order order) {
+            // TODO: Call this only on new order from network
             this.not_picked.Add(order);
             Application.Invoke(delegate {
                 this.list_window.AddOrder(new Tuple<long, string>(order.id, order.desc));
@@ -39,13 +40,13 @@ namespace Restaurant {
         }
 
         public void MoveOrder(long order_id) {
-            Console.WriteLine("Cliked on order #{0}, MoveOrder", order_id);
             Order order = this.FindOrder(order_id);
             if (order != null && this.list_window.PickOrder(order_id)) {
                 this.preparing.Add(order);
                 this.not_picked.Remove(order);
                 this.list_window.root.ShowAll();
                 this.list_window.root.QueueDraw();
+                // TODO: Warn network that order has moved from 'Not Picked' to 'Preparing'
             }
         }
 
@@ -56,6 +57,7 @@ namespace Restaurant {
                 this.preparing.Remove(order);
                 this.list_window.root.ShowAll();
                 this.list_window.root.QueueDraw();
+                // TODO: Warn network that order is ready to be picked!
             }
         }
 

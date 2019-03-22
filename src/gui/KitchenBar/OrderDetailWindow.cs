@@ -17,9 +17,7 @@ namespace Restaurant {
         [Glade.Widget]
         Gtk.Label TableNLabel;
         [Glade.Widget]
-        Gtk.VBox DishesBox;
-        [Glade.Widget]
-        Gtk.VBox DrinksBox;
+        Gtk.Table ProductsBox;
 
         public OrderDetailWindow(EventHandler back_handler, long order_id, string desc, int table_n) {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
@@ -31,17 +29,11 @@ namespace Restaurant {
         }
 
         public void AddProducts(Dictionary<string, uint> products, bool is_dish) {
-            if (is_dish) {
-                this.AddProductsToVBox(products, this.DishesBox);
-            }
-            else {
-                this.AddProductsToVBox(products, DrinksBox);
-            }
-        }
-        
-        private void AddProductsToVBox(Dictionary<string, uint> products, Gtk.VBox box) {
             foreach(KeyValuePair<string, uint> product in products) {
-                box.PackStart(this.CreateBox(product.Key, product.Value));
+                uint child_n = (uint)this.ProductsBox.Children.Length;
+                this.ProductsBox.Attach(this.CreateBox(product.Key, product.Value),
+                0, 1, 0 + child_n, 1 + child_n, 
+                Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 3);
             }
         }
 

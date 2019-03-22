@@ -2,14 +2,12 @@ using Gtk;
 using System;
 using System.Collections.Generic;
 
-namespace Restaurant
-{
-    public delegate void ButtonFunc(long order_id);
+namespace Restaurant {
+    public delegate void OrderListFunc(long order_id);
 
     public class OrderListWindow {
         private const string WINDOW_FILE = GuiConstants.WINDOWS_DIR + "KitchenBar.glade";
         private const string WINDOW_NAME = "root";
-        private const string PROP_NAME = "empty";
 
         [Glade.Widget]
         public Gtk.Window root;
@@ -18,18 +16,17 @@ namespace Restaurant
         [Glade.Widget]
         Gtk.Table PreparingBox;
 
-        ButtonFunc view_handler;
-        ButtonFunc prepare_handler;
-        ButtonFunc done_handler;
+        OrderListFunc view_handler;
+        OrderListFunc prepare_handler;
+        OrderListFunc done_handler;
 
-        public OrderListWindow(ButtonFunc view_handler,  ButtonFunc prepare_handler,  ButtonFunc done_handler) {
+        public OrderListWindow(OrderListFunc view_handler,  OrderListFunc prepare_handler,  OrderListFunc done_handler) {
             this.view_handler = view_handler;
             this.prepare_handler = prepare_handler;
             this.done_handler = done_handler;
         }
 
         public void StartThread() {
-            Console.WriteLine("Starting OrderListWindow Thread");
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
             this.root.ShowAll();
@@ -81,8 +78,7 @@ namespace Restaurant
 
         private void AddOrderToBox(Tuple<long, string> order, Gtk.Table box, bool picked) {
             uint child_n = (uint)box.Children.Length;
-            OrderEntry new_entry = new OrderEntry();
-            new_entry.SetProperties(order.Item1, order.Item2, picked);
+            OrderEntry new_entry = new OrderEntry(order.Item1, order.Item2, picked);
             new_entry.SetHandlers(this.view_handler, (picked ? this.done_handler : this.prepare_handler));
             box.Attach(new_entry, 0, 1, 0+child_n, 1+child_n, Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 3);
             box.ShowAll();
@@ -97,26 +93,20 @@ namespace Restaurant
 
 namespace Restaurant {
     internal class OrderEntry: Gtk.HBox {
-        public bool empty {get; private set;}
         internal long order_id {get; private set;}
-        ButtonFunc label_handler;
-        ButtonFunc img_handler;
+        OrderListFunc label_handler;
+        OrderListFunc img_handler;
         OrderLabel label;
-        OrderImage img;
+        ImageAction img;
 
-        internal OrderEntry(): base(false, 0) {
-            this.empty = true;
-        }
-
-        internal void SetProperties(long order_id, string order_desc, bool picked) {
-            this.empty = false;
+        internal OrderEntry(long order_id, string desc, bool picked): base(false, 0) {
             this.order_id = order_id;
-            this.label = new OrderLabel(order_desc);
+            this.label = new OrderLabel(desc);
             if (!picked) {
-                this.img = new OrderImage(Gtk.Stock.GoForward, Gtk.IconSize.Button);
+                this.img = new ImageAction(Gtk.Stock.GoForward, Gtk.IconSize.Button);
             }
             else {
-                this.img = new OrderImage(Gtk.Stock.Apply, Gtk.IconSize.Button);
+                this.img = new ImageAction(Gtk.Stock.Apply, Gtk.IconSize.Button);
             }
             this.SetSizeRequest(150, 50);
             this.Add(this.label);
@@ -125,7 +115,7 @@ namespace Restaurant {
             this.img.ButtonReleaseEvent += this.ImgReleaseFunc;
         }
 
-        internal void SetHandlers(ButtonFunc label_handler, ButtonFunc img_handler) {
+        internal void SetHandlers(OrderListFunc label_handler, OrderListFunc img_handler) {
             this.label_handler = label_handler;
             this.img_handler = img_handler;
         }
@@ -149,25 +139,10 @@ namespace Restaurant {
 
         internal OrderLabel(string text) {
             this.label = new Gtk.Label(text);
+            this.label.Justify = Gtk.Justification.Left;
+            this.label.LineWrap = true;
             this.Add(this.label);
             this.SetSizeRequest(120, 0);
-        }
-    }
-
-    internal class OrderImage: Gtk.EventBox {
-        private Gtk.Image image;
-
-        internal OrderImage(string stock, Gtk.IconSize type) {
-            this.image = new Gtk.Image(stock, type);
-            this.Add(this.image);
-            this.SetSizeRequest(30, 0);
-        }
-
-        internal void SetImage(string stock, Gtk.IconSize type) {
-            this.Remove(this.image);
-            this.image = new Gtk.Image(stock, type);
-            this.Add(this.image);
-            this.ShowAll();
         }
     }
 }

@@ -1,4 +1,5 @@
 using Gtk;
+using Gdk;
 using Glade;
 using System;
 using System.Threading;
@@ -8,12 +9,14 @@ namespace Restaurant {
     class MainWindow {
         
         [Glade.Widget]
-        Window root;
+        Gtk.Window root;
         [Glade.Widget]
         Gtk.EventBox starter;
 
         List<Order> not_picked;
         List<Order> preparing;
+
+        Gtk.StatusIcon icons;
 
         public static void Main(string[] args) {
             MainWindow win = new MainWindow();
@@ -22,10 +25,14 @@ namespace Restaurant {
 
         public MainWindow() {
             Application.Init();
+            Gtk.Settings.Default.SetLongProperty ("gtk-button-images", 1, "");
             Glade.XML gxml = new Glade.XML("./assets/windows/starter.glade", "root", null);
             gxml.Autoconnect(this);
             this.not_picked = new List<Order>();
             this.preparing = new List<Order>();
+            this.icons = new Gtk.StatusIcon(new Gdk.Pixbuf("./assets/icons/ovo.jpg"));
+            this.icons.Tooltip = "Restaurant System";
+            this.icons.Activate += delegate { this.root.UrgencyHint = true; };
         }
 
         public void StartLoop() {
