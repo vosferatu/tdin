@@ -31,10 +31,10 @@ namespace Restaurant {
             this.window.StartThread();
         }
 
-        private List<string> ProductsToString(List<Product> products) {
-            List<string> ret = new List<string>(products.Count);
+        private List<Tuple<string, double>> ProductsToString(List<Product> products) {
+            List<Tuple<string, double>> ret = new List<Tuple<string, double>>(products.Count);
             foreach(Product product in products) {
-                ret.Add(product.name);
+                ret.Add(new Tuple<string, double>(product.name, product.price));
             }
 
             return ret;
@@ -48,8 +48,7 @@ namespace Restaurant {
             }
         }
 
-        public void AddProduct(string p_name) {
-            Console.WriteLine("Adding product '{0}'", p_name);
+        public void AddProduct(string p_name, bool add_history) {
             bool is_dish = this.products[p_name].type == Product.Type.Dish;
             if (this.order.ContainsKey(p_name)) {
                 uint new_amount = this.order[p_name] + 1;
@@ -61,11 +60,13 @@ namespace Restaurant {
                 this.order.Add(p_name, 1);
                 this.window.AddProduct(p_name, is_dish);
             }
-            this.history.Push(new Tuple<string, int>(p_name, 1));
+
+            if (add_history) {
+                this.history.Push(new Tuple<string, int>(p_name, 1));
+            }
         }
 
-        public void RemProduct(string p_name) {
-            Console.WriteLine("Removing product '{0}'", p_name);
+        public void RemProduct(string p_name, bool add_history) {
             bool is_dish = this.products[p_name].type == Product.Type.Dish;
             if (this.order.ContainsKey(p_name)) {
                 uint old_amount = this.order[p_name];
@@ -77,19 +78,20 @@ namespace Restaurant {
                 else {
                     this.window.RemoveProduct(p_name, is_dish);
                 }
-                this.history.Push(new Tuple<string, int>(p_name, -1));
+                if (add_history) {
+                    this.history.Push(new Tuple<string, int>(p_name, -1));
+                }
             }
         }
 
         public void UndoOrder() {
-            Console.WriteLine("Resetting order!");
             if (this.history.Count > 0) {
                 Tuple<string, int> latest = this.history.Pop();
                 if (latest.Item2 < 0) {
-                    this.AddProduct(latest.Item1);
+                    this.AddProduct(latest.Item1,false);
                 }
                 else {
-                    this.RemProduct(latest.Item1);
+                    this.RemProduct(latest.Item1, false);
                 }
             }
         }

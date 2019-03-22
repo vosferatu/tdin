@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Restaurant {
-    public delegate void ProductListFunc(string p_name);
+    public delegate void ProductListFunc(string p_name, bool add_history);
     public delegate void SimpleFunction();
     
     public class ProductListWindow {
@@ -47,18 +47,18 @@ namespace Restaurant {
             Application.Run();
         }
     
-        public void SetProducts(List<string> dishes, List<string> drinks) {
+        public void SetProducts(List<Tuple<string, double>> dishes, List<Tuple<string, double>> drinks) {
             Console.WriteLine("Adding products");
             uint child_n = (uint)this.DishOrderList.Children.Length;
-            foreach(string dish in dishes) {
-                ProductEntry new_entry = new ProductEntry(dish, this.add_p);
+            foreach(Tuple<string, double> dish in dishes) {
+                ProductEntry new_entry = new ProductEntry(dish.Item1, dish.Item2, this.add_p);
                 this.DishProductList.Attach(new_entry, 0, 1, 0 + child_n, 1 + child_n,
                     Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink, 0, 2);
                 child_n++;
             }
             child_n = (uint)this.DishOrderList.Children.Length;
-            foreach(string drink in drinks) {
-                ProductEntry new_entry = new ProductEntry(drink, this.add_p);
+            foreach(Tuple<string, double> drink in drinks) {
+                ProductEntry new_entry = new ProductEntry(drink.Item1, drink.Item2, this.add_p);
                 this.DrinkProductList.Attach(new_entry, 0, 1, 0 + child_n, 1 + child_n,
                     Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink, 0, 2);
                 child_n++;
