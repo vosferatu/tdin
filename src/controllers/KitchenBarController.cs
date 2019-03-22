@@ -5,20 +5,37 @@ using System.Threading;
 using System.Collections.Generic;
 
 namespace Restaurant {
-    public class KitchenBarController {
+    public class KitchenBarController: IController {
         OrderDetailWindow detail_window;
         OrderListWindow list_window;
 
         List<Order> not_picked;
         List<Order> preparing;
 
-        public KitchenBarController() {
+        public KitchenBarController(bool is_kitchen) {
             this.not_picked = new List<Order>();
             this.preparing = new List<Order>();
+        }
+
+        public bool InitializeNetwork() {
+            return true;
+        }
+
+        public bool TryAndJoinNetwork() {
+            return true;
+        }
+
+        public bool StartController() {
             this.list_window = new OrderListWindow(this.ViewOrderDetails, this.MoveOrder, this.FinishOrder);
             Thread thr = new Thread(new ThreadStart(this.list_window.StartThread));
-            thr.Start();
-            // TODO: Initialize network listening/speaking tasks
+            try {
+                thr.Start();
+                return true;
+            }
+            catch (Exception e) {
+                Console.WriteLine("Failed to start KitchenBarController!\n - {0}", e);
+                return false;
+            }
         }
 
         public void NewOrder(Order order) {

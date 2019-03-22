@@ -41,7 +41,6 @@ namespace Restaurant {
         }
         
         public void StartThread() {
-            Application.Init();
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
             Application.Run();

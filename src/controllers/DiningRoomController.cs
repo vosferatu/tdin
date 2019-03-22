@@ -4,7 +4,7 @@ using System.Threading;
 using System.Collections.Generic;
 
 namespace Restaurant {
-    public class DiningRoomController {
+    public class DiningRoomController: IController {
         ProductListWindow window;
         Dictionary<string, uint> order;
         Dictionary<string, Product> products;
@@ -14,21 +14,36 @@ namespace Restaurant {
         List<Product> drinks;
 
         public DiningRoomController(List<Product> dishes, List<Product> drinks) {
+            this.dishes = dishes;
+            this.drinks = drinks;
             this.order      = new Dictionary<string, uint>();
             this.history    = new Stack<Tuple<string, int>>();
             this.products   = new Dictionary<string, Product>(dishes.Count + drinks.Count);
-            this.ProductsToDict(new List<Product>[] {dishes, drinks});
-            this.window     = new ProductListWindow(this.AddProduct, this.RemProduct, this.SubmitOrder, this.UndoOrder);
-            Thread thr = new Thread(new ThreadStart(this.window.StartThread));
-            thr.Start();
-            Thread.Sleep(100);
-            Application.Invoke(delegate {
-                this.window.SetProducts(this.ProductsToString(dishes), this.ProductsToString(drinks));
-            });
+            this.ProductsToDict(new List<Product>[] {dishes, drinks}); 
         }
 
-        private void StartThread() {
-            this.window.StartThread();
+        public bool InitializeNetwork() {
+            return true;
+        }
+
+        public bool TryAndJoinNetwork() {
+            return true;
+        }
+
+        public bool StartController() {
+            this.window     = new ProductListWindow(this.AddProduct, this.RemProduct, this.SubmitOrder, this.UndoOrder);
+            Thread thr = new Thread(new ThreadStart(this.window.StartThread));
+            try {
+                thr.Start();
+                Application.Invoke(delegate {
+                    this.window.SetProducts(this.ProductsToString(this.dishes), this.ProductsToString(this.drinks));
+                });
+                return true;
+            }
+            catch (Exception e) {
+                Console.WriteLine("Failed to start DiningRoomController!\n - {0}", e);
+                return false;
+            }
         }
 
         private List<Tuple<string, double>> ProductsToString(List<Product> products) {

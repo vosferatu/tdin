@@ -29,7 +29,7 @@ namespace Restaurant {
         public void StartThread() {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
-            this.root.ShowAll();
+            Application.Run();
         }
 
         public void AddOrders(List<Tuple<long, string>> orders, bool picked) {
@@ -37,12 +37,12 @@ namespace Restaurant {
             foreach(Tuple<long, string> order in orders) {
                 this.AddOrderToBox(order, box, picked);
             }
-            this.root.ShowNow();
+            this.root.ShowAll();
         }
 
         public void AddOrder(Tuple<long, string> order) {
             this.AddOrderToBox(order, this.NotPickedBox, false);
-            this.root.ShowNow();
+            this.root.ShowAll();
         }
 
         public bool RemoveOrder(long order_id) {
