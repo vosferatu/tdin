@@ -32,17 +32,9 @@ namespace Restaurant {
         }
 
         private static void StartProgram(IController controller) {
-            if (
-                controller.InitializeNetwork() &&
-                controller.TryAndJoinNetwork() &&
-                controller.StartController()
-                ) 
-            {
-                Console.WriteLine("Program finished");
-            }
-            else {
-                Console.WriteLine("Something went wrong :(");
-            }
+            controller.InitializeNetwork();
+            controller.TryAndJoinNetwork();
+            controller.StartController();
         }
 
         private static void StartOrders() {

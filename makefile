@@ -15,7 +15,7 @@ PROD_DLL=$(DLL_DIR)/products.dll
 CONTROLLER_DIR=$(SRC_DIR)/controllers
 CONTROLLER_SRC=$(wildcard $(CONTROLLER_DIR)/*cs) $(wildcard $(CONTROLLER_DIR)/*/*.cs)
 CONTROLLER_DLL=$(DLL_DIR)/controller.dll
-CONTROLLER_LIBS=-r:$(GUI_DLL) -r:$(PROD_DLL) -pkg:glade-sharp-2.0
+CONTROLLER_LIBS=-r:$(GUI_DLL) -r:$(PROD_DLL) -r:System.Runtime.Remoting.dll -pkg:glade-sharp-2.0
 
 SRC_SRC=$(wildcard $(SRC_DIR)/*.cs)
 SRC_PKGS=-pkg:glade-sharp-2.0

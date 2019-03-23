@@ -105,7 +105,17 @@ namespace Restaurant {
             this.submit();
             this.root.ShowAll();
         }
-    
+
+        public void ResetOrder() {
+            this.DishOrderList.Foreach((Gtk.Widget widget) => {
+                this.DishOrderList.Remove(widget);
+            });
+
+            this.DrinkOrderList.Foreach((Gtk.Widget widget) => {
+                this.DrinkOrderList.Remove(widget);
+            });
+        }
+
         public void OnDelete(object o, DeleteEventArgs e) {
             Console.WriteLine("Quitting!!");
             Application.Quit();

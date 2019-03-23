@@ -1,17 +1,34 @@
 using Gtk;
 using System;
 using System.Threading;
+using System.Collections;
+using System.Runtime.Remoting;
 using System.Collections.Generic;
+using System.Security.Permissions;
+using System.Runtime.Serialization;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Serialization.Formatters;
 
 namespace Restaurant {
     public class DiningRoomController: IController {
+        #region FIELDS
+
+        private const string CONFIG_FILE = "./assets/configs/client.config";
+        private const string REMOTE_URI = "tcp://localhost:8000/Central";
+
+        ICentralController central;
         ProductListWindow window;
+
         Dictionary<string, uint> order;
-        Dictionary<string, Product> products;
+        uint table_n = 5;
         Stack<Tuple<string, int>> history;
+        Dictionary<string, Product> products;
 
         List<Product> dishes;
         List<Product> drinks;
+
+        #endregion FIELDS
 
         public DiningRoomController(List<Product> dishes, List<Product> drinks) {
             this.dishes = dishes;
@@ -22,16 +39,54 @@ namespace Restaurant {
             this.ProductsToDict(new List<Product>[] {dishes, drinks}); 
         }
 
+        #region NETWORK_METHODS
+
         public bool InitializeNetwork() {
+            while (!this.TryRemoteConnection()) {
+                Thread.Sleep(990);
+                Console.WriteLine("Failed to connect to central node!\n - Retrying every second...");
+            }
             return true;
+        }
+
+        private bool TryRemoteConnection() {
+            try {
+                Hashtable props = new Hashtable();
+                props["port"] = 0;  
+                props["name"] = "DiningRoomChannel";
+                BinaryClientFormatterSinkProvider cs = new BinaryClientFormatterSinkProvider();
+                BinaryServerFormatterSinkProvider ss = new BinaryServerFormatterSinkProvider();
+                ss.TypeFilterLevel = TypeFilterLevel.Full;
+                ChannelServices.RegisterChannel(new TcpChannel(props, cs, ss), false);
+                this.central = (ICentralController)Activator.GetObject(
+                    typeof(ICentralController), REMOTE_URI
+                );
+                EventRepeaterDelegate evnt_del = new EventRepeaterDelegate(this.OnOrderReady, null);
+                this.central.OrderReadyEvent += evnt_del.OrderReadyCallback;
+
+                return true;
+            }
+            catch (Exception e) {
+                Console.WriteLine("{0}", e);
+            }
+            return false;
         }
 
         public bool TryAndJoinNetwork() {
+            Console.WriteLine("Managed to connect!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             return true;
         }
 
+        public void OnOrderReady(long order_id, uint table_n) {
+            Console.WriteLine("Order #{0} ready!", order_id);
+        }
+
+        #endregion NETWORK_METHODS
+
+        #region METHODS
+
         public bool StartController() {
-            this.window     = new ProductListWindow(this.AddProduct, this.RemProduct, this.SubmitOrder, this.UndoOrder);
+            this.window = new ProductListWindow(this.AddProduct, this.RemProduct, this.SubmitOrder, this.UndoOrder);
             Thread thr = new Thread(new ThreadStart(this.window.StartThread));
             try {
                 thr.Start();
@@ -114,7 +169,33 @@ namespace Restaurant {
         public void SubmitOrder() {
             if (this.order.Count > 0) {
                 Console.WriteLine("Submitting order!");
-                // TODO: Send order to the network
+                this.central.NewOrder(this.order, this.table_n);
+                this.order.Clear();
+                this.history.Clear();
+                this.window.ResetOrder();
+            }
+        }
+    
+        #endregion METHODS
+    }
+
+    public class EventRepeaterDelegate: EventRepeaterDelegateObject {
+        OrderReadyEventHandler ready_handler;
+        NewOrderEventHandler new_handler;
+
+        public EventRepeaterDelegate(OrderReadyEventHandler ready_handler, NewOrderEventHandler new_handler) {
+            this.ready_handler = ready_handler;
+            this.new_handler = new_handler;
+        }
+        
+        protected override void NewOrderCallbackCore(Order order) {
+            if (this.new_handler != null) {
+                this.new_handler(order);
+            }
+        }
+        protected override void OrderReadyCallbackCore(long order_id, uint table_n) {
+            if (this.ready_handler != null) {
+                this.ready_handler(order_id, table_n);
             }
         }
     }

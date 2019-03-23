@@ -1,7 +1,8 @@
 using System;
 
 namespace Restaurant {
-    public class Product {
+    [Serializable]
+    public class Product{
         public enum Type {Dish, Drink};
         public string name {get; private set;}
         public double price {get; private set;}
