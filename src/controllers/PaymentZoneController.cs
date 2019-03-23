@@ -1,3 +1,4 @@
+using Base;
 using System;
 using System.Collections;
 using System.Runtime.Remoting;
@@ -13,15 +14,15 @@ namespace Restaurant {
     [Serializable]
     public class PaymentZoneController: MarshalByRefObject, ICentralController {
     #region FIELDS
-        private const string URI = "Central";
         public event OrderReadyEventHandler OrderReadyEvent;
         public event NewOrderEventHandler NewDishesOrderEvent;
         public event NewOrderEventHandler NewDrinksOrderEvent;
         
         double total_money;
+        [NonSerialized]
         Dictionary<string, Product> products;
         [NonSerialized]
-        static ConcurrentDictionary<long, Order> orders;    
+        static ConcurrentDictionary<long, Order> orders = new ConcurrentDictionary<long, Order>();
     #endregion FIELDS
 
     #region NETWORK_METHODS
@@ -30,13 +31,13 @@ namespace Restaurant {
         public bool InitializeNetwork() {
             try {
                 IDictionary dict =  new Hashtable();
-                dict["port"] = 8000;
-                dict["name"] = "PaymentChannel";
+                dict["port"] = Constants.CENTRAL_PORT;
+                dict["name"] = Constants.CENTRAL_CHANNEL_NAME;
                 BinaryServerFormatterSinkProvider ss = new BinaryServerFormatterSinkProvider();
                 BinaryClientFormatterSinkProvider cs = new BinaryClientFormatterSinkProvider();
                 ss.TypeFilterLevel = TypeFilterLevel.Full;
                 ChannelServices.RegisterChannel(new TcpChannel(dict, cs, ss), false);
-                RemotingServices.Marshal(this, URI);
+                RemotingServices.Marshal(this, Constants.CENTRAL_URI);
                 return true;
             }
             catch (Exception e) {
@@ -66,12 +67,20 @@ namespace Restaurant {
             }
         }
 
-        public void OrderReady(long order_id, uint table_n) {
+        public void OrderReady(long order_id, uint table_n, bool from_kitchen) {
             Console.WriteLine("Order #{0} ready!", order_id);
+            if (orders.ContainsKey(order_id)) {
+                Order order = orders[order_id];
+                order.SetReady((from_kitchen ? OrderTarget.Kitchen : OrderTarget.Bar));
 
-            if (this.OrderReadyEvent != null) {
-                this.OrderReadyEvent(order_id, table_n);
+                if (this.OrderReadyEvent != null && order.IsReady()) {
+                    this.OrderReadyEvent(order_id, table_n);
+                }
             }
+            else {
+                Console.WriteLine("Order #{0} does not exist!", order_id);
+            }
+
         }
 
         public void NewOrder(Dictionary<string, uint> p_infos, uint table_n) {
@@ -87,17 +96,29 @@ namespace Restaurant {
             }
 
             Order new_order = Order.NewOrder(table_n, p);
-            if (new_order.type == Target.Both && this.NewDishesOrderEvent != null && this.NewDrinksOrderEvent != null) {
-                this.NewDishesOrderEvent(new_order.GetOrder(Target.Kitchen));
-                this.NewDrinksOrderEvent(new_order.GetOrder(Target.Bar));
+            orders.AddOrUpdate(new_order.id, new_order, (k, v) => new_order);
+            if (new_order.type == OrderTarget.Both && this.NewDishesOrderEvent != null && this.NewDrinksOrderEvent != null) {
+                this.NewDishesOrderEvent(new_order.GetOrder(OrderTarget.Kitchen));
+                this.NewDrinksOrderEvent(new_order.GetOrder(OrderTarget.Bar));
             }
-            else if (new_order.type == Target.Bar && this.NewDrinksOrderEvent != null) {
+            else if (new_order.type == OrderTarget.Bar && this.NewDrinksOrderEvent != null) {
                 this.NewDrinksOrderEvent(new_order);
             }
-            else if (new_order.type == Target.Kitchen && this.NewDishesOrderEvent != null) {
+            else if (new_order.type == OrderTarget.Kitchen && this.NewDishesOrderEvent != null) {
                 this.NewDishesOrderEvent(new_order);
             }
             return;
+        }
+    
+        public void OrderPaid(long order_id) {
+            if (orders.ContainsKey(order_id)) {
+                Order order = orders[order_id];
+                this.total_money += order.TotalPrice();
+                order.Paid();
+            }
+            else {
+                Console.WriteLine("Order #{0} does not exist!", order_id);
+            }
         }
     #endregion METHODS
     }

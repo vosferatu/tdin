@@ -1,10 +1,8 @@
+using Base;
 using System;
 using System.Collections.Generic;
 
 namespace Restaurant {
-    public enum Target {Kitchen, Bar, Both};
-    public enum State {NotPicked, Preparing, Ready, Paid};
-    
     [Serializable]
     public abstract class Order: IEquatable<Order> {
     #region FIELDS
@@ -12,51 +10,57 @@ namespace Restaurant {
         public long id {get; protected set;}
         public uint table_n {get; protected set;}
 
-        public Target type {get; protected set;}
-        protected State state;
+        public OrderTarget type {get; protected set;}
+        protected OrderState state;
     #endregion FIELDS
 
     #region METHODS
         public abstract double TotalTime();
         public abstract double TotalPrice();
-        public abstract State GetState();
+        public abstract OrderState GetState();
 
-        public abstract Order GetOrder(Target target);
+        public abstract Order GetOrder(OrderTarget target);
+        public abstract void SetReady(OrderTarget target);
+        public abstract bool IsReady();
 
-        protected Order(uint table_n, Target type) {
+        protected Order(uint table_n, OrderTarget type) {
             this.table_n = table_n;
             this.type = type;
-            this.state = State.NotPicked;
+            this.state = OrderState.NotPicked;
         }
     
         public static Order NewOrder(uint table_n, Dictionary<Product, uint> items) {
-            Target target = CheckItemsTarget(items);
-            if (target == Target.Both) {
+            OrderTarget target = CheckItemsTarget(items);
+            if (target == OrderTarget.Both) {
                 return new CompositeOrder(table_n, target, items);
             }
             return new SimpleOrder(table_n, target, items);
         }
 
-        private static Target CheckItemsTarget(Dictionary<Product, uint> items) {
+        private static OrderTarget CheckItemsTarget(Dictionary<Product, uint> items) {
             uint drinks_n = 0, dishes_n = 0;
             foreach(KeyValuePair<Product, uint> item in items) {
-                if (item.Key.type == Product.Type.Dish) {
+                if (item.Key.type == ProductType.Dish) {
                     dishes_n++;
                 }
                 else {
                     drinks_n++;
                 }
             }
-            if (drinks_n > 0 && dishes_n == 0) return Target.Bar;
-            if (drinks_n == 0 && dishes_n > 0) return Target.Kitchen;
-            return Target.Both;    
+            if (drinks_n > 0 && dishes_n == 0) return OrderTarget.Bar;
+            if (drinks_n == 0 && dishes_n > 0) return OrderTarget.Kitchen;
+            return OrderTarget.Both;    
         }
     
         public bool Equals(Order other) {
             return this.id == other.id;
         }
-    
-        public string ToString() {
+
+        public void Paid() {
+            this.state = OrderState.Paid;
+        }
+
+        public override string ToString() {
             return String.Format("Order #{0}", this.id);
         }
     #endregion METHODS
@@ -70,7 +74,7 @@ namespace Restaurant {
     #endregion FIELDS
 
     #region METHODS
-        internal CompositeOrder(uint table_n, Target type, Dictionary<Product, uint> items)
+        internal CompositeOrder(uint table_n, OrderTarget type, Dictionary<Product, uint> items)
             :base (table_n, type) 
         {
             this.id =  Order.curr_id;
@@ -79,7 +83,7 @@ namespace Restaurant {
             Dictionary<Product, uint> dishes = new Dictionary<Product, uint>();
 
             foreach (KeyValuePair<Product, uint> item in items) {
-                if (item.Key.type == Product.Type.Dish) {
+                if (item.Key.type == ProductType.Dish) {
                     dishes.Add(item.Key, item.Value);
                 }
                 else {
@@ -87,14 +91,14 @@ namespace Restaurant {
                 }
             }
 
-            this.bar_order = new SimpleOrder(this.id, this.table_n, Target.Bar, drinks);
-            this.kit_order = new SimpleOrder(this.id, this.table_n, Target.Kitchen, dishes);
+            this.bar_order = new SimpleOrder(this.id, this.table_n, OrderTarget.Bar, drinks);
+            this.kit_order = new SimpleOrder(this.id, this.table_n, OrderTarget.Kitchen, dishes);
         }
 
-        public override Order GetOrder(Target target) {
+        public override Order GetOrder(OrderTarget target) {
             Order result = null;
-            if (target == Target.Kitchen) result =  this.kit_order;
-            else if (target == Target.Bar) result =  this.bar_order;
+            if (target == OrderTarget.Kitchen) result =  this.kit_order;
+            else if (target == OrderTarget.Bar) result =  this.bar_order;
             return result;
         }
     
@@ -106,8 +110,25 @@ namespace Restaurant {
             return this.bar_order.TotalTime() + this.kit_order.TotalTime();
         }
     
-        public override State GetState() {
-            return (State)Math.Min((int)this.bar_order.GetState(), (int)this.kit_order.GetState());
+        public override OrderState GetState() {
+            return (OrderState)Math.Min((int)this.bar_order.GetState(), (int)this.kit_order.GetState());
+        }
+    
+        public override void SetReady(OrderTarget target) {
+            if (target == OrderTarget.Bar) {
+                this.bar_order.SetReady(target);
+            }
+            else if (target == OrderTarget.Kitchen) {
+                this.kit_order.SetReady(target);
+            }
+            else {
+                this.kit_order.SetReady(target);
+                this.bar_order.SetReady(target);
+            }
+        }
+   
+        public override bool IsReady() {
+            return this.kit_order.IsReady() && this.bar_order.IsReady();
         }
     #endregion METHODS
     }
@@ -119,20 +140,20 @@ namespace Restaurant {
     #endregion FIELDS
 
     #region METHODS
-        internal SimpleOrder(long id, uint table_n, Target type, Dictionary<Product, uint> items)
+        internal SimpleOrder(long id, uint table_n, OrderTarget type, Dictionary<Product, uint> items)
             :base (table_n, type) 
         {
             this.id = id;
         }
 
-        internal SimpleOrder(uint table, Target type, Dictionary<Product, uint> items)
+        internal SimpleOrder(uint table, OrderTarget type, Dictionary<Product, uint> items)
             :base (table, type) 
         {
             this.id = Order.curr_id;
             Order.curr_id++;
         }
 
-        public override Order GetOrder(Target target) {
+        public override Order GetOrder(OrderTarget target) {
             return this;
         }
     
@@ -152,8 +173,16 @@ namespace Restaurant {
             return time;
         }
     
-        public override State GetState() {
+        public override OrderState GetState() {
             return this.state;
+        }
+   
+        public override void SetReady(OrderTarget target) {
+            this.state = OrderState.Ready;
+        }
+
+        public override bool IsReady() {
+            return this.state == OrderState.Ready;
         }
     #endregion METHODS
     }

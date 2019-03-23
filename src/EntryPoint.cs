@@ -1,5 +1,6 @@
 using Gtk;
 using Gdk;
+using Base;
 using Glade;
 using System;
 using System.Threading;
@@ -7,20 +8,13 @@ using System.Collections.Generic;
 
 namespace Restaurant {
     static class EntryPoint {
-        private const string DINING = "DiningRoom";
-        private const string KITCHEN = "Kitchen";
-        private const string BAR = "Bar";
-        private const string CENTRAL = "CentralNode";
-
-        private static List<Order> not_picked = new List<Order>();
-        private static List<Order> preparing = new List<Order>();
-
         public static void Main(string[] args) {
             if (args.Length == 1) {
                 Application.Init();
-                if (args[0] == DINING)  StartProgram(NewDiningRoom());
-                else if (args[0] == KITCHEN || args[0] == BAR)  StartProgram(NewKitchenBar(args[0] == KITCHEN));
-                else if (args[0] == CENTRAL)  StartProgram(NewCentralNode());
+                if (args[0] == Constants.START_DINING)  StartProgram(NewDiningRoom());
+                else if (args[0] == Constants.START_KITCHEN || args[0] == Constants.START_BAR)  
+                    StartProgram(NewKitchenBar(args[0] == Constants.START_KITCHEN));
+                else if (args[0] == Constants.START_CENTRAL)  StartProgram(NewCentralNode());
             }
         }
 

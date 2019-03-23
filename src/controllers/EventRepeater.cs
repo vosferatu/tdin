@@ -2,9 +2,7 @@ using System;
 
 namespace Restaurant {
     public abstract class EventRepeaterDelegateObject: MarshalByRefObject {
-        event OrderReadyEventHandler OrderReadyEventRepeater;
-        event NewOrderEventHandler NewOrderEventRepeater;
-
+    #region METHODS
         public override object InitializeLifetimeService() {return null;}
 
         public void NewOrderCallback(Order order) {
@@ -17,12 +15,16 @@ namespace Restaurant {
 
         protected abstract void NewOrderCallbackCore(Order order);
         protected abstract void OrderReadyCallbackCore(long order_id, uint table_n);
+    #endregion METHODS
     }
 
     public class EventRepeaterDelegate: EventRepeaterDelegateObject {
+    #region FIELDS
         OrderReadyEventHandler ready_handler;
         NewOrderEventHandler new_handler;
+    #endregion FIELDS
 
+    #region METHODS
         public EventRepeaterDelegate (OrderReadyEventHandler ready_handler, NewOrderEventHandler new_handler) {
             this.ready_handler = ready_handler;
             this.new_handler = new_handler;
@@ -39,5 +41,6 @@ namespace Restaurant {
                 this.ready_handler(order_id, table_n);
             }
         }
+    #endregion METHODS
     }
 }

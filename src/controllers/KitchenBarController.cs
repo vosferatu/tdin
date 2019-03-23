@@ -1,4 +1,5 @@
 using Gtk;
+using Base;
 using Glade;
 using System;
 using System.Threading;
@@ -12,9 +13,7 @@ using System.Runtime.Serialization.Formatters;
 
 namespace Restaurant {
     public class KitchenBarController: IController {
-        #region FIELDS
-        private const string REMOTE_URI = "tcp://localhost:8000/Central";
-        
+    #region FIELDS
         ICentralController central;
         OrderDetailWindow detail_window;
         OrderListWindow list_window;
@@ -22,12 +21,12 @@ namespace Restaurant {
         List<Order> not_picked;
         List<Order> preparing;
         bool is_kitchen;
-        #endregion FIELDS
+    #endregion FIELDS
 
-        #region NETWORK_METHODS
+    #region NETWORK_METHODS
         public bool InitializeNetwork() {
             while (!this.TryRemoteConnection()) {
-                Thread.Sleep(1990);
+                Thread.Sleep(Constants.CONNECT_RETRY_DELAY);
                 Console.WriteLine("Failed to connect! Retrying...");
             }
             return true;
@@ -36,14 +35,14 @@ namespace Restaurant {
         public bool TryRemoteConnection() {
             try {
                 Hashtable props = new Hashtable();
-                props["port"] = 0;  
-                props["name"] = "KitchenBarChannel";
+                props["port"] = Constants.KITCHENBAR_PORT;  
+                props["name"] = Constants.KITCHENBAR_CHANNEL_NAME;
                 BinaryClientFormatterSinkProvider cs = new BinaryClientFormatterSinkProvider();
                 BinaryServerFormatterSinkProvider ss = new BinaryServerFormatterSinkProvider();
                 ss.TypeFilterLevel = TypeFilterLevel.Full;
                 ChannelServices.RegisterChannel(new TcpChannel(props, cs, ss), false);
                 this.central = (ICentralController)Activator.GetObject(
-                    typeof(ICentralController), REMOTE_URI
+                    typeof(ICentralController), Constants.FULL_CENTRAL_URI
                 );
 
                 EventRepeaterDelegate evnt_del = new EventRepeaterDelegate(null, this.OnNewOrder);
@@ -55,7 +54,7 @@ namespace Restaurant {
                 }
                 return true;
             }
-            catch (Exception e) {}
+            catch (Exception) {}
             return false;
         }
 
@@ -71,9 +70,9 @@ namespace Restaurant {
                 return false;
             }
         }
-        #endregion NETWORK_METHODS
+    #endregion NETWORK_METHODS
 
-        #region METHODS
+    #region METHODS
         public KitchenBarController(bool is_kitchen) {
             this.is_kitchen = is_kitchen;
             this.not_picked = new List<Order>();
@@ -114,7 +113,7 @@ namespace Restaurant {
                 this.preparing.Remove(order);
                 this.list_window.root.ShowAll();
                 this.list_window.root.QueueDraw();
-                this.central.OrderReady(order_id, order.table_n);
+                this.central.OrderReady(order_id, order.table_n, this.is_kitchen);
             }
         }
 
@@ -137,6 +136,6 @@ namespace Restaurant {
 
             return null;
         }
-        #endregion METHODS
+    #endregion METHODS
     }
 }

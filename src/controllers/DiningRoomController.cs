@@ -1,4 +1,5 @@
 using Gtk;
+using Base;
 using System;
 using System.Threading;
 using System.Collections;
@@ -12,26 +13,23 @@ using System.Runtime.Serialization.Formatters;
 
 namespace Restaurant {
     public class DiningRoomController: IController {
-        #region FIELDS
-        private const string REMOTE_URI = "tcp://localhost:8000/Central";
-
+    #region FIELDS
         ICentralController central;
         ProductListWindow window;
 
         Dictionary<string, uint> order;
-        uint table_n = 5;
         Stack<Tuple<string, int>> history;
         Dictionary<string, Product> products;
 
         List<Product> dishes;
         List<Product> drinks;
 
-        #endregion FIELDS
+    #endregion FIELDS
 
-        #region NETWORK_METHODS
+    #region NETWORK_METHODS
         public bool InitializeNetwork() {
             while (!this.TryRemoteConnection()) {
-                Thread.Sleep(1990);
+                Thread.Sleep(Constants.CONNECT_RETRY_DELAY);
                 Console.WriteLine("Failed to connect! Retrying...");
             }
             return true;
@@ -40,21 +38,23 @@ namespace Restaurant {
         private bool TryRemoteConnection() {
             try {
                 Hashtable props = new Hashtable();
-                props["port"] = 0;  
-                props["name"] = "DiningRoomChannel";
+                props["port"] = Constants.DINING_PORT;  
+                props["name"] = Constants.DINING_CHANNEL_NAME;
                 BinaryClientFormatterSinkProvider cs = new BinaryClientFormatterSinkProvider();
                 BinaryServerFormatterSinkProvider ss = new BinaryServerFormatterSinkProvider();
                 ss.TypeFilterLevel = TypeFilterLevel.Full;
                 ChannelServices.RegisterChannel(new TcpChannel(props, cs, ss), false);
                 this.central = (ICentralController)Activator.GetObject(
-                    typeof(ICentralController), REMOTE_URI
+                    typeof(ICentralController), Constants.FULL_CENTRAL_URI
                 );
                 EventRepeaterDelegate evnt_del = new EventRepeaterDelegate(this.OnOrderReady, null);
                 this.central.OrderReadyEvent += evnt_del.OrderReadyCallback;
 
                 return true;
             }
-            catch (Exception e) {}
+            catch (Exception e) {
+                Console.WriteLine("{0}", e);
+            }
             return false;
         }
 
@@ -73,9 +73,9 @@ namespace Restaurant {
                 return false;
             }
         }
-        #endregion NETWORK_METHODS
+    #endregion NETWORK_METHODS
 
-        #region METHODS
+    #region METHODS
         public DiningRoomController(List<Product> dishes, List<Product> drinks) {
             this.dishes = dishes;
             this.drinks = drinks;
@@ -103,7 +103,7 @@ namespace Restaurant {
         }
 
         public void AddProduct(string p_name, bool add_history) {
-            bool is_dish = this.products[p_name].type == Product.Type.Dish;
+            bool is_dish = this.products[p_name].type == ProductType.Dish;
             if (this.order.ContainsKey(p_name)) {
                 uint new_amount = this.order[p_name] + 1;
                 this.order.Remove(p_name);
@@ -121,7 +121,7 @@ namespace Restaurant {
         }
 
         public void RemProduct(string p_name, bool add_history) {
-            bool is_dish = this.products[p_name].type == Product.Type.Dish;
+            bool is_dish = this.products[p_name].type == ProductType.Dish;
             if (this.order.ContainsKey(p_name)) {
                 uint old_amount = this.order[p_name];
                 this.order.Remove(p_name);
@@ -153,7 +153,8 @@ namespace Restaurant {
         public void SubmitOrder() {
             if (this.order.Count > 0) {
                 Console.WriteLine("Submitting order!");
-                this.central.NewOrder(this.order, this.table_n);
+                // TODO Add dinamic table number
+                this.central.NewOrder(this.order, 5);
                 this.order.Clear();
                 this.history.Clear();
                 this.window.ResetOrder();
@@ -162,7 +163,8 @@ namespace Restaurant {
 
         public void OnOrderReady(long order_id, uint table_n) {
             Console.WriteLine("Order #{0} ready!", order_id);
+            // TODO Add behaviour for order ready
         }
-        #endregion METHODS
+    #endregion METHODS
     }
 }

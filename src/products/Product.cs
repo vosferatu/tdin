@@ -1,19 +1,19 @@
+using Base;
 using System;
 
 namespace Restaurant {
     [Serializable]
     public class Product{
-        public enum Type {Dish, Drink};
         public string name {get; private set;}
         public double price {get; private set;}
         public double time {get; private set;}
-        public Product.Type type{get; private set;}
+        public ProductType type{get; private set;}
 
         public Product(string name, double price, double time, bool is_dish) {
             this.name = name;
             this.price = price;
             this.time = time;
-            this.type = (is_dish) ? Product.Type.Dish : Product.Type.Drink;
+            this.type = (is_dish) ? ProductType.Dish : ProductType.Drink;
         }
 
         public string toString() {
