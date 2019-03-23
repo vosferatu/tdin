@@ -174,54 +174,6 @@
           <placeholder/>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
           <widget class="GtkButton" id="BackButton">
             <property name="label">gtk-go-back</property>
             <property name="width_request">35</property>
@@ -234,17 +186,6 @@
           <packing>
             <property name="x_options"/>
             <property name="y_options"/>
-          </packing>
-        </child>
-        <child>
-          <widget class="GtkLabel" id="OrderDescriptionLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Order Description</property>
-          </widget>
-          <packing>
-            <property name="left_attach">2</property>
-            <property name="right_attach">10</property>
           </packing>
         </child>
         <child>
@@ -292,6 +233,21 @@
                     <child>
                       <placeholder/>
                     </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
                   </widget>
                 </child>
               </widget>
@@ -300,7 +256,7 @@
           <packing>
             <property name="left_attach">2</property>
             <property name="right_attach">10</property>
-            <property name="top_attach">4</property>
+            <property name="top_attach">2</property>
             <property name="bottom_attach">9</property>
           </packing>
         </child>
@@ -313,8 +269,8 @@
           <packing>
             <property name="left_attach">4</property>
             <property name="right_attach">8</property>
-            <property name="top_attach">3</property>
-            <property name="bottom_attach">4</property>
+            <property name="top_attach">1</property>
+            <property name="bottom_attach">2</property>
           </packing>
         </child>
         <child>
@@ -326,9 +282,19 @@
           <packing>
             <property name="left_attach">4</property>
             <property name="right_attach">8</property>
-            <property name="top_attach">1</property>
-            <property name="bottom_attach">2</property>
           </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>

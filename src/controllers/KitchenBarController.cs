@@ -2,27 +2,61 @@ using Gtk;
 using Glade;
 using System;
 using System.Threading;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Serialization.Formatters;
+
 
 namespace Restaurant {
     public class KitchenBarController: IController {
+        #region FIELDS
+        private const string REMOTE_URI = "tcp://localhost:8000/Central";
+        
+        ICentralController central;
         OrderDetailWindow detail_window;
         OrderListWindow list_window;
 
         List<Order> not_picked;
         List<Order> preparing;
+        bool is_kitchen;
+        #endregion FIELDS
 
-        public KitchenBarController(bool is_kitchen) {
-            this.not_picked = new List<Order>();
-            this.preparing = new List<Order>();
-        }
-
+        #region NETWORK_METHODS
         public bool InitializeNetwork() {
+            while (!this.TryRemoteConnection()) {
+                Thread.Sleep(1990);
+                Console.WriteLine("Failed to connect! Retrying...");
+            }
             return true;
         }
 
-        public bool TryAndJoinNetwork() {
-            return true;
+        public bool TryRemoteConnection() {
+            try {
+                Hashtable props = new Hashtable();
+                props["port"] = 0;  
+                props["name"] = "KitchenBarChannel";
+                BinaryClientFormatterSinkProvider cs = new BinaryClientFormatterSinkProvider();
+                BinaryServerFormatterSinkProvider ss = new BinaryServerFormatterSinkProvider();
+                ss.TypeFilterLevel = TypeFilterLevel.Full;
+                ChannelServices.RegisterChannel(new TcpChannel(props, cs, ss), false);
+                this.central = (ICentralController)Activator.GetObject(
+                    typeof(ICentralController), REMOTE_URI
+                );
+
+                EventRepeaterDelegate evnt_del = new EventRepeaterDelegate(null, this.OnNewOrder);
+                if (this.is_kitchen) {
+                    this.central.NewDishesOrderEvent += evnt_del.NewOrderCallback;
+                }
+                else {
+                    this.central.NewDrinksOrderEvent += evnt_del.NewOrderCallback;
+                }
+                return true;
+            }
+            catch (Exception e) {}
+            return false;
         }
 
         public bool StartController() {
@@ -37,12 +71,19 @@ namespace Restaurant {
                 return false;
             }
         }
+        #endregion NETWORK_METHODS
 
-        public void NewOrder(Order order) {
-            // TODO: Call this only on new order from network
+        #region METHODS
+        public KitchenBarController(bool is_kitchen) {
+            this.is_kitchen = is_kitchen;
+            this.not_picked = new List<Order>();
+            this.preparing = new List<Order>();
+        }
+
+        public void OnNewOrder(Order order) {
             this.not_picked.Add(order);
             Application.Invoke(delegate {
-                this.list_window.AddOrder(new Tuple<long, string>(order.id, order.desc));
+                this.list_window.AddOrder(new Tuple<long, string>(order.id, order.ToString()));
             });
         }
 
@@ -50,7 +91,7 @@ namespace Restaurant {
             Console.WriteLine("Cliked on order #{0}, ViewOrderDetails", order_id);
             Order order = this.FindOrder(order_id);
             if (order != null) {
-                this.detail_window = new OrderDetailWindow(this.GoBack, order.id, order.desc, order.table_n);
+                this.detail_window = new OrderDetailWindow(this.GoBack, order.id, order.ToString(), order.table_n);
                 this.list_window.root.HideAll();
                 this.detail_window.root.ShowAll();
             }
@@ -63,7 +104,6 @@ namespace Restaurant {
                 this.not_picked.Remove(order);
                 this.list_window.root.ShowAll();
                 this.list_window.root.QueueDraw();
-                // TODO: Warn network that order has moved from 'Not Picked' to 'Preparing'
             }
         }
 
@@ -74,7 +114,7 @@ namespace Restaurant {
                 this.preparing.Remove(order);
                 this.list_window.root.ShowAll();
                 this.list_window.root.QueueDraw();
-                // TODO: Warn network that order is ready to be picked!
+                this.central.OrderReady(order_id, order.table_n);
             }
         }
 
@@ -97,5 +137,6 @@ namespace Restaurant {
 
             return null;
         }
+        #endregion METHODS
     }
 }

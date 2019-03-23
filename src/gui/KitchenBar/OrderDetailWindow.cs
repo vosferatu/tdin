@@ -13,18 +13,15 @@ namespace Restaurant {
         [Glade.Widget]
         Gtk.Button BackButton;
         [Glade.Widget]
-        Gtk.Label OrderDescriptionLabel;
-        [Glade.Widget]
         Gtk.Label TableNLabel;
         [Glade.Widget]
         Gtk.Table ProductsBox;
 
-        public OrderDetailWindow(EventHandler back_handler, long order_id, string desc, int table_n) {
+        public OrderDetailWindow(EventHandler back_handler, long order_id, string desc, uint table_n) {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
-            root.Title = "Order #" + order_id;
-            OrderDescriptionLabel.Text = desc;
-            TableNLabel.Text = "Table #" + table_n;
+            root.Title = desc;
+            TableNLabel.Text = String.Format("Table #{0}",  table_n);
             BackButton.Clicked += back_handler;
         }
 

@@ -13,8 +13,6 @@ using System.Runtime.Serialization.Formatters;
 namespace Restaurant {
     public class DiningRoomController: IController {
         #region FIELDS
-
-        private const string CONFIG_FILE = "./assets/configs/client.config";
         private const string REMOTE_URI = "tcp://localhost:8000/Central";
 
         ICentralController central;
@@ -30,21 +28,11 @@ namespace Restaurant {
 
         #endregion FIELDS
 
-        public DiningRoomController(List<Product> dishes, List<Product> drinks) {
-            this.dishes = dishes;
-            this.drinks = drinks;
-            this.order      = new Dictionary<string, uint>();
-            this.history    = new Stack<Tuple<string, int>>();
-            this.products   = new Dictionary<string, Product>(dishes.Count + drinks.Count);
-            this.ProductsToDict(new List<Product>[] {dishes, drinks}); 
-        }
-
         #region NETWORK_METHODS
-
         public bool InitializeNetwork() {
             while (!this.TryRemoteConnection()) {
-                Thread.Sleep(990);
-                Console.WriteLine("Failed to connect to central node!\n - Retrying every second...");
+                Thread.Sleep(1990);
+                Console.WriteLine("Failed to connect! Retrying...");
             }
             return true;
         }
@@ -66,24 +54,9 @@ namespace Restaurant {
 
                 return true;
             }
-            catch (Exception e) {
-                Console.WriteLine("{0}", e);
-            }
+            catch (Exception e) {}
             return false;
         }
-
-        public bool TryAndJoinNetwork() {
-            Console.WriteLine("Managed to connect!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            return true;
-        }
-
-        public void OnOrderReady(long order_id, uint table_n) {
-            Console.WriteLine("Order #{0} ready!", order_id);
-        }
-
-        #endregion NETWORK_METHODS
-
-        #region METHODS
 
         public bool StartController() {
             this.window = new ProductListWindow(this.AddProduct, this.RemProduct, this.SubmitOrder, this.UndoOrder);
@@ -99,6 +72,17 @@ namespace Restaurant {
                 Console.WriteLine("Failed to start DiningRoomController!\n - {0}", e);
                 return false;
             }
+        }
+        #endregion NETWORK_METHODS
+
+        #region METHODS
+        public DiningRoomController(List<Product> dishes, List<Product> drinks) {
+            this.dishes = dishes;
+            this.drinks = drinks;
+            this.order      = new Dictionary<string, uint>();
+            this.history    = new Stack<Tuple<string, int>>();
+            this.products   = new Dictionary<string, Product>(dishes.Count + drinks.Count);
+            this.ProductsToDict(new List<Product>[] {dishes, drinks}); 
         }
 
         private List<Tuple<string, double>> ProductsToString(List<Product> products) {
@@ -175,28 +159,10 @@ namespace Restaurant {
                 this.window.ResetOrder();
             }
         }
-    
+
+        public void OnOrderReady(long order_id, uint table_n) {
+            Console.WriteLine("Order #{0} ready!", order_id);
+        }
         #endregion METHODS
-    }
-
-    public class EventRepeaterDelegate: EventRepeaterDelegateObject {
-        OrderReadyEventHandler ready_handler;
-        NewOrderEventHandler new_handler;
-
-        public EventRepeaterDelegate(OrderReadyEventHandler ready_handler, NewOrderEventHandler new_handler) {
-            this.ready_handler = ready_handler;
-            this.new_handler = new_handler;
-        }
-        
-        protected override void NewOrderCallbackCore(Order order) {
-            if (this.new_handler != null) {
-                this.new_handler(order);
-            }
-        }
-        protected override void OrderReadyCallbackCore(long order_id, uint table_n) {
-            if (this.ready_handler != null) {
-                this.ready_handler(order_id, table_n);
-            }
-        }
     }
 }

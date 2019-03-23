@@ -12,27 +12,19 @@ using System.Runtime.Serialization.Formatters;
 namespace Restaurant {
     [Serializable]
     public class PaymentZoneController: MarshalByRefObject, ICentralController {
+    #region FIELDS
         private const string URI = "Central";
         public event OrderReadyEventHandler OrderReadyEvent;
-        public event NewOrderEventHandler NewOrderEvent;
+        public event NewOrderEventHandler NewDishesOrderEvent;
+        public event NewOrderEventHandler NewDrinksOrderEvent;
         
-        [NonSerialized]
-        private static PaymentZoneController instance;
         double total_money;
         Dictionary<string, Product> products;
         [NonSerialized]
         static ConcurrentDictionary<long, Order> orders;    
-        
-        public PaymentZoneController() {}
+    #endregion FIELDS
 
-        public PaymentZoneController(List<Product> dishes, List<Product> drinks) {
-            this.total_money = 0;
-        }
-
-        public ICentralController getObj() {
-            return instance;
-        }
-
+    #region NETWORK_METHODS
         public override object InitializeLifetimeService() { return (null); }
 
         public bool InitializeNetwork() {
@@ -53,9 +45,6 @@ namespace Restaurant {
             }
         }
 
-        public bool TryAndJoinNetwork() {
-            return true;
-        }
 
         public bool StartController() {
             Console.WriteLine("Server running, enter <return> to exit");
@@ -63,12 +52,53 @@ namespace Restaurant {
             return true;
         }
 
+    #endregion NETWORK_METHODS
+
+    #region METHODS
+        public PaymentZoneController(List<Product> dishes, List<Product> drinks) {
+            this.total_money = 0;
+            this.products = new Dictionary<string, Product>(dishes.Count + drinks.Count);
+            foreach(Product dish in dishes) {
+                this.products.Add(dish.name, dish);
+            }
+            foreach(Product drink in drinks) {
+                this.products.Add(drink.name, drink);
+            }
+        }
+
         public void OrderReady(long order_id, uint table_n) {
+            Console.WriteLine("Order #{0} ready!", order_id);
 
+            if (this.OrderReadyEvent != null) {
+                this.OrderReadyEvent(order_id, table_n);
+            }
         }
 
-        public void NewOrder(Dictionary<string, uint> products, uint table_n) {
-            Console.WriteLine("Got order to table #{0}", table_n);
+        public void NewOrder(Dictionary<string, uint> p_infos, uint table_n) {
+            Dictionary<Product, uint> p = new Dictionary<Product, uint>(p_infos.Count);
+            foreach(KeyValuePair<string, uint> p_info in p_infos) {
+                if (this.products.ContainsKey(p_info.Key)) {
+                    p.Add(this.products[p_info.Key], p_info.Value);
+                }
+                else {
+                    Console.WriteLine("Product '{0}' not found! Aborting order...", p_info.Key);
+                    return;
+                }
+            }
+
+            Order new_order = Order.NewOrder(table_n, p);
+            if (new_order.type == Target.Both && this.NewDishesOrderEvent != null && this.NewDrinksOrderEvent != null) {
+                this.NewDishesOrderEvent(new_order.GetOrder(Target.Kitchen));
+                this.NewDrinksOrderEvent(new_order.GetOrder(Target.Bar));
+            }
+            else if (new_order.type == Target.Bar && this.NewDrinksOrderEvent != null) {
+                this.NewDrinksOrderEvent(new_order);
+            }
+            else if (new_order.type == Target.Kitchen && this.NewDishesOrderEvent != null) {
+                this.NewDishesOrderEvent(new_order);
+            }
+            return;
         }
+    #endregion METHODS
     }
 }
