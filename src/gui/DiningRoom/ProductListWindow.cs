@@ -89,21 +89,21 @@ namespace Restaurant {
             ProductEntry entry = new ProductEntry(name, 1, this.rem_p);
             table.Attach(entry, 
                 0, 1, 0 + child_n, 1 + child_n,
-                Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
                 0, 0
             );
-            table.ShowAll();
+            entry.ShowAll();
         }
 
         public void RemoveProduct(string name, bool is_dish) {
             Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
             foreach(Gtk.Widget widget in table) {
                 if (((ProductEntry)widget).p_name == name) {
+                    widget.HideAll();
                     table.Remove(widget);
                     break;
                 }
             }
-            table.ShowAll();
         } 
         
         public void ChangeAmount(string name, int change, bool is_dish) {
@@ -115,7 +115,6 @@ namespace Restaurant {
                     break;
                 }
             }
-            table.ShowAll();
         }
 
         public void OnUndo(object o, EventArgs args) {

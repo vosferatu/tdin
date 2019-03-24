@@ -17,6 +17,20 @@ namespace Restaurant {
                     StartProgram(NewKitchenBar(args[0] == Constants.START_KITCHEN));
                 else if (args[0] == Constants.START_CENTRAL)  StartProgram(NewCentralNode());
             }
+            else {
+                Console.WriteLine("Wrong usage!");
+                PrintUsage();
+            }
+        }
+
+        private static void PrintUsage() {
+            Console.WriteLine("Usage:");
+            Console.WriteLine("     app.exe <controller>\n");
+            Console.WriteLine("Controllers:");
+            Console.WriteLine("     CentralNode     Payment zone for the restaurant");
+            Console.WriteLine("     DiningRoom      Dining room terminal view");
+            Console.WriteLine("     Kitchen         Kitchen room terminal view");
+            Console.WriteLine("     Bar             Bar room terminal view\n");
         }
 
         private static void StartProgram(IController controller) {
