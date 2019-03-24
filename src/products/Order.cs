@@ -190,7 +190,7 @@ namespace Restaurant {
         public override double TotalPrice() {
             double price = 0.0;
             foreach (KeyValuePair<Product, uint> entry in this.items) {
-                price += entry.Key.price;
+                price += entry.Key.price * entry.Value;
             }
             return price;
         }

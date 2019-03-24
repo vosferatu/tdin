@@ -1,3 +1,4 @@
+using Gdk;
 using Gtk;
 using Glade;
 using System;
@@ -20,7 +21,8 @@ namespace Restaurant {
         public OrderDetailWindow(EventHandler back_handler, Dictionary<string, uint> prods, long order_id, uint table_n) {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
-            root.Title = String.Format("Order #{0} Details", order_id);
+            this.root.SetIconFromFile(GuiConstants.APP_ICON);
+            this.root.Title = String.Format("Order #{0} Details", order_id);
             TableNLabel.Text = String.Format("Table #{0}",  table_n);
             BackButton.Clicked += back_handler;
             foreach(KeyValuePair<string, uint> product in prods) {
@@ -28,22 +30,30 @@ namespace Restaurant {
                 this.ProductsBox.Attach(
                     this.CreateBox(product.Key, product.Value),
                     0, 1, 0 + child_n, 1 + child_n,
-                    Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                    Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
                     0, 0
                 );
             }
         }
 
-        // TODO: Center this freaking labels
-        private HBox CreateBox(string name, uint amount) {
-            Gtk.HBox p_entry = new Gtk.HBox(false, 0);
+        private Gtk.Table CreateBox(string name, uint amount) {
+            Gtk.Table p_entry = new Gtk.Table(1, 1, false);
             Gtk.Label p_name = new Gtk.Label(name);
-            Gtk.Label p_amount = new Gtk.Label(String.Format("{0}", amount));
-            p_entry.Homogeneous = false;
-            p_name.SetSizeRequest(80, 30);
-            p_amount.SetSizeRequest(250, 30);
-            p_entry.Add(p_name);
-            p_entry.Add(p_amount);
+            Gtk.Label p_amount = new Gtk.Label(amount.ToString());
+            p_name.Xalign = 0.05f;
+            p_amount.UseMarkup = true;
+            p_amount.Markup = String.Format("<b><big>{0}</big></b>", p_amount.Text);
+            p_name.SetSizeRequest(210, 30);
+            p_entry.Attach(p_name,
+                0, 1, 0, 1,
+                Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
+                0, 0
+            );
+            p_entry.Attach(p_amount,
+                1, 2, 0, 1,
+                Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
+                0, 0
+            );
             p_entry.ShowAll();
             return p_entry;
         }

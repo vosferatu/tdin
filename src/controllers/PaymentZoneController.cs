@@ -11,7 +11,6 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
 
-// TODO: Add a GUI for this
 namespace Restaurant {
     [Serializable]
     public class PaymentZoneController: MarshalByRefObject, ICentralController {
@@ -60,12 +59,10 @@ namespace Restaurant {
         }
 
         public bool StartController() {
-            this.window = new PaymentZoneWindow(this.OnTableSelect);
+            this.window = new PaymentZoneWindow(this.OnTableSelect, this.TablePaid);
             Thread thr = new Thread(new ThreadStart(this.window.StartThread));
             try {
                 thr.Start();
-                Console.WriteLine("Server running, enter <return> to exit");
-                Console.ReadLine();
                 return true;
             }
             catch (Exception e) {
@@ -138,21 +135,6 @@ namespace Restaurant {
             return table_orders;
         }
 
-        public void OrderReady(long order_id, uint table_n, bool from_kitchen) {
-            if (orders.ContainsKey(order_id)) {
-                Order order = orders[order_id];
-                order.SetReady((from_kitchen ? OrderTarget.Kitchen : OrderTarget.Bar));
-
-                if (this.OrderReadyEvent != null && order.IsReady()) {
-                    this.OrderReadyEvent(order_id, table_n);
-                }
-            }
-            else {
-                Console.WriteLine("Order #{0} does not exist!", order_id);
-            }
-
-        }
-
         public void NewOrder(Dictionary<string, uint> p_infos, uint table_n) {
             Dictionary<Product, uint> p = new Dictionary<Product, uint>(p_infos.Count);
             foreach(KeyValuePair<string, uint> p_info in p_infos) {
@@ -167,17 +149,32 @@ namespace Restaurant {
 
             Order new_order = Order.NewOrder(table_n, p);
             orders.AddOrUpdate(new_order.id, new_order, (k, v) => new_order);
-            if (new_order.type == OrderTarget.Both && this.NewDishesOrderEvent != null && this.NewDrinksOrderEvent != null) {
-                this.NewDishesOrderEvent(new_order.GetOrder(OrderTarget.Kitchen));
-                this.NewDrinksOrderEvent(new_order.GetOrder(OrderTarget.Bar));
-            }
-            else if (new_order.type == OrderTarget.Bar && this.NewDrinksOrderEvent != null) {
-                this.NewDrinksOrderEvent(new_order);
-            }
-            else if (new_order.type == OrderTarget.Kitchen && this.NewDishesOrderEvent != null) {
-                this.NewDishesOrderEvent(new_order);
-            }
+            // if (new_order.type == OrderTarget.Both && this.NewDishesOrderEvent != null && this.NewDrinksOrderEvent != null) {
+            //     this.NewDishesOrderEvent(new_order.GetOrder(OrderTarget.Kitchen));
+            //     this.NewDrinksOrderEvent(new_order.GetOrder(OrderTarget.Bar));
+            // }
+            // else if (new_order.type == OrderTarget.Bar && this.NewDrinksOrderEvent != null) {
+            //     this.NewDrinksOrderEvent(new_order);
+            // }
+            // else if (new_order.type == OrderTarget.Kitchen && this.NewDishesOrderEvent != null) {
+            //     this.NewDishesOrderEvent(new_order);
+            // }
             return;
+        }
+
+        public void OrderReady(long order_id, uint table_n, bool from_kitchen) {
+            if (orders.ContainsKey(order_id)) {
+                Order order = orders[order_id];
+                order.SetReady((from_kitchen ? OrderTarget.Kitchen : OrderTarget.Bar));
+
+                if (this.OrderReadyEvent != null && order.IsReady()) {
+                    this.OrderReadyEvent(order_id, table_n);
+                }
+            }
+            else {
+                Console.WriteLine("Order #{0} does not exist!", order_id);
+            }
+
         }
 
         public void OrderDelivered(long order_id) {
@@ -198,14 +195,24 @@ namespace Restaurant {
             }
         }
 
-        public void OrderPaid(long order_id) {
-            if (orders.ContainsKey(order_id)) {
-                Order order = orders[order_id];
-                this.total_money += order.TotalPrice();
-                order.Paid();
+        public void TablePaid() {
+            uint table_n = this.selected_table;
+            if (table_delivered_orders.ContainsKey(table_n)) {
+                lock(table_delivered_orders) {
+                    ConcurrentBag<Order> table_orders = table_delivered_orders[table_n];
+                    lock(table_orders) {
+                        foreach(Order order in table_orders) {
+                            this.total_money += order.TotalPrice();
+                            order.Paid();
+                        }
+                        table_orders.Clear();
+                    }
+                }
+                this.window.SetTotalMoney(this.total_money);
+                this.window.ClearProductsList();
             }
             else {
-                Console.WriteLine("Order #{0} does not exist!", order_id);
+                Console.WriteLine("Table #{0} does not exist!", table_n);
             }
         }
     #endregion METHODS

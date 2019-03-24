@@ -5,6 +5,7 @@
   <widget class="GtkWindow" id="root">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Payment Zone</property>
     <property name="default_width">600</property>
     <property name="default_height">400</property>
     <signal name="delete_event" handler="OnDelete" swapped="no"/>
@@ -14,6 +15,18 @@
         <property name="can_focus">False</property>
         <property name="n_rows">10</property>
         <property name="n_columns">10</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
         <child>
           <placeholder/>
         </child>
@@ -380,12 +393,50 @@
           </widget>
           <packing>
             <property name="right_attach">5</property>
-            <property name="bottom_attach">10</property>
+            <property name="top_attach">1</property>
+            <property name="bottom_attach">9</property>
             <property name="x_options">GTK_SHRINK</property>
           </packing>
         </child>
         <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
           <widget class="GtkFrame" id="frame2">
+            <property name="width_request">300</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label_xalign">0</property>
@@ -416,7 +467,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
-                                <property name="label" translatable="yes">&lt;small&gt;Name&lt;/small&gt;</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Name&lt;/b&gt;</property>
                                 <property name="use_markup">True</property>
                               </widget>
                               <packing>
@@ -425,6 +476,7 @@
                             </child>
                             <child>
                               <widget class="GtkLabel" id="label15">
+                                <property name="width_request">60</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">&lt;small&gt;Price&lt;/small&gt;</property>
@@ -439,6 +491,7 @@
                             </child>
                             <child>
                               <widget class="GtkLabel" id="label16">
+                                <property name="width_request">50</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">&lt;small&gt;Amount&lt;/small&gt;</property>
@@ -453,9 +506,11 @@
                             </child>
                             <child>
                               <widget class="GtkLabel" id="label17">
+                                <property name="width_request">65</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">&lt;small&gt;Total&lt;/small&gt;</property>
+                                <property name="xalign">0.94999998807907104</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Total&lt;/b&gt;</property>
                                 <property name="use_markup">True</property>
                               </widget>
                               <packing>
@@ -512,6 +567,21 @@
                             <child>
                               <placeholder/>
                             </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
                           </widget>
                           <packing>
                             <property name="top_attach">1</property>
@@ -519,6 +589,9 @@
                           </packing>
                         </child>
                       </widget>
+                      <packing>
+                        <property name="x_padding">2</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkTable" id="table6">
@@ -530,7 +603,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="xalign">1</property>
-                            <property name="label" translatable="yes">0</property>
+                            <property name="label" translatable="yes">0.0</property>
                           </widget>
                           <packing>
                             <property name="y_options">GTK_SHRINK</property>
@@ -584,17 +657,18 @@
         <child>
           <widget class="GtkButton" id="PaidButton">
             <property name="label" translatable="yes">Paid</property>
-            <property name="visible">True</property>
+            <property name="height_request">35</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <signal name="clicked" handler="OnPaidClicked" swapped="no"/>
           </widget>
           <packing>
             <property name="left_attach">9</property>
             <property name="right_attach">10</property>
             <property name="top_attach">9</property>
             <property name="bottom_attach">10</property>
-            <property name="x_options"/>
-            <property name="y_options">GTK_SHRINK</property>
+            <property name="x_options">GTK_SHRINK</property>
+            <property name="y_options"/>
           </packing>
         </child>
         <child>
@@ -607,7 +681,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="label" translatable="yes">0</property>
+                <property name="label" translatable="yes">0.0</property>
               </widget>
               <packing>
                 <property name="y_options">GTK_SHRINK</property>
@@ -632,6 +706,55 @@
             <property name="left_attach">5</property>
             <property name="right_attach">10</property>
             <property name="y_options">GTK_SHRINK</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <widget class="GtkLabel" id="label3">
+            <property name="height_request">35</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">
+</property>
+          </widget>
+          <packing>
+            <property name="left_attach">6</property>
+            <property name="right_attach">9</property>
+            <property name="top_attach">9</property>
+            <property name="bottom_attach">10</property>
+            <property name="y_options"/>
           </packing>
         </child>
       </widget>

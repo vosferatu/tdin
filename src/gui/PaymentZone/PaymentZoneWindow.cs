@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace Restaurant {
     public delegate void TableSelected(uint table_n);
+    public delegate void PaidOrder();
 
     public class PaymentZoneWindow {
         private const string WINDOW_FILE = GuiConstants.WINDOWS_DIR + "PaymentZone.glade";
@@ -46,18 +47,26 @@ namespace Restaurant {
 
     #region FIELDS
         TableSelected table_handler;
+        PaidOrder paid_handler;
         Dictionary<uint, Gtk.ToggleButton> buttons;
     #endregion FIELDS
 
     #region METHODS
-        public PaymentZoneWindow(TableSelected table_handler) {
+        public PaymentZoneWindow(TableSelected table_handler, PaidOrder paid_handler) {
             this.table_handler = table_handler;
+            this.paid_handler = paid_handler;
         }
 
         public void StartThread() {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
+            this.root.SetIconFromFile(GuiConstants.APP_ICON);
             this.buttons = new Dictionary<uint, Gtk.ToggleButton>(9);
+            this.FinishSetup();
+            Application.Run();
+        }
+
+        private void FinishSetup() {
             this.buttons.Add(1, this.Table1);
             this.buttons.Add(2, this.Table2);
             this.buttons.Add(3, this.Table3);
@@ -67,7 +76,9 @@ namespace Restaurant {
             this.buttons.Add(7, this.Table7);
             this.buttons.Add(8, this.Table8);
             this.buttons.Add(9, this.Table9);
-            Application.Run();
+            this.PaidButton.Label = "Paid";
+            this.PaidButton.ImagePosition = Gtk.PositionType.Right;
+            this.PaidButton.Image = new Gtk.Image(GuiConstants.DOLLAR_SIGN);
         }
 
         internal void OnTableSelect(object e, EventArgs args) {
@@ -89,21 +100,34 @@ namespace Restaurant {
 
         public void ClearProductsList() {
             this.OrderPriceLabel.Text = "0.0";
+            this.PaidButton.HideAll();
             foreach(Gtk.Widget widget in this.TableProductsList) {
                 this.TableProductsList.Remove(widget);
             }
         }
 
         public void SetProductsList(List<Gtk.Widget> prod_info, double total_price) {
-            this.OrderPriceLabel.Text = total_price.ToString();
-            foreach (Gtk.Widget widget in prod_info) {
-                uint child_n = (uint)this.TableProductsList.Children.Length;
-                this.TableProductsList.Attach(widget,
-                    0, 1, 0 + child_n, 1 + child_n,
-                    Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
-                    0, 0
-                );
+            if (prod_info.Count > 0) {
+                this.OrderPriceLabel.Text = total_price.ToString();
+                this.PaidButton.ShowAll();
+                foreach (Gtk.Widget widget in prod_info) {
+                    uint child_n = (uint)this.TableProductsList.Children.Length;
+                    this.TableProductsList.Attach(widget,
+                        0, 1, 0 + child_n, 1 + child_n,
+                        Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
+                        0, 0
+                    );
+                }
             }
+        }
+
+        public void OnPaidClicked(object e, EventArgs args) {
+            this.paid_handler();
+        }
+
+        public void SetTotalMoney(double money) {
+            this.TotalMoneyLabel.Text = money.ToString();
+            this.TotalMoneyLabel.Show();
         }
 
         public void OnDelete(object o, DeleteEventArgs e) {
@@ -138,13 +162,24 @@ namespace Restaurant {
         }
 
         private void ConfigureLabels() {
-            this.name_label.SetSizeRequest(150, 20);
+            this.name_label.SetSizeRequest(145, 20);
+            this.name_label.Xalign = 0f;
+            this.price_label.SetSizeRequest(60, 20);
+            this.price_label.Markup = String.Format("<small>{0}</small>", this.price_label.Text);
+            this.price_label.UseMarkup = true;
+            this.amount_label.SetSizeRequest(50, 20);
+            this.amount_label.Markup = String.Format("<small>{0}</small>", this.amount_label.Text);
+            this.amount_label.UseMarkup = true;
+            this.total_label.SetSizeRequest(65, 20);
+            this.total_label.Markup = String.Format("<b>{0}€</b>", this.total_label.Text);
+            this.total_label.UseMarkup = true;
+            this.total_label.Xalign = 0.95f;
         }
 
         private void AttachEverything() {
             this.Attach(this.name_label,
                 0, 1, 0, 1,
-                Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
                 0, 3
             );
             this.Attach(this.sep1,
@@ -174,7 +209,7 @@ namespace Restaurant {
             );
             this.Attach(this.total_label,
                 6, 7, 0, 1,
-                Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
                 0, 3
             );
         }

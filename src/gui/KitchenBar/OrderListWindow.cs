@@ -29,6 +29,7 @@ namespace Restaurant {
         public void StartThread() {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
+            this.root.SetIconFromFile(GuiConstants.APP_ICON);
             Application.Run();
         }
 
@@ -41,6 +42,7 @@ namespace Restaurant {
         }
 
         public void AddOrder(long order_id) {
+            Console.WriteLine("WTF");
             this.AddOrderToBox(order_id, this.NotPickedBox, false);
             this.root.ShowAll();
         }
@@ -76,6 +78,7 @@ namespace Restaurant {
         }
 
         private void AddOrderToBox(long order_id, Gtk.Table box, bool picked) {
+            Console.WriteLine("WTF");
             uint child_n = (uint)box.Children.Length;
             OrderEntry new_entry = new OrderEntry(order_id, picked);
             new_entry.SetHandlers(this.view_handler, (picked ? this.done_handler : this.prepare_handler));

@@ -49,6 +49,7 @@ namespace Restaurant {
         public void StartThread() {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
+            this.root.SetIconFromFile(GuiConstants.APP_ICON);
             Application.Run();
         }
     

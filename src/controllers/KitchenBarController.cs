@@ -25,10 +25,10 @@ namespace Restaurant {
 
     #region NETWORK_METHODS
         public bool InitializeNetwork() {
-            while (!this.TryRemoteConnection()) {
-                Thread.Sleep(Constants.CONNECT_RETRY_DELAY);
-                Console.WriteLine("Failed to connect! Retrying...");
-            }
+            // while (!this.TryRemoteConnection()) {
+            //     Thread.Sleep(Constants.CONNECT_RETRY_DELAY);
+            //     Console.WriteLine("Failed to connect! Retrying...");
+            // }
             return true;
         }
 
@@ -89,7 +89,6 @@ namespace Restaurant {
         }
 
         public void ViewOrderDetails(long order_id) {
-            Console.WriteLine("Cliked on order #{0}, ViewOrderDetails", order_id);
             Order order = this.FindOrder(order_id);
             if (order != null) {
                 this.detail_window = new OrderDetailWindow(this.GoBack, order.GetProductsSimplified(), order.id, order.table_n);
@@ -109,7 +108,6 @@ namespace Restaurant {
         }
 
         public void FinishOrder(long order_id) {
-            Console.WriteLine("Cliked on order #{0}, FinishOrder", order_id);
             Order order = this.FindOrder(order_id);
             if (order != null && this.list_window.RemoveOrder(order_id)) {
                 this.preparing.Remove(order);
