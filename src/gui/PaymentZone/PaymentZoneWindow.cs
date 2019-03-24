@@ -2,6 +2,7 @@ using Gtk;
 using Gdk;
 using Glade;
 using System;
+using System.Timers;
 using System.Collections.Generic;
 
 namespace Restaurant {
@@ -11,6 +12,7 @@ namespace Restaurant {
     public class PaymentZoneWindow {
         private const string WINDOW_FILE = GuiConstants.WINDOWS_DIR + "PaymentZone.glade";
         private const string WINDOW_NAME = "root";
+        private Timer price_timer;
     #region WIDGETS
         [Glade.Widget]
         Gtk.Window root;
@@ -126,7 +128,19 @@ namespace Restaurant {
         }
 
         public void SetTotalMoney(double money) {
-            this.TotalMoneyLabel.Text = money.ToString();
+            this.price_timer = new Timer(GuiConstants.PRICE_ANIMATION);
+            this.price_timer.Elapsed += (obj, args) => {
+                this.TotalMoneyLabel.Text = money.ToString() + " €";
+                this.TotalMoneyLabel.Markup = money.ToString() + " €";
+                this.TotalMoneyLabel.UseMarkup = false;
+                this.TotalMoneyLabel.ModifyFg(Gtk.StateType.Normal, GuiConstants.BLACK);
+                this.price_timer.Close();
+            };
+            this.TotalMoneyLabel.Text = money.ToString() + " €";
+            this.TotalMoneyLabel.Markup = String.Format("<big><b>{0}</b></big>", this.TotalMoneyLabel.Text);
+            this.TotalMoneyLabel.UseMarkup = true;
+            this.TotalMoneyLabel.ModifyFg(Gtk.StateType.Normal, GuiConstants.GREEN);
+            this.price_timer.Start();
             this.TotalMoneyLabel.Show();
         }
 

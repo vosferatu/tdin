@@ -40,6 +40,12 @@
           <placeholder/>
         </child>
         <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
           <widget class="GtkFrame" id="frame1">
             <property name="width_request">250</property>
             <property name="visible">True</property>
@@ -435,6 +441,30 @@
           <placeholder/>
         </child>
         <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
           <widget class="GtkFrame" id="frame2">
             <property name="width_request">300</property>
             <property name="visible">True</property>
@@ -582,6 +612,12 @@
                             <child>
                               <placeholder/>
                             </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
                           </widget>
                           <packing>
                             <property name="top_attach">1</property>
@@ -622,6 +658,7 @@
                             <property name="right_attach">2</property>
                             <property name="x_options">GTK_SHRINK</property>
                             <property name="y_options">GTK_SHRINK</property>
+                            <property name="x_padding">5</property>
                           </packing>
                         </child>
                       </widget>
@@ -681,7 +718,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="label" translatable="yes">0.0</property>
+                <property name="label" translatable="yes">0.0 €</property>
               </widget>
               <packing>
                 <property name="y_options">GTK_SHRINK</property>
@@ -689,9 +726,10 @@
             </child>
             <child>
               <widget class="GtkLabel" id="label4">
+                <property name="height_request">30</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">€ &lt;b&gt;Total Money  &lt;/b&gt;</property>
+                <property name="label" translatable="yes">&lt;b&gt;Total Money  &lt;/b&gt;</property>
                 <property name="use_markup">True</property>
               </widget>
               <packing>
@@ -699,6 +737,7 @@
                 <property name="right_attach">2</property>
                 <property name="x_options">GTK_SHRINK</property>
                 <property name="y_options">GTK_SHRINK</property>
+                <property name="x_padding">5</property>
               </packing>
             </child>
           </widget>
