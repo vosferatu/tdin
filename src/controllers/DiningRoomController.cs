@@ -153,8 +153,7 @@ namespace Restaurant {
         public void SubmitOrder() {
             if (this.order.Count > 0) {
                 Console.WriteLine("Submitting order!");
-                // TODO Add dinamic table number
-                this.central.NewOrder(this.order, 5);
+                this.central.NewOrder(this.order, (uint)this.window.TableNumber.ValueAsInt);
                 this.order.Clear();
                 this.history.Clear();
                 this.window.ResetOrder();
@@ -162,8 +161,7 @@ namespace Restaurant {
         }
 
         public void OnOrderReady(long order_id, uint table_n) {
-            Console.WriteLine("Order #{0} ready!", order_id);
-            // TODO Add behaviour for order ready
+            this.window.OrderReady(order_id);
         }
     #endregion METHODS
     }

@@ -63,6 +63,8 @@ namespace Restaurant {
             Thread thr = new Thread(new ThreadStart(this.list_window.StartThread));
             try {
                 thr.Start();
+                while (this.list_window.root == null) {}
+                this.list_window.root.Title = (this.is_kitchen ? "Kitchen Orders" : "Bar Orders");
                 return true;
             }
             catch (Exception e) {
@@ -82,7 +84,7 @@ namespace Restaurant {
         public void OnNewOrder(Order order) {
             this.not_picked.Add(order);
             Application.Invoke(delegate {
-                this.list_window.AddOrder(new Tuple<long, string>(order.id, order.ToString()));
+                this.list_window.AddOrder(order.id);
             });
         }
 
@@ -90,7 +92,7 @@ namespace Restaurant {
             Console.WriteLine("Cliked on order #{0}, ViewOrderDetails", order_id);
             Order order = this.FindOrder(order_id);
             if (order != null) {
-                this.detail_window = new OrderDetailWindow(this.GoBack, order.id, order.ToString(), order.table_n);
+                this.detail_window = new OrderDetailWindow(this.GoBack, order.GetProductsSimplified(), order.id, order.table_n);
                 this.list_window.root.HideAll();
                 this.detail_window.root.ShowAll();
             }

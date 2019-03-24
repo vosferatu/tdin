@@ -11,6 +11,7 @@ namespace Restaurant {
         public static void Main(string[] args) {
             if (args.Length == 1) {
                 Application.Init();
+                Gtk.Settings.Default.SetLongProperty ("gtk-button-images", 1, "");
                 if (args[0] == Constants.START_DINING)  StartProgram(NewDiningRoom());
                 else if (args[0] == Constants.START_KITCHEN || args[0] == Constants.START_BAR)  
                     StartProgram(NewKitchenBar(args[0] == Constants.START_KITCHEN));

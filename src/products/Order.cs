@@ -22,6 +22,7 @@ namespace Restaurant {
         public abstract Order GetOrder(OrderTarget target);
         public abstract void SetReady(OrderTarget target);
         public abstract bool IsReady();
+        public abstract Dictionary<string, uint> GetProductsSimplified();
 
         protected Order(uint table_n, OrderTarget type) {
             this.table_n = table_n;
@@ -58,10 +59,6 @@ namespace Restaurant {
 
         public void Paid() {
             this.state = OrderState.Paid;
-        }
-
-        public override string ToString() {
-            return String.Format("Order #{0}", this.id);
         }
     #endregion METHODS
     }
@@ -102,6 +99,15 @@ namespace Restaurant {
             return result;
         }
     
+        public override Dictionary<string, uint> GetProductsSimplified() {
+            Dictionary<string, uint> result = new Dictionary<string, uint>(this.bar_order.GetProductsSimplified());
+            foreach(KeyValuePair<string, uint> prod in this.kit_order.GetProductsSimplified()) {
+                result.Add(prod.Key, prod.Value);
+            }
+
+            return result;
+        }
+
         public override double TotalPrice() {
             return this.bar_order.TotalPrice() + this.kit_order.TotalPrice();
         }
@@ -144,6 +150,7 @@ namespace Restaurant {
             :base (table_n, type) 
         {
             this.id = id;
+            this.items = items;
         }
 
         internal SimpleOrder(uint table, OrderTarget type, Dictionary<Product, uint> items)
@@ -151,12 +158,22 @@ namespace Restaurant {
         {
             this.id = Order.curr_id;
             Order.curr_id++;
+            this.items = items;
         }
 
         public override Order GetOrder(OrderTarget target) {
             return this;
         }
     
+        public override Dictionary<string, uint> GetProductsSimplified() {
+            Dictionary<string, uint> result = new Dictionary<string, uint>(this.items.Count);
+            foreach(KeyValuePair<Product, uint> item in this.items) {
+                result.Add(item.Key.name, item.Value);
+            }
+
+            return result;
+        }
+
         public override double TotalPrice() {
             double price = 0.0;
             foreach (KeyValuePair<Product, uint> entry in this.items) {

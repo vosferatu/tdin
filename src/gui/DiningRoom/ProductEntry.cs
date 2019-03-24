@@ -18,7 +18,7 @@ namespace Restaurant {
             this.price_label = new Gtk.Label(String.Format("{0}€", price));
             this.price_label.SetSizeRequest(50, 25);
             this.name_label = new Gtk.Label(p_name);
-            this.name_label.SetSizeRequest(150, 25);
+            this.name_label.SetSizeRequest(175, 25);
             this.image = new ImageAction(Gtk.Stock.Add, Gtk.IconSize.Button);
             this.image.SetSizeRequest(30, 25);
 
@@ -32,7 +32,7 @@ namespace Restaurant {
             this.p_name = p_name;
             this.rem_product = rem_handler;
             this.name_label = new Gtk.Label(p_name);
-            this.name_label.SetSizeRequest(150, 25);
+            this.name_label.SetSizeRequest(175, 25);
             this.amount_label = new Gtk.Label(String.Format("{0}", amount));
             this.amount_label.SetSizeRequest(50, 25);
             this.image = new ImageAction(Gtk.Stock.Remove, Gtk.IconSize.Button);

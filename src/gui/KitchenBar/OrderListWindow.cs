@@ -32,16 +32,16 @@ namespace Restaurant {
             Application.Run();
         }
 
-        public void AddOrders(List<Tuple<long, string>> orders, bool picked) {
+        public void AddOrders(List<long> orders_id, bool picked) {
             Gtk.Table box = (picked ? this.PreparingBox : this.NotPickedBox);
-            foreach(Tuple<long, string> order in orders) {
-                this.AddOrderToBox(order, box, picked);
+            foreach(long order_id in orders_id) {
+                this.AddOrderToBox(order_id, box, picked);
             }
             this.root.ShowAll();
         }
 
-        public void AddOrder(Tuple<long, string> order) {
-            this.AddOrderToBox(order, this.NotPickedBox, false);
+        public void AddOrder(long order_id) {
+            this.AddOrderToBox(order_id, this.NotPickedBox, false);
             this.root.ShowAll();
         }
 
@@ -75,16 +75,15 @@ namespace Restaurant {
             return picked;
         }
 
-        private void AddOrderToBox(Tuple<long, string> order, Gtk.Table box, bool picked) {
+        private void AddOrderToBox(long order_id, Gtk.Table box, bool picked) {
             uint child_n = (uint)box.Children.Length;
-            OrderEntry new_entry = new OrderEntry(order.Item1, order.Item2, picked);
+            OrderEntry new_entry = new OrderEntry(order_id, picked);
             new_entry.SetHandlers(this.view_handler, (picked ? this.done_handler : this.prepare_handler));
             box.Attach(new_entry, 0, 1, 0+child_n, 1+child_n, Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 3);
             box.ShowAll();
         }
     
         public void OnDelete(object o, DeleteEventArgs e) {
-            Console.WriteLine("Deleting window!");
             Application.Quit();
         }
     }
@@ -98,16 +97,16 @@ namespace Restaurant {
         OrderLabel label;
         ImageAction img;
 
-        internal OrderEntry(long order_id, string desc, bool picked): base(false, 0) {
+        internal OrderEntry(long order_id, bool picked): base(false, 0) {
             this.order_id = order_id;
-            this.label = new OrderLabel(desc);
+            this.label = new OrderLabel(String.Format("Order #{0}", order_id));
             if (!picked) {
                 this.img = new ImageAction(Gtk.Stock.GoForward, Gtk.IconSize.Button);
             }
             else {
                 this.img = new ImageAction(Gtk.Stock.Apply, Gtk.IconSize.Button);
             }
-            this.SetSizeRequest(150, 50);
+            this.SetSizeRequest(200, 40);
             this.Add(this.label);
             this.Add(this.img);
             this.label.ButtonReleaseEvent += this.LabelReleaseFunc;

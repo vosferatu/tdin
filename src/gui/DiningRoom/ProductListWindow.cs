@@ -9,7 +9,7 @@ namespace Restaurant {
     public delegate void SimpleFunction();
     
     public class ProductListWindow {
-        private Gdk.Color GREEN = new Gdk.Color(153, 255, 153);
+    #region FIELDS
         private const string WINDOW_FILE = GuiConstants.WINDOWS_DIR + "ProductPicker.glade";
         private const string WINDOW_NAME = "root";
         
@@ -24,13 +24,19 @@ namespace Restaurant {
         Gtk.Table DishOrderList;
         [Glade.Widget]
         Gtk.Table DrinkOrderList;
+        [Glade.Widget]
+        public Gtk.SpinButton TableNumber;
+        [Glade.Widget]
+        Gtk.Table OrderReadyBox;
 
 
         ProductListFunc add_p;
         ProductListFunc rem_p;
         SimpleFunction submit;
         SimpleFunction undo;
+    #endregion FIELDS
 
+    #region METHODS
         public ProductListWindow(ProductListFunc add_product, ProductListFunc remove_product, 
             SimpleFunction submit, SimpleFunction undo) 
         {
@@ -51,49 +57,69 @@ namespace Restaurant {
             uint child_n = (uint)this.DishOrderList.Children.Length;
             foreach(Tuple<string, double> dish in dishes) {
                 ProductEntry new_entry = new ProductEntry(dish.Item1, dish.Item2, this.add_p);
-                this.DishProductList.Attach(new_entry, 0, 1, 0 + child_n, 1 + child_n,
-                    Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink, 0, 2);
+                this.DishProductList.Attach(new_entry, 
+                    0, 1, 0 + child_n, 1 + child_n,
+                    Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                    0, 0
+                );
                 child_n++;
             }
             child_n = (uint)this.DishOrderList.Children.Length;
             foreach(Tuple<string, double> drink in drinks) {
                 ProductEntry new_entry = new ProductEntry(drink.Item1, drink.Item2, this.add_p);
-                this.DrinkProductList.Attach(new_entry, 0, 1, 0 + child_n, 1 + child_n,
-                    Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink, 0, 2);
+                this.DrinkProductList.Attach(new_entry, 
+                    0, 1, 0 + child_n, 1 + child_n,
+                    Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink, 
+                    0, 0
+                );
                 child_n++;
             }
             this.root.ShowAll();
         }
 
+        // TODO: 
+        // Add at least 2 products to your order
+        // Completelly delete one of the products from your order
+        // Add a new product to your order
+        // EXPECTED: New product added below existing one
+        // HAPPENS:  New product added on top of existing one
         public void AddProduct(string name, bool is_dish) {
             Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
             uint child_n = (uint)table.Children.Length;
+            Console.WriteLine("Before adding -> Child n = {0}, is_dish ? {1}", child_n, is_dish);
             ProductEntry entry = new ProductEntry(name, 1, this.rem_p);
-            table.Attach(entry, 0, 1, 0 + child_n, 1 + child_n,
-                Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink, 0, 2);
-            this.root.ShowAll();
+            table.Attach(entry, 
+                0, 1, 0 + child_n, 1 + child_n,
+                Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                0, 0
+            );
+            Console.WriteLine("After adding -> Child n = {0}, is_dish ? {1}", child_n, is_dish);
+            table.ShowAll();
         }
 
         public void RemoveProduct(string name, bool is_dish) {
             Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
-            table.Foreach((Gtk.Widget widget) => {
-                ProductEntry entry = (ProductEntry)widget;
-                if (entry.p_name == name) {
+            Console.WriteLine("Before Remove -> Child n = {0}, is_dish ? {1}", table.Children.Length, is_dish);
+            foreach(Gtk.Widget widget in table) {
+                if (((ProductEntry)widget).p_name == name) {
                     table.Remove(widget);
+                    break;
                 }
-            });
-            this.root.ShowAll();
+            }
+            Console.WriteLine("After Remove -> Child n = {0}, is_dish ? {1}", table.Children.Length, is_dish);
+            table.ShowAll();
         } 
         
         public void ChangeAmount(string name, int change, bool is_dish) {
             Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
-            table.Foreach((Gtk.Widget widget) => {
+            foreach(Gtk.Widget widget in table) {
                 ProductEntry entry = (ProductEntry)widget;
                 if (entry.p_name == name) {
                     entry.ChangeAmount(change);
+                    break;
                 }
-            });
-            this.root.ShowAll();
+            }
+            table.ShowAll();
         }
 
         public void OnUndo(object o, EventArgs args) {
@@ -116,9 +142,61 @@ namespace Restaurant {
             });
         }
 
+        public void OrderReady(long order_id) {
+            OrderReadyEntry new_entry = new OrderReadyEntry(order_id, this.FinishOrder);
+            uint child_n = (uint)this.OrderReadyBox.Children.Length;
+            this.OrderReadyBox.Attach(new_entry,
+                0, 1, 0+child_n, 1+child_n,
+                Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                0, 10
+            );
+        }
+
+        internal void FinishOrder(long order_id) {
+            foreach(Widget widget in this.OrderReadyBox) {
+                OrderReadyEntry entry = (OrderReadyEntry)widget;
+                if (entry.order_id == order_id) {
+                    this.OrderReadyBox.Remove(widget);
+                    break;
+                }
+            }
+        }
+
         public void OnDelete(object o, DeleteEventArgs e) {
-            Console.WriteLine("Quitting!!");
             Application.Quit();
+        }
+    
+    #endregion METHODS
+    }
+}
+
+namespace Restaurant {
+    public delegate void OrderDelivered(long order_id);
+
+    public class OrderReadyEntry: Gtk.HBox {
+        internal long order_id {get; private set;}
+        OrderDelivered handler;
+        Gtk.Label order_name;
+        ImageAction finish;
+
+
+        public OrderReadyEntry(long order_id, OrderDelivered func) {
+            this.order_id = order_id;
+            this.handler = func;
+            this.order_name = new Gtk.Label(String.Format("<big>{0}</big>", order_id));
+            this.order_name.UseMarkup = true;
+            this.finish = new ImageAction(Gtk.Stock.Apply, Gtk.IconSize.SmallToolbar);
+            this.finish.ButtonReleaseEvent += this.Finished;
+
+            this.order_name.SetSizeRequest(35, 20);
+
+            this.Add(this.order_name);
+            this.Add(this.finish);
+            this.ShowAll();
+        }
+
+        private void Finished(object e, Gtk.ButtonReleaseEventArgs args) {
+            this.handler(this.order_id);
         }
     }
 }
