@@ -63,6 +63,8 @@ namespace Restaurant {
             Thread thr = new Thread(new ThreadStart(this.window.StartThread));
             try {
                 thr.Start();
+                Console.WriteLine("Server running, enter <return> to exit");
+                Console.ReadLine();
                 return true;
             }
             catch (Exception e) {
@@ -149,16 +151,17 @@ namespace Restaurant {
 
             Order new_order = Order.NewOrder(table_n, p);
             orders.AddOrUpdate(new_order.id, new_order, (k, v) => new_order);
-            // if (new_order.type == OrderTarget.Both && this.NewDishesOrderEvent != null && this.NewDrinksOrderEvent != null) {
-            //     this.NewDishesOrderEvent(new_order.GetOrder(OrderTarget.Kitchen));
-            //     this.NewDrinksOrderEvent(new_order.GetOrder(OrderTarget.Bar));
-            // }
-            // else if (new_order.type == OrderTarget.Bar && this.NewDrinksOrderEvent != null) {
-            //     this.NewDrinksOrderEvent(new_order);
-            // }
-            // else if (new_order.type == OrderTarget.Kitchen && this.NewDishesOrderEvent != null) {
-            //     this.NewDishesOrderEvent(new_order);
-            // }
+            this.window.NewOrderOnTable(table_n);
+            if (new_order.type == OrderTarget.Both && this.NewDishesOrderEvent != null && this.NewDrinksOrderEvent != null) {
+                this.NewDishesOrderEvent(new_order.GetOrder(OrderTarget.Kitchen));
+                this.NewDrinksOrderEvent(new_order.GetOrder(OrderTarget.Bar));
+            }
+            else if (new_order.type == OrderTarget.Bar && this.NewDrinksOrderEvent != null) {
+                this.NewDrinksOrderEvent(new_order);
+            }
+            else if (new_order.type == OrderTarget.Kitchen && this.NewDishesOrderEvent != null) {
+                this.NewDishesOrderEvent(new_order);
+            }
             return;
         }
 
@@ -187,7 +190,7 @@ namespace Restaurant {
                             bag.Add(order);
                             return bag;
                     });
-                    Console.WriteLine("Delivered order #{0}", order_id);
+                    this.window.OrderDeliveredOnTable(order.table_n);
                 }
             }
             else {

@@ -25,14 +25,14 @@ namespace Restaurant {
 
     #region NETWORK_METHODS
         public bool InitializeNetwork() {
-            // while (!this.TryRemoteConnection()) {
-            //     Thread.Sleep(Constants.CONNECT_RETRY_DELAY);
-            //     Console.WriteLine("Failed to connect! Retrying...");
-            // }
+            while (!this.TryRemoteConnection()) {
+                Thread.Sleep(Constants.CONNECT_RETRY_DELAY);
+                Console.WriteLine("Failed to connect! Retrying...");
+            }
             return true;
         }
 
-        public bool TryRemoteConnection() {
+        private bool TryRemoteConnection() {
             try {
                 Hashtable props = new Hashtable();
                 props["port"] = Constants.KITCHENBAR_PORT;  

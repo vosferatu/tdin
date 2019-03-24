@@ -12,7 +12,6 @@ namespace Restaurant {
     public class PaymentZoneWindow {
         private const string WINDOW_FILE = GuiConstants.WINDOWS_DIR + "PaymentZone.glade";
         private const string WINDOW_NAME = "root";
-        private Timer price_timer;
     #region WIDGETS
         [Glade.Widget]
         Gtk.Window root;
@@ -128,20 +127,42 @@ namespace Restaurant {
         }
 
         public void SetTotalMoney(double money) {
-            this.price_timer = new Timer(GuiConstants.PRICE_ANIMATION);
-            this.price_timer.Elapsed += (obj, args) => {
+            Timer price_timer = new Timer(GuiConstants.PRICE_ANIMATION);
+            price_timer.Elapsed += (obj, args) => {
                 this.TotalMoneyLabel.Text = money.ToString() + " €";
                 this.TotalMoneyLabel.Markup = money.ToString() + " €";
                 this.TotalMoneyLabel.UseMarkup = false;
                 this.TotalMoneyLabel.ModifyFg(Gtk.StateType.Normal, GuiConstants.BLACK);
-                this.price_timer.Close();
+                price_timer.Close();
             };
             this.TotalMoneyLabel.Text = money.ToString() + " €";
             this.TotalMoneyLabel.Markup = String.Format("<big><b>{0}</b></big>", this.TotalMoneyLabel.Text);
             this.TotalMoneyLabel.UseMarkup = true;
             this.TotalMoneyLabel.ModifyFg(Gtk.StateType.Normal, GuiConstants.GREEN);
-            this.price_timer.Start();
+            price_timer.Start();
             this.TotalMoneyLabel.Show();
+        }
+
+        public void NewOrderOnTable(uint table_n) {
+            Gtk.Button table = this.buttons[table_n];
+            this.TableAnimation(table, GuiConstants.YELLOW);
+        }
+
+        public void OrderDeliveredOnTable(uint table_n) {
+            Gtk.Button table = this.buttons[table_n];
+            this.TableAnimation(table, GuiConstants.GREEN);
+        }
+
+        private void TableAnimation(Gtk.Button table, Gdk.Color color) {
+            Timer timer = new Timer(GuiConstants.TABLE_ANIMATION);
+            timer.Elapsed += (obj, args) => {
+                table.Parent.ModifyBg(Gtk.StateType.Normal);
+                timer.Enabled = false;
+                timer.Close();
+            };
+            table.Parent.ModifyBg(Gtk.StateType.Normal, color);
+            timer.Enabled = true;
+            timer.Start();
         }
 
         public void OnDelete(object o, DeleteEventArgs e) {

@@ -152,7 +152,6 @@ namespace Restaurant {
 
         public void SubmitOrder() {
             if (this.order.Count > 0) {
-                Console.WriteLine("Submitting order!");
                 this.central.NewOrder(this.order, (uint)this.window.TableNumber.ValueAsInt);
                 this.order.Clear();
                 this.history.Clear();

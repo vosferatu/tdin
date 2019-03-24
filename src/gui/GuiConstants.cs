@@ -9,9 +9,11 @@ namespace Restaurant {
         public const string DOLLAR_SIGN = ICONS_DIR + "dollar.png";
 
         public const double PRICE_ANIMATION = 400;
+        public const double TABLE_ANIMATION = 1000;
 
         public static readonly Gdk.Color GREEN = new Gdk.Color(0, 128, 0);
         public static readonly Gdk.Color BLACK = new Gdk.Color(0, 0, 0);
+        public static readonly Gdk.Color YELLOW = new Gdk.Color(204, 204, 0);
     }
 
     internal class ImageAction: Gtk.EventBox {

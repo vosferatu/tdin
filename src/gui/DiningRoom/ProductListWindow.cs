@@ -54,7 +54,6 @@ namespace Restaurant {
         }
     
         public void SetProducts(List<Tuple<string, double>> dishes, List<Tuple<string, double>> drinks) {
-            Console.WriteLine("Adding products");
             uint child_n = (uint)this.DishOrderList.Children.Length;
             foreach(Tuple<string, double> dish in dishes) {
                 ProductEntry new_entry = new ProductEntry(dish.Item1, dish.Item2, this.add_p);

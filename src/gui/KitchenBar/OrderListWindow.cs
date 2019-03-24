@@ -42,7 +42,6 @@ namespace Restaurant {
         }
 
         public void AddOrder(long order_id) {
-            Console.WriteLine("WTF");
             this.AddOrderToBox(order_id, this.NotPickedBox, false);
             this.root.ShowAll();
         }
@@ -78,11 +77,14 @@ namespace Restaurant {
         }
 
         private void AddOrderToBox(long order_id, Gtk.Table box, bool picked) {
-            Console.WriteLine("WTF");
             uint child_n = (uint)box.Children.Length;
             OrderEntry new_entry = new OrderEntry(order_id, picked);
             new_entry.SetHandlers(this.view_handler, (picked ? this.done_handler : this.prepare_handler));
-            box.Attach(new_entry, 0, 1, 0+child_n, 1+child_n, Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 3);
+            box.Attach(new_entry, 
+                0, 1, 0+child_n, 1+child_n, 
+                Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
+                0, 3
+            );
             box.ShowAll();
         }
     
