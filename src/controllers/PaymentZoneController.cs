@@ -15,14 +15,17 @@ using System.Runtime.Serialization.Formatters;
 namespace Restaurant {
     [Serializable]
     public class PaymentZoneController: MarshalByRefObject, ICentralController {
-    #region FIELDS
         public event OrderReadyEventHandler OrderReadyEvent;
         public event NewOrderEventHandler NewDishesOrderEvent;
         public event NewOrderEventHandler NewDrinksOrderEvent;
         
-        double total_money;
+    #region FIELDS
+        [NonSerialized]
+        double total_money = 0.0;
         [NonSerialized]
         uint selected_table = 0;
+        [NonSerialized]
+        double order_total = 0.0;
         [NonSerialized]
         PaymentZoneWindow window;
         [NonSerialized]
@@ -89,13 +92,50 @@ namespace Restaurant {
             if (this.selected_table == table_n) {
                 this.window.UntoggleButton(table_n);
                 this.selected_table = 0;
-                // TODO Clear payment list
+                this.window.ClearProductsList();
             }
             else {
                 this.window.UntoggleButton(this.selected_table);
                 this.selected_table = table_n;
-                // TODO Show payment list of order
+                if (table_delivered_orders.ContainsKey(table_n)) {
+                    this.window.SetProductsList(this.CreateWidgets(table_n, ref this.order_total), this.order_total);
+                }
             }
+        }
+
+        private List<Gtk.Widget> CreateWidgets(uint table_n, ref double price) {
+            Dictionary<Product, uint> prods = this.MergeTableOrders(table_n);
+            List<Gtk.Widget> widgets = new List<Gtk.Widget>(prods.Count);
+            price = 0.0;
+            foreach(KeyValuePair<Product, uint> info in prods) {
+                Product prod = info.Key;
+                price += prod.price * info.Value;
+                widgets.Add(new TableProductEntry(prod.name, prod.price, info.Value));
+            }
+
+            return widgets;
+        }
+
+        private Dictionary<Product, uint> MergeTableOrders(uint table_n) {
+            Dictionary<Product, uint> table_orders = new Dictionary<Product, uint>();
+            lock(table_delivered_orders) {
+                ConcurrentBag<Order> orders = table_delivered_orders[table_n];
+                lock (orders) {
+                    foreach(Order order in orders) {
+                        Dictionary<Product, uint> order_prods = order.GetProducts();
+                        foreach(KeyValuePair<Product, uint> order_prod in order_prods) {
+                            if (table_orders.ContainsKey(order_prod.Key)) {
+                                table_orders[order_prod.Key] = table_orders[order_prod.Key] + order_prod.Value;
+                            }
+                            else {
+                                table_orders.Add(order_prod.Key, order_prod.Value);
+                            }
+
+                        }
+                    }
+                }
+            }
+            return table_orders;
         }
 
         public void OrderReady(long order_id, uint table_n, bool from_kitchen) {
@@ -170,4 +210,8 @@ namespace Restaurant {
         }
     #endregion METHODS
     }
+}
+
+namespace Restaurant {
+
 }

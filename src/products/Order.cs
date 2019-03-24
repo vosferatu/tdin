@@ -23,6 +23,7 @@ namespace Restaurant {
         public abstract void SetReady(OrderTarget target);
         public abstract bool IsReady();
         public abstract Dictionary<string, uint> GetProductsSimplified();
+        public abstract Dictionary<Product, uint> GetProducts();
 
         protected Order(uint table_n, OrderTarget type) {
             this.table_n = table_n;
@@ -108,6 +109,14 @@ namespace Restaurant {
             return result;
         }
 
+        public override Dictionary<Product, uint> GetProducts() {
+            Dictionary<Product, uint> result = new Dictionary<Product, uint>(this.bar_order.GetProducts());
+            foreach(KeyValuePair<Product, uint> prod in this.kit_order.GetProducts()) {
+                result.Add(prod.Key, prod.Value);
+            }
+            return result;
+        }
+
         public override double TotalPrice() {
             return this.bar_order.TotalPrice() + this.kit_order.TotalPrice();
         }
@@ -172,6 +181,10 @@ namespace Restaurant {
             }
 
             return result;
+        }
+
+        public override Dictionary<Product, uint> GetProducts() {
+            return this.items;
         }
 
         public override double TotalPrice() {

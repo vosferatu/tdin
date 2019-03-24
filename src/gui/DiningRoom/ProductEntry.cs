@@ -33,7 +33,7 @@ namespace Restaurant {
             this.rem_product = rem_handler;
             this.name_label = new Gtk.Label(p_name);
             this.name_label.SetSizeRequest(175, 25);
-            this.amount_label = new Gtk.Label(String.Format("{0}", amount));
+            this.amount_label = new Gtk.Label(amount.ToString());
             this.amount_label.SetSizeRequest(50, 25);
             this.image = new ImageAction(Gtk.Stock.Remove, Gtk.IconSize.Button);
             this.image.SetSizeRequest(30, 25);

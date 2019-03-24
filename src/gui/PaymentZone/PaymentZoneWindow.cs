@@ -80,13 +80,29 @@ namespace Restaurant {
         }
 
         public void UntoggleButton(uint table_n) {
-            Console.WriteLine("UntoggleButton({0})", table_n);
             if (this.buttons.ContainsKey(table_n)) {
-                Console.WriteLine("Toggling button #{0}", table_n);
-                // this.buttons[table_n].Toggle();
                 this.buttons[table_n].Active = false;
                 this.buttons[table_n].DrawIndicator = false;
                 this.ButtonsTable.ShowAll();
+            }
+        }
+
+        public void ClearProductsList() {
+            this.OrderPriceLabel.Text = "0.0";
+            foreach(Gtk.Widget widget in this.TableProductsList) {
+                this.TableProductsList.Remove(widget);
+            }
+        }
+
+        public void SetProductsList(List<Gtk.Widget> prod_info, double total_price) {
+            this.OrderPriceLabel.Text = total_price.ToString();
+            foreach (Gtk.Widget widget in prod_info) {
+                uint child_n = (uint)this.TableProductsList.Children.Length;
+                this.TableProductsList.Attach(widget,
+                    0, 1, 0 + child_n, 1 + child_n,
+                    Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                    0, 0
+                );
             }
         }
 
@@ -94,5 +110,73 @@ namespace Restaurant {
             Application.Quit();
         }
     #endregion METHODS
+    }
+}
+
+namespace Restaurant {
+    public class TableProductEntry: Gtk.Table {
+        Gtk.Label name_label;
+        Gtk.Label price_label;
+        Gtk.Label amount_label;
+        Gtk.Label total_label;
+        Gtk.VSeparator sep1;
+        Gtk.VSeparator sep2;
+        Gtk.VSeparator sep3;
+
+        public TableProductEntry(string name, double price, uint amount): base(1, 7, false) {
+            double total = price * amount;
+            this.name_label = new Gtk.Label(name);
+            this.price_label = new Gtk.Label(price.ToString());
+            this.amount_label = new Gtk.Label(amount.ToString());
+            this.total_label = new Gtk.Label(total.ToString());
+            this.sep1 = new Gtk.VSeparator();
+            this.sep2 = new Gtk.VSeparator();
+            this.sep3 = new Gtk.VSeparator();
+            this.ConfigureLabels();
+            this.AttachEverything();
+            this.ShowAll();
+        }
+
+        private void ConfigureLabels() {
+            this.name_label.SetSizeRequest(150, 20);
+        }
+
+        private void AttachEverything() {
+            this.Attach(this.name_label,
+                0, 1, 0, 1,
+                Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                0, 3
+            );
+            this.Attach(this.sep1,
+                1, 2, 0, 1,
+                Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink,
+                0, 3
+            );
+            this.Attach(this.price_label,
+                2, 3, 0, 1,
+                Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink,
+                0, 3
+            );
+            this.Attach(this.sep2,
+                3, 4, 0, 1,
+                Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink,
+                0, 3
+            );
+            this.Attach(this.amount_label,
+                4, 5, 0, 1,
+                Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink,
+                0, 3
+            );
+            this.Attach(this.sep3,
+                5, 6, 0, 1,
+                Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink,
+                0, 3
+            );
+            this.Attach(this.total_label,
+                6, 7, 0, 1,
+                Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
+                0, 3
+            );
+        }
     }
 }
