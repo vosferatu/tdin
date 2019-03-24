@@ -86,27 +86,23 @@ namespace Restaurant {
         public void AddProduct(string name, bool is_dish) {
             Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
             uint child_n = (uint)table.Children.Length;
-            Console.WriteLine("Before adding -> Child n = {0}, is_dish ? {1}", child_n, is_dish);
             ProductEntry entry = new ProductEntry(name, 1, this.rem_p);
             table.Attach(entry, 
                 0, 1, 0 + child_n, 1 + child_n,
                 Gtk.AttachOptions.Expand, Gtk.AttachOptions.Shrink,
                 0, 0
             );
-            Console.WriteLine("After adding -> Child n = {0}, is_dish ? {1}", child_n, is_dish);
             table.ShowAll();
         }
 
         public void RemoveProduct(string name, bool is_dish) {
             Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
-            Console.WriteLine("Before Remove -> Child n = {0}, is_dish ? {1}", table.Children.Length, is_dish);
             foreach(Gtk.Widget widget in table) {
                 if (((ProductEntry)widget).p_name == name) {
                     table.Remove(widget);
                     break;
                 }
             }
-            Console.WriteLine("After Remove -> Child n = {0}, is_dish ? {1}", table.Children.Length, is_dish);
             table.ShowAll();
         } 
         
@@ -142,8 +138,8 @@ namespace Restaurant {
             });
         }
 
-        public void OrderReady(long order_id) {
-            OrderReadyEntry new_entry = new OrderReadyEntry(order_id, this.FinishOrder);
+        public void OrderReady(long order_id, OrderDelivered handler) {
+            OrderReadyEntry new_entry = new OrderReadyEntry(order_id, handler);
             uint child_n = (uint)this.OrderReadyBox.Children.Length;
             this.OrderReadyBox.Attach(new_entry,
                 0, 1, 0+child_n, 1+child_n,
@@ -152,7 +148,7 @@ namespace Restaurant {
             );
         }
 
-        internal void FinishOrder(long order_id) {
+        public void FinishOrder(long order_id) {
             foreach(Widget widget in this.OrderReadyBox) {
                 OrderReadyEntry entry = (OrderReadyEntry)widget;
                 if (entry.order_id == order_id) {

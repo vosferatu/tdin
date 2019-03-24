@@ -1,5 +1,6 @@
 using Base;
 using System;
+using System.Threading;
 using System.Collections;
 using System.Runtime.Remoting;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
 
+// TODO: Add a GUI for this
 namespace Restaurant {
     [Serializable]
     public class PaymentZoneController: MarshalByRefObject, ICentralController {
@@ -20,9 +22,17 @@ namespace Restaurant {
         
         double total_money;
         [NonSerialized]
+        uint selected_table = 0;
+        [NonSerialized]
+        PaymentZoneWindow window;
+        [NonSerialized]
         Dictionary<string, Product> products;
         [NonSerialized]
-        static ConcurrentDictionary<long, Order> orders = new ConcurrentDictionary<long, Order>();
+        static ConcurrentDictionary<long, Order> orders = 
+            new ConcurrentDictionary<long, Order>(2, 10);
+        [NonSerialized]
+        static ConcurrentDictionary<uint, ConcurrentBag<Order>> table_delivered_orders = 
+            new ConcurrentDictionary<uint, ConcurrentBag<Order>>(2, 9);
     #endregion FIELDS
 
     #region NETWORK_METHODS
@@ -46,11 +56,19 @@ namespace Restaurant {
             }
         }
 
-
         public bool StartController() {
-            Console.WriteLine("Server running, enter <return> to exit");
-            Console.ReadLine();
-            return true;
+            this.window = new PaymentZoneWindow(this.OnTableSelect);
+            Thread thr = new Thread(new ThreadStart(this.window.StartThread));
+            try {
+                thr.Start();
+                Console.WriteLine("Server running, enter <return> to exit");
+                Console.ReadLine();
+                return true;
+            }
+            catch (Exception e) {
+                Console.WriteLine("Failed to start PaymentZoneController!\n - {0}", e);
+                return false;
+            }
         }
 
     #endregion NETWORK_METHODS
@@ -67,8 +85,20 @@ namespace Restaurant {
             }
         }
 
+        public void OnTableSelect(uint table_n) {
+            if (this.selected_table == table_n) {
+                this.window.UntoggleButton(table_n);
+                this.selected_table = 0;
+                // TODO Clear payment list
+            }
+            else {
+                this.window.UntoggleButton(this.selected_table);
+                this.selected_table = table_n;
+                // TODO Show payment list of order
+            }
+        }
+
         public void OrderReady(long order_id, uint table_n, bool from_kitchen) {
-            Console.WriteLine("Order #{0} ready!", order_id);
             if (orders.ContainsKey(order_id)) {
                 Order order = orders[order_id];
                 order.SetReady((from_kitchen ? OrderTarget.Kitchen : OrderTarget.Bar));
@@ -109,7 +139,25 @@ namespace Restaurant {
             }
             return;
         }
-    
+
+        public void OrderDelivered(long order_id) {
+            if (orders.ContainsKey(order_id)) {
+                Order order = orders[order_id];
+                lock (table_delivered_orders) {
+                    table_delivered_orders.AddOrUpdate(order.table_n, 
+                        new ConcurrentBag<Order> {order}, 
+                        (table_n, bag) => {
+                            bag.Add(order);
+                            return bag;
+                    });
+                    Console.WriteLine("Delivered order #{0}", order_id);
+                }
+            }
+            else {
+                Console.WriteLine("Delivered order #{0} not found!", order_id);
+            }
+        }
+
         public void OrderPaid(long order_id) {
             if (orders.ContainsKey(order_id)) {
                 Order order = orders[order_id];

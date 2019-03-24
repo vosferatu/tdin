@@ -161,7 +161,12 @@ namespace Restaurant {
         }
 
         public void OnOrderReady(long order_id, uint table_n) {
-            this.window.OrderReady(order_id);
+            this.window.OrderReady(order_id, this.OnOrderDelivered);
+        }
+
+        internal void OnOrderDelivered(long order_id) {
+            this.window.FinishOrder(order_id);
+            this.central.OrderDelivered(order_id);
         }
     #endregion METHODS
     }
