@@ -16,14 +16,27 @@ namespace Restaurant {
         public static readonly Gdk.Color YELLOW = new Gdk.Color(204, 204, 0);
     }
 
+    /// <summary>
+    /// Represents an image that when clicked has an associated action
+    /// </summary>
     internal class ImageAction: Gtk.EventBox {
         private Gtk.Image image;
 
+        /// <summary>
+        /// Constructor of the ImageAction
+        /// </summary>
+        /// <param name="stock">Stock image to use</param>
+        /// <param name="type">Icon size to use</param>
         internal ImageAction(string stock, Gtk.IconSize type) {
             this.image = new Gtk.Image(stock, type);
             this.Add(this.image);
         }
 
+        /// <summary>
+        /// Resets the image associated with this class
+        /// </summary>
+        /// <param name="stock">Stock image to use</param>
+        /// <param name="type">Icon size to use</param>
         internal void SetImage(string stock, Gtk.IconSize type) {
             this.Remove(this.image);
             this.image = new Gtk.Image(stock, type);

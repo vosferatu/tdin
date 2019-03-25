@@ -2,6 +2,9 @@ using Gtk;
 using System;
 
 namespace Restaurant {
+    /// <summary>
+    /// Represents a single product entry in the Dining Room window
+    /// </summary>
     internal class ProductEntry: Gtk.Table {
         internal string p_name {get; private set;}
         Gtk.Label price_label;
@@ -12,6 +15,13 @@ namespace Restaurant {
         ProductListFunc add_product;
         ProductListFunc rem_product;
 
+        /// <summary>
+        /// Creates a new Product Entry
+        /// </summary>
+        /// <param name="p_name">Name of the product</param>
+        /// <param name="price">Price of the product</param>
+        /// <param name="add_handler">Handler to be called when the button is clicked</param>
+        /// <returns></returns>
         internal ProductEntry(string p_name, double price, ProductListFunc add_handler): base(1, 3, false) {
             this.p_name = p_name;
             this.add_product = add_handler;
@@ -41,9 +51,16 @@ namespace Restaurant {
                 0, 0    
             );
             this.image.ButtonReleaseEvent += this.AddProductToOrder;
+            this.ShowAll();
         }
 
-
+        /// <summary>
+        /// Creates a new ProductEntry but with a remove handler
+        /// </summary>
+        /// <param name="p_name">Name of the product</param>
+        /// <param name="amount">Amount of the product</param>
+        /// <param name="rem_handler">Handler to be called when the 'Remove' button is clicked</param>
+        /// <returns></returns>
         internal ProductEntry(string p_name, uint amount, ProductListFunc rem_handler): base(1, 3, false) {
             this.p_name = p_name;
             this.rem_product = rem_handler;
@@ -73,18 +90,33 @@ namespace Restaurant {
                 0, 0    
             );
             this.image.ButtonReleaseEvent += this.RemProductFromOrder;
+            this.ShowAll();
         }
 
+        /// <summary>
+        /// Changes the amount of the product
+        /// </summary>
+        /// <param name="change">Actual change (either 1 or -1)</param>
         internal void ChangeAmount(int change) {
             if (this.amount_label != null) {
-                this.amount_label.Text = String.Format("{0}", uint.Parse(this.amount_label.Text) + change);
+                this.amount_label.Markup = String.Format("<small>{0}</small>", uint.Parse(this.amount_label.Text) + change);
             }
         }
 
+        /// <summary>
+        /// Function linked with 'Add' Gtk EventBox event
+        /// </summary>
+        /// <param name="e">Object that called the method</param>
+        /// <param name="args">Arguments of the event</param>
         internal void AddProductToOrder(object e, Gtk.ButtonReleaseEventArgs args) {
             this.add_product(this.p_name, true);
         }
-    
+
+        /// <summary>
+        /// Function linked with 'Remove' Gtk EventBox event
+        /// </summary>
+        /// <param name="e">Object that called the method</param>
+        /// <param name="args">Arguments of the event</param>
         internal void RemProductFromOrder(object e, Gtk.ButtonReleaseEventArgs args) {
             this.rem_product(this.p_name, true);
         }

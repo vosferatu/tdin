@@ -6,9 +6,19 @@ using System.Timers;
 using System.Collections.Generic;
 
 namespace Restaurant {
+    /// <summary>
+    /// Function to be called when a table is selected
+    /// </summary>
+    /// <param name="table_n">Number of the selected table</param>
     public delegate void TableSelected(uint table_n);
+    /// <summary>
+    /// Function to be called when the order has been paid
+    /// </summary>
     public delegate void PaidOrder();
 
+    /// <summary>
+    /// Responsible for communicating directly with Gtk on the Payment Zone Window
+    /// </summary>
     public class PaymentZoneWindow {
         private const string WINDOW_FILE = GuiConstants.WINDOWS_DIR + "PaymentZone.glade";
         private const string WINDOW_NAME = "root";
@@ -53,11 +63,19 @@ namespace Restaurant {
     #endregion FIELDS
 
     #region METHODS
+        /// <summary>
+        /// Constructor of this window
+        /// </summary>
+        /// <param name="table_handler">Handler when selecting a table</param>
+        /// <param name="paid_handler">Handler when paying the table orders</param>
         public PaymentZoneWindow(TableSelected table_handler, PaidOrder paid_handler) {
             this.table_handler = table_handler;
             this.paid_handler = paid_handler;
         }
 
+        /// <summary>
+        /// Starts the actual Gtk thread of this window
+        /// </summary>
         public void StartThread() {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
@@ -67,6 +85,9 @@ namespace Restaurant {
             Application.Run();
         }
 
+        /// <summary>
+        /// Finishes setting up the different widgets of this window
+        /// </summary>
         private void FinishSetup() {
             this.buttons.Add(1, this.Table1);
             this.buttons.Add(2, this.Table2);
@@ -82,6 +103,11 @@ namespace Restaurant {
             this.PaidButton.Image = new Gtk.Image(GuiConstants.DOLLAR_SIGN);
         }
 
+        /// <summary>
+        /// Function called when a table is selected
+        /// </summary>
+        /// <param name="e">Object that called the function</param>
+        /// <param name="args">Event arguments of the callback</param>
         internal void OnTableSelect(object e, EventArgs args) {
             Gtk.ToggleButton button = (Gtk.ToggleButton)e;
             Gtk.Label label = (Gtk.Label)button.Child;
@@ -91,6 +117,10 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Untoggles the specified button
+        /// </summary>
+        /// <param name="table_n">Table number associated with a button</param>
         public void UntoggleButton(uint table_n) {
             if (this.buttons.ContainsKey(table_n)) {
                 this.buttons[table_n].Active = false;
@@ -99,6 +129,9 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Clears the table products list
+        /// </summary>
         public void ClearProductsList() {
             this.OrderPriceLabel.Text = "0.0";
             this.PaidButton.HideAll();
@@ -107,6 +140,11 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Sets the prodcts shown on the Table Products List window
+        /// </summary>
+        /// <param name="prod_info">List with the various products</param>
+        /// <param name="total_price">Total price of the products</param>
         public void SetProductsList(List<Gtk.Widget> prod_info, double total_price) {
             if (prod_info.Count > 0) {
                 this.OrderPriceLabel.Text = total_price.ToString();
@@ -118,14 +156,25 @@ namespace Restaurant {
                         Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
                         0, 0
                     );
+                    this.TableProductsList.ShowAll();
                 }
             }
         }
 
+        /// <summary>
+        /// Function called when the paid button is clicked
+        /// </summary>
+        /// <param name="e">Object that called the function</param>
+        /// <param name="args">Arguments of the event</param>
         public void OnPaidClicked(object e, EventArgs args) {
             this.paid_handler();
         }
 
+        /// <summary>
+        /// Sets the total money of the restaurant
+        /// Fires up a simple animation
+        /// </summary>
+        /// <param name="money">Total money of the restaurant</param>
         public void SetTotalMoney(double money) {
             Timer price_timer = new Timer(GuiConstants.PRICE_ANIMATION);
             price_timer.Elapsed += (obj, args) => {
@@ -143,16 +192,29 @@ namespace Restaurant {
             this.TotalMoneyLabel.Show();
         }
 
+        /// <summary>
+        /// Fires up an animation on new order on a table
+        /// </summary>
+        /// <param name="table_n">Number of table associated with order</param>
         public void NewOrderOnTable(uint table_n) {
             Gtk.Button table = this.buttons[table_n];
             this.TableAnimation(table, GuiConstants.YELLOW);
         }
 
+        /// <summary>
+        /// Fires up an animation on order delivered to table
+        /// </summary>
+        /// <param name="table_n">Number of table associated with order</param>
         public void OrderDeliveredOnTable(uint table_n) {
             Gtk.Button table = this.buttons[table_n];
             this.TableAnimation(table, GuiConstants.GREEN);
         }
 
+        /// <summary>
+        /// Simple table animation that is made on new orders or orders delivered to a table
+        /// </summary>
+        /// <param name="table">Button to be used on animation</param>
+        /// <param name="color">Color to be used for animation</param>
         private void TableAnimation(Gtk.Button table, Gdk.Color color) {
             Timer timer = new Timer(GuiConstants.TABLE_ANIMATION);
             timer.Elapsed += (obj, args) => {
@@ -163,8 +225,13 @@ namespace Restaurant {
             table.Parent.ModifyBg(Gtk.StateType.Normal, color);
             timer.Enabled = true;
             timer.Start();
-        }
+        }  
 
+        /// <summary>
+        /// Function called when the window is destroyed
+        /// </summary>
+        /// <param name="o">Object</param>
+        /// <param name="e">Delete event arguments</param>
         public void OnDelete(object o, DeleteEventArgs e) {
             Application.Quit();
         }
@@ -173,6 +240,9 @@ namespace Restaurant {
 }
 
 namespace Restaurant {
+    /// <summary>
+    /// Represents a single entry in the Payment Zone Window table products list
+    /// </summary>
     public class TableProductEntry: Gtk.Table {
         Gtk.Label name_label;
         Gtk.Label price_label;
@@ -182,6 +252,13 @@ namespace Restaurant {
         Gtk.VSeparator sep2;
         Gtk.VSeparator sep3;
 
+        /// <summary>
+        /// Creates a new TableProductEntry
+        /// </summary>
+        /// <param name="name">Name of the product</param>
+        /// <param name="price">Price of the product</param>
+        /// <param name="amount">Amount of product ordered</param>
+        /// <returns></returns>
         public TableProductEntry(string name, double price, uint amount): base(1, 7, false) {
             double total = price * amount;
             this.name_label = new Gtk.Label(name);
@@ -196,6 +273,9 @@ namespace Restaurant {
             this.ShowAll();
         }
 
+        /// <summary>
+        /// Configures the various labels of the  widget
+        /// </summary>
         private void ConfigureLabels() {
             this.name_label.SetSizeRequest(145, 20);
             this.name_label.Xalign = 0f;
@@ -211,6 +291,9 @@ namespace Restaurant {
             this.total_label.Xalign = 0.95f;
         }
 
+        /// <summary>
+        /// Finalizes the setup by attaching every widget to the table
+        /// </summary>
         private void AttachEverything() {
             this.Attach(this.name_label,
                 0, 1, 0, 1,

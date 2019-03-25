@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 
 namespace Restaurant {
+    /// <summary>
+    /// Responsible for communicating directly with Gtk on the Order Detail Window
+    /// </summary>
     public class OrderDetailWindow {
         private const string WINDOW_FILE = GuiConstants.WINDOWS_DIR + "OrderDetail.glade";
         private const string WINDOW_NAME = "root";
@@ -18,6 +21,13 @@ namespace Restaurant {
         [Glade.Widget]
         Gtk.Table ProductsBox;
 
+        /// <summary>
+        /// Creates the window
+        /// </summary>
+        /// <param name="back_handler"></param>
+        /// <param name="prods"></param>
+        /// <param name="order_id"></param>
+        /// <param name="table_n"></param>
         public OrderDetailWindow(EventHandler back_handler, Dictionary<string, uint> prods, long order_id, uint table_n) {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
@@ -36,6 +46,12 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Creates the box that will hold a single product
+        /// </summary>
+        /// <param name="name">Name of the product</param>
+        /// <param name="amount">Amount of the product</param>
+        /// <returns></returns>
         private Gtk.Table CreateBox(string name, uint amount) {
             Gtk.Table p_entry = new Gtk.Table(1, 1, false);
             Gtk.Label p_name = new Gtk.Label(name);
@@ -57,7 +73,12 @@ namespace Restaurant {
             p_entry.ShowAll();
             return p_entry;
         }
-
+        
+        /// <summary>
+        /// Function called when the window is destroyed
+        /// </summary>
+        /// <param name="o">Object</param>
+        /// <param name="e">Delete event arguments</param>
         public void OnDelete(object o, DeleteEventArgs e) {
             Application.Quit();
         }
