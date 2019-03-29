@@ -12,6 +12,9 @@ using System.Runtime.Serialization.Formatters;
 
 
 namespace Restaurant {
+    /// <summary>
+    /// Responsible for managing the KichenBar GUI
+    /// </summary>
     public class KitchenBarController: IController {
     #region FIELDS
         ICentralController central;
@@ -24,6 +27,10 @@ namespace Restaurant {
     #endregion FIELDS
 
     #region NETWORK_METHODS
+        /// <summary>
+        /// Initializes the networking aspects of the controller
+        /// </summary>
+        /// <returns>Whether the network was initialized or not</returns>
         public bool InitializeNetwork() {
             while (!this.TryRemoteConnection()) {
                 Thread.Sleep(Constants.CONNECT_RETRY_DELAY);
@@ -32,6 +39,10 @@ namespace Restaurant {
             return true;
         }
 
+        /// <summary>
+        /// Attempts to connect to the central node
+        /// </summary>
+        /// <returns>Whether the connection was sucessfull or not</returns>
         private bool TryRemoteConnection() {
             try {
                 Hashtable props = new Hashtable();
@@ -58,6 +69,10 @@ namespace Restaurant {
             return false;
         }
 
+        /// <summary>
+        /// Starts the controller logic
+        /// </summary>
+        /// <returns>Retuns on error</returns>
         public bool StartController() {
             this.list_window = new OrderListWindow(this.ViewOrderDetails, this.MoveOrder, this.FinishOrder);
             Thread thr = new Thread(new ThreadStart(this.list_window.StartThread));
@@ -75,12 +90,21 @@ namespace Restaurant {
     #endregion NETWORK_METHODS
 
     #region METHODS
+        /// <summary>
+        /// Creates a new instance of the KitchenBarController
+        /// </summary>
+        /// <param name="is_kitchen">Whether this controller is for the Kitchen or not</param>
         public KitchenBarController(bool is_kitchen) {
             this.is_kitchen = is_kitchen;
             this.not_picked = new List<Order>();
             this.preparing = new List<Order>();
         }
-
+        
+        /// <summary>
+        /// Callback called when a new order is created
+        /// Function called when clicking on the button 'Submit'
+        /// </summary>
+        /// <param name="order">Newly constructed order</param>
         public void OnNewOrder(Order order) {
             this.not_picked.Add(order);
             Application.Invoke(delegate {
@@ -88,6 +112,11 @@ namespace Restaurant {
             });
         }
 
+        /// <summary>
+        /// Callback called when user clicks order and needs to view its details
+        /// Function called when clicking the label of a order
+        /// </summary>
+        /// <param name="order_id">ID of the clicked order</param>
         public void ViewOrderDetails(long order_id) {
             Order order = this.FindOrder(order_id);
             if (order != null) {
@@ -97,6 +126,11 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Moves an order from the 'Not Picked' to the 'Preparing' state
+        /// Function called when clicking the 'Forward' image, next to the label in the Not Picked frame
+        /// </summary>
+        /// <param name="order_id">ID of the moved order</param>
         public void MoveOrder(long order_id) {
             Order order = this.FindOrder(order_id);
             if (order != null && this.list_window.PickOrder(order_id)) {
@@ -107,6 +141,11 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Removes the order from the GUI, signals that it is ready to be picked
+        /// Function called when clicking the 'Apply' image, next to the label in the Preparing frame
+        /// </summary>
+        /// <param name="order_id">ID of the finished order</param>
         public void FinishOrder(long order_id) {
             Order order = this.FindOrder(order_id);
             if (order != null && this.list_window.RemoveOrder(order_id)) {
@@ -117,11 +156,21 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Returns to the default KitchenBarWindow interface
+        /// </summary>
+        /// <param name="o">Object that called this function</param>
+        /// <param name="args">Arguments of the event</param>
         public void GoBack(object o, EventArgs args) {
             this.detail_window.root.HideAll();
             this.list_window.root.ShowAll();
         }
 
+        /// <summary>
+        /// Finds the specified order in the list of orders
+        /// </summary>
+        /// <param name="order_id">ID of the order to be found</param>
+        /// <returns>Specified order or null on not found</returns>
         private Order FindOrder(long order_id) {
             foreach(Order order in this.not_picked) {
                 if (order.id == order_id) {

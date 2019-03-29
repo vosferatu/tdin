@@ -13,6 +13,10 @@ using System.Runtime.Serialization.Formatters;
 
 namespace Restaurant {
     [Serializable]
+    /// <summary>
+    /// Responsible for the Central Node of the Restaurant
+    /// This controller is the one most directly connected to the 'products' dll
+    /// </summary>
     public class PaymentZoneController: MarshalByRefObject, ICentralController {
         public event OrderReadyEventHandler OrderReadyEvent;
         public event NewOrderEventHandler NewDishesOrderEvent;
@@ -40,6 +44,10 @@ namespace Restaurant {
     #region NETWORK_METHODS
         public override object InitializeLifetimeService() { return (null); }
 
+        /// <summary>
+        /// Initializes the networking aspects of the controller
+        /// </summary>
+        /// <returns>Whether the network was initialized or not</returns>
         public bool InitializeNetwork() {
             try {
                 IDictionary dict =  new Hashtable();
@@ -58,6 +66,10 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Starts the controller logic
+        /// </summary>
+        /// <returns>Retuns on error</returns>
         public bool StartController() {
             this.window = new PaymentZoneWindow(this.OnTableSelect, this.TablePaid);
             Thread thr = new Thread(new ThreadStart(this.window.StartThread));
@@ -76,6 +88,11 @@ namespace Restaurant {
     #endregion NETWORK_METHODS
 
     #region METHODS
+        /// <summary>
+        /// Creates a new instance of the controller
+        /// </summary>
+        /// <param name="dishes">List of the dish products</param>
+        /// <param name="drinks">List of the drink products</param>
         public PaymentZoneController(List<Product> dishes, List<Product> drinks) {
             this.total_money = 0;
             this.products = new Dictionary<string, Product>(dishes.Count + drinks.Count);
@@ -87,6 +104,10 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Callback to be called when the user has selected a table in the UI
+        /// </summary>
+        /// <param name="table_n">Number of the selected table</param>
         public void OnTableSelect(uint table_n) {
             if (this.selected_table == table_n) {
                 this.window.UntoggleButton(table_n);
@@ -102,6 +123,12 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Creates a list of widgets based on the products associated with the orders of a table
+        /// </summary>
+        /// <param name="table_n">Number of table to view the products</param>
+        /// <param name="price">Price of the order will be calculated and stored in this variable</param>
+        /// <returns>List of widgets to be shown</returns>
         private List<Gtk.Widget> CreateWidgets(uint table_n, ref double price) {
             Dictionary<Product, uint> prods = this.MergeTableOrders(table_n);
             List<Gtk.Widget> widgets = new List<Gtk.Widget>(prods.Count);
@@ -115,6 +142,11 @@ namespace Restaurant {
             return widgets;
         }
 
+        /// <summary>
+        /// Merges the list of products of the multiple orders associated with a single table
+        /// </summary>
+        /// <param name="table_n">Number of table to merge the products</param>
+        /// <returns>Dictionary with product and respective amounts</returns>
         private Dictionary<Product, uint> MergeTableOrders(uint table_n) {
             Dictionary<Product, uint> table_orders = new Dictionary<Product, uint>();
             lock(table_delivered_orders) {
@@ -137,6 +169,12 @@ namespace Restaurant {
             return table_orders;
         }
 
+        /// <summary>
+        /// Callback called when a new order is created
+        /// Function called by the DiningRoomController
+        /// </summary>
+        /// <param name="p_infos">Dictionary with products name and amounts</param>
+        /// <param name="table_n">Number of table to associate the products</param>
         public void NewOrder(Dictionary<string, uint> p_infos, uint table_n) {
             Dictionary<Product, uint> p = new Dictionary<Product, uint>(p_infos.Count);
             foreach(KeyValuePair<string, uint> p_info in p_infos) {
@@ -165,6 +203,13 @@ namespace Restaurant {
             return;
         }
 
+        /// <summary>
+        /// Callback called when an order is ready to be picked up
+        /// Function called from the KitchenBarController
+        /// </summary>
+        /// <param name="order_id">ID of the order that is ready</param>
+        /// <param name="table_n">Number of the table associated with the order</param>
+        /// <param name="from_kitchen">Whether the order came from the kitchen or not</param>
         public void OrderReady(long order_id, uint table_n, bool from_kitchen) {
             if (orders.ContainsKey(order_id)) {
                 Order order = orders[order_id];
@@ -180,6 +225,11 @@ namespace Restaurant {
 
         }
 
+        /// <summary>
+        /// Callback called when the order was delivered to the table
+        /// Function called by the DiningRoomController
+        /// </summary>
+        /// <param name="order_id">ID of the delivered order</param>
         public void OrderDelivered(long order_id) {
             if (orders.ContainsKey(order_id)) {
                 Order order = orders[order_id];
@@ -198,6 +248,10 @@ namespace Restaurant {
             }
         }
 
+        /// <summary>
+        /// Callback called when the table has been paid
+        /// Function called by the Payment Zone GUI
+        /// </summary>
         public void TablePaid() {
             uint table_n = this.selected_table;
             if (table_delivered_orders.ContainsKey(table_n)) {
@@ -220,8 +274,4 @@ namespace Restaurant {
         }
     #endregion METHODS
     }
-}
-
-namespace Restaurant {
-
 }

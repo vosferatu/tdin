@@ -5,7 +5,11 @@ using System.Collections.Generic;
 namespace Restaurant {
     public delegate void OrderListFunc(long order_id);
 
+    /// <summary>
+    /// Responsible for communicating with the Gtk Window of the Order List in a Kitchen/Bar
+    /// </summary>
     public class OrderListWindow {
+    #region FIELDS
         private const string WINDOW_FILE = GuiConstants.WINDOWS_DIR + "KitchenBar.glade";
         private const string WINDOW_NAME = "root";
 
@@ -19,13 +23,24 @@ namespace Restaurant {
         OrderListFunc view_handler;
         OrderListFunc prepare_handler;
         OrderListFunc done_handler;
+    #endregion FIELDS
 
+    #region METHODS
+        /// <summary>
+        /// Creates a new instance of the window
+        /// </summary>
+        /// <param name="view_handler">Handler to be called when user clicks to view details of order</param>
+        /// <param name="prepare_handler">Called when user moves order to prepared state</param>
+        /// <param name="done_handler">Called when user says order is prepared</param>
         public OrderListWindow(OrderListFunc view_handler,  OrderListFunc prepare_handler,  OrderListFunc done_handler) {
             this.view_handler = view_handler;
             this.prepare_handler = prepare_handler;
             this.done_handler = done_handler;
         }
 
+        /// <summary>
+        /// Starts the actual thread of the window
+        /// </summary>
         public void StartThread() {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
@@ -33,6 +48,11 @@ namespace Restaurant {
             Application.Run();
         }
 
+        /// <summary>
+        /// Adds the list of orders to the windoow
+        /// </summary>
+        /// <param name="orders_id">List of the orders to be displayed</param>
+        /// <param name="picked">Whether this list of orders has been picked or not</param>
         public void AddOrders(List<long> orders_id, bool picked) {
             Gtk.Table box = (picked ? this.PreparingBox : this.NotPickedBox);
             foreach(long order_id in orders_id) {
@@ -41,11 +61,20 @@ namespace Restaurant {
             this.root.ShowAll();
         }
 
+        /// <summary>
+        /// Adds a single order to the window
+        /// </summary>
+        /// <param name="order_id">ID of the order to be displayed</param>
         public void AddOrder(long order_id) {
             this.AddOrderToBox(order_id, this.NotPickedBox, false);
             this.root.ShowAll();
         }
 
+        /// <summary>
+        /// Removes an order from the list in the window
+        /// </summary>
+        /// <param name="order_id">ID of the order to be added</param>
+        /// <returns>Whether the order was removed or not</returns>
         public bool RemoveOrder(long order_id) {
             bool removed = false;
             PreparingBox.Foreach((child) => {
@@ -59,6 +88,11 @@ namespace Restaurant {
             return removed;
         }
 
+        /// <summary>
+        /// Moves order from the Not Picked to the Preparing frame
+        /// </summary>
+        /// <param name="order_id">ID of the order to be moved</param>
+        /// <returns>Whether the order was moved or not</returns>
         public bool PickOrder(long order_id) {
             bool picked = false;
             NotPickedBox.Foreach((child) => {
@@ -76,6 +110,12 @@ namespace Restaurant {
             return picked;
         }
 
+        /// <summary>
+        /// Adds the specified order to the given box
+        /// </summary>
+        /// <param name="order_id">ID of the order to be added</param>
+        /// <param name="box">Box to add the order</param>
+        /// <param name="picked">Whether the order has been picked or not</param>
         private void AddOrderToBox(long order_id, Gtk.Table box, bool picked) {
             uint child_n = (uint)box.Children.Length;
             OrderEntry new_entry = new OrderEntry(order_id, picked);
@@ -87,10 +127,16 @@ namespace Restaurant {
             );
             box.ShowAll();
         }
-    
+        
+        /// <summary>
+        /// Function called when the window is destroyed
+        /// </summary>
+        /// <param name="o">Object</param>
+        /// <param name="e">Delete event arguments</param>
         public void OnDelete(object o, DeleteEventArgs e) {
             Application.Quit();
         }
+    #endregion METHODS
     }
 }
 
