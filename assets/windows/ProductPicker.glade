@@ -82,9 +82,6 @@
           <placeholder/>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
           <widget class="GtkFrame" id="ProductListFrame">
             <property name="width_request">550</property>
             <property name="visible">True</property>
@@ -141,15 +138,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="n_rows">2</property>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
                                 <child>
                                   <placeholder/>
                                 </child>
@@ -363,6 +351,9 @@
                                     <child>
                                       <placeholder/>
                                     </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="top_attach">1</property>
@@ -394,15 +385,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="n_rows">2</property>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
                                 <child>
                                   <placeholder/>
                                 </child>
@@ -619,6 +601,9 @@
                                   <widget class="GtkTable" id="DrinkProductList">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
                                     <child>
                                       <placeholder/>
                                     </child>
@@ -1272,29 +1257,6 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkSpinButton" id="TableNumber">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="max_length">1</property>
-            <property name="invisible_char">●</property>
-            <property name="primary_icon_activatable">False</property>
-            <property name="secondary_icon_activatable">False</property>
-            <property name="primary_icon_sensitive">True</property>
-            <property name="secondary_icon_sensitive">True</property>
-            <property name="adjustment">1 1 9 1 10 0</property>
-            <property name="climb_rate">1</property>
-            <property name="digits">1</property>
-            <property name="numeric">True</property>
-          </widget>
-          <packing>
-            <property name="left_attach">12</property>
-            <property name="right_attach">14</property>
-            <property name="top_attach">8</property>
-            <property name="bottom_attach">9</property>
-            <property name="y_options">GTK_SHRINK</property>
-          </packing>
-        </child>
-        <child>
           <widget class="GtkLabel" id="label5">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -1350,6 +1312,9 @@
                             <child>
                               <placeholder/>
                             </child>
+                            <child>
+                              <placeholder/>
+                            </child>
                           </widget>
                         </child>
                       </widget>
@@ -1375,6 +1340,31 @@
             <property name="right_attach">14</property>
             <property name="bottom_attach">6</property>
           </packing>
+        </child>
+        <child>
+          <widget class="GtkComboBox" id="TableNumber">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="items" translatable="yes">1
+2
+3
+4
+5
+6
+7
+8
+9</property>
+          </widget>
+          <packing>
+            <property name="left_attach">12</property>
+            <property name="right_attach">14</property>
+            <property name="top_attach">8</property>
+            <property name="bottom_attach">9</property>
+            <property name="y_options">GTK_SHRINK</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </widget>
     </child>

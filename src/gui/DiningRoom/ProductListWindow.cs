@@ -28,7 +28,7 @@ namespace Restaurant {
         [Glade.Widget]
         Gtk.Table DrinkOrderList;
         [Glade.Widget]
-        public Gtk.SpinButton TableNumber;
+        public Gtk.ComboBox TableNumber;
         [Glade.Widget]
         Gtk.Table OrderReadyBox;
 

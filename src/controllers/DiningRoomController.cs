@@ -201,7 +201,7 @@ namespace Restaurant {
         /// </summary>
         public void SubmitOrder() {
             if (this.order.Count > 0) {
-                this.central.NewOrder(this.order, (uint)this.window.TableNumber.ValueAsInt);
+                this.central.NewOrder(this.order, (uint)this.window.TableNumber.Active + 1);
                 this.order.Clear();
                 this.history.Clear();
                 this.window.ResetOrder();
