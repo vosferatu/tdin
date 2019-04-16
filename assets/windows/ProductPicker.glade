@@ -79,9 +79,6 @@
           <placeholder/>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
           <widget class="GtkFrame" id="ProductListFrame">
             <property name="width_request">550</property>
             <property name="visible">True</property>
@@ -138,15 +135,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="n_rows">2</property>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
                                 <child>
                                   <placeholder/>
                                 </child>
@@ -354,6 +342,9 @@
                                     <child>
                                       <placeholder/>
                                     </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="top_attach">1</property>
@@ -385,15 +376,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="n_rows">2</property>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
                                 <child>
                                   <placeholder/>
                                 </child>
@@ -601,6 +583,9 @@
                                   <widget class="GtkTable" id="DrinkProductList">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
                                     <child>
                                       <placeholder/>
                                     </child>
@@ -1276,9 +1261,6 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
           <widget class="GtkFrame" id="frame1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -1303,6 +1285,9 @@
                           <widget class="GtkTable" id="OrderReadyBox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <child>
+                              <placeholder/>
+                            </child>
                             <child>
                               <placeholder/>
                             </child>
@@ -1345,6 +1330,7 @@
           <widget class="GtkComboBox" id="TableNumber">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="active">1</property>
             <property name="items" translatable="yes">1
 2
 3
@@ -1362,6 +1348,12 @@
             <property name="bottom_attach">9</property>
             <property name="y_options">GTK_SHRINK</property>
           </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>

@@ -144,7 +144,7 @@ namespace Restaurant {
     /// <summary>
     /// Represents a single order entry in the Kitchen Bar window.
     /// </summary>
-    internal class OrderEntry: Gtk.HBox {
+    internal class OrderEntry: Gtk.Table {
         internal long order_id {get; private set;}
         OrderListFunc label_handler;
         OrderListFunc img_handler;
@@ -157,7 +157,7 @@ namespace Restaurant {
         /// <param name="order_id">ID of the order</param>
         /// <param name="picked">Whether the order has been picked or not</param>
         /// <returns></returns>
-        internal OrderEntry(long order_id, bool picked): base(false, 0) {
+        internal OrderEntry(long order_id, bool picked): base(1, 2, false) {
             this.order_id = order_id;
             this.label = new OrderLabel(String.Format("Order #{0}", order_id));
             if (!picked) {
@@ -167,8 +167,12 @@ namespace Restaurant {
                 this.img = new ImageAction(Gtk.Stock.Apply, Gtk.IconSize.Button);
             }
             this.SetSizeRequest(200, 40);
-            this.Add(this.label);
-            this.Add(this.img);
+            this.Attach(this.label, 0, 1, 0, 1,
+                Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink, 0, 0
+            );
+            this.Attach(this.img, 1, 2, 0, 1,
+                Gtk.AttachOptions.Shrink , Gtk.AttachOptions.Shrink, 0, 0
+            );
             this.label.ButtonReleaseEvent += this.LabelReleaseFunc;
             this.img.ButtonReleaseEvent += this.ImgReleaseFunc;
         }
@@ -226,7 +230,7 @@ namespace Restaurant {
             this.label.Justify = Gtk.Justification.Left;
             this.label.LineWrap = true;
             this.Add(this.label);
-            this.SetSizeRequest(120, 0);
+            this.SetSizeRequest(120, 40);
         }
     }
 }

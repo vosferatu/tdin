@@ -51,6 +51,5 @@ namespace Restaurant {
         public override bool Equals(object obj) {
             return ((obj is Product) && Equals((Product)obj, this));
         }
-
     }
 }

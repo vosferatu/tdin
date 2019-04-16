@@ -1,12 +1,12 @@
 using Gtk;
 using Gdk;
+using Base;
 using Glade;
 using System;
 using System.Collections.Generic;
 
 namespace Restaurant {
     public delegate void ProductListFunc(string p_name, bool add_history);
-    public delegate void SimpleFunction();
     
     /// <summary>
     /// Responsible for communicating directly with Gtk and handling its events for the Dining Room window
@@ -63,6 +63,7 @@ namespace Restaurant {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
             this.root.SetIconFromFile(GuiConstants.APP_ICON);
+            this.TableNumber.Active = 0;
             Application.Run();
         }
 
@@ -127,7 +128,7 @@ namespace Restaurant {
             Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
             foreach(Gtk.Widget widget in table)
                 if (widget is ProductEntry && ((ProductEntry)widget).p_name == name)
-                    table.Remove(widget);
+                    widget.Destroy();
         } 
         
         /// <summary>
@@ -232,7 +233,7 @@ namespace Restaurant {
     /// <summary>
     /// Represents an entry in the Order Ready frame
     /// </summary>
-    public class OrderReadyEntry: Gtk.HBox {
+    public class OrderReadyEntry: Gtk.Table {
         internal long order_id {get; private set;}
         OrderDelivered handler;
         Gtk.Label order_name;
@@ -243,7 +244,7 @@ namespace Restaurant {
         /// </summary>
         /// <param name="order_id">ID of the ready order</param>
         /// <param name="func">Function to be called when the 'ready' button is pressed</param>
-        public OrderReadyEntry(long order_id, OrderDelivered func) {
+        public OrderReadyEntry(long order_id, OrderDelivered func): base(1, 2, false) {
             this.order_id = order_id;
             this.handler = func;
             this.order_name = new Gtk.Label(String.Format("<big>{0}</big>", order_id));
@@ -253,8 +254,12 @@ namespace Restaurant {
 
             this.order_name.SetSizeRequest(35, 20);
 
-            this.Add(this.order_name);
-            this.Add(this.finish);
+            this.Attach(this.order_name, 0, 1, 0, 1,
+                Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink, 0, 0
+            );
+            this.Attach(this.finish, 0, 1, 0, 1,
+                Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 0
+            );
             this.ShowAll();
         }
 

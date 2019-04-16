@@ -4,6 +4,7 @@ namespace Base {
     public enum OrderTarget {Kitchen, Bar, Both};
     public enum OrderState {NotPicked, Preparing, Ready, Paid};
     public enum ProductType {Dish, Drink};
+    public delegate void SimpleFunction();
 
     public static class Constants {
     #region CENTRAL

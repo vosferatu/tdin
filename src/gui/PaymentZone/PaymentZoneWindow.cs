@@ -1,5 +1,6 @@
 using Gtk;
 using Gdk;
+using Base;
 using Glade;
 using System;
 using System.Timers;
@@ -24,7 +25,7 @@ namespace Restaurant {
         private const string WINDOW_NAME = "root";
     #region WIDGETS
         [Glade.Widget]
-        Gtk.Window root;
+        public Gtk.Window root;
         [Glade.Widget]
         Gtk.Table ButtonsTable;
         [Glade.Widget]
@@ -53,12 +54,12 @@ namespace Restaurant {
         Gtk.Button PaidButton;
         [Glade.Widget]
         Gtk.Table TableProductsList;
-
     #endregion WIDGETS
 
     #region FIELDS
         TableSelected table_handler;
         PaidOrder paid_handler;
+        SimpleFunction see_stat;
         Dictionary<uint, Gtk.ToggleButton> buttons;
     #endregion FIELDS
 
@@ -68,9 +69,10 @@ namespace Restaurant {
         /// </summary>
         /// <param name="table_handler">Handler when selecting a table</param>
         /// <param name="paid_handler">Handler when paying the table orders</param>
-        public PaymentZoneWindow(TableSelected table_handler, PaidOrder paid_handler) {
+        public PaymentZoneWindow(TableSelected table_handler, PaidOrder paid_handler, SimpleFunction see_stat) {
             this.table_handler = table_handler;
             this.paid_handler = paid_handler;
+            this.see_stat = see_stat;
         }
 
         /// <summary>
@@ -225,7 +227,16 @@ namespace Restaurant {
             table.Parent.ModifyBg(Gtk.StateType.Normal, color);
             timer.Enabled = true;
             timer.Start();
-        }  
+        }
+
+        /// <summary>
+        /// Function to be called when user clicks 'See Statistics' button
+        /// </summary>
+        /// <param name="e">Object that triggered the event</param>
+        /// <param name="args">Event parameters</param>
+        internal void SeeStatistics(object e, EventArgs args) {
+            this.see_stat();
+        } 
 
         /// <summary>
         /// Function called when the window is destroyed

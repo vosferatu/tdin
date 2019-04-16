@@ -26,13 +26,10 @@ namespace Restaurant {
         /// </summary>
         /// <param name="back_handler"></param>
         /// <param name="prods"></param>
-        /// <param name="order_id"></param>
         /// <param name="table_n"></param>
-        public OrderDetailWindow(EventHandler back_handler, Dictionary<string, uint> prods, long order_id, uint table_n) {
+        public OrderDetailWindow(EventHandler back_handler, Dictionary<string, uint> prods, uint table_n) {
             Glade.XML gxml = new Glade.XML(WINDOW_FILE, WINDOW_NAME, null);
             gxml.Autoconnect(this);
-            this.root.SetIconFromFile(GuiConstants.APP_ICON);
-            this.root.Title = String.Format("Order #{0} Details", order_id);
             TableNLabel.Text = String.Format("Table #{0}",  table_n);
             BackButton.Clicked += back_handler;
             foreach(KeyValuePair<string, uint> product in prods) {
@@ -56,7 +53,7 @@ namespace Restaurant {
             Gtk.Table p_entry = new Gtk.Table(1, 1, false);
             Gtk.Label p_name = new Gtk.Label(name);
             Gtk.Label p_amount = new Gtk.Label(amount.ToString());
-            p_name.Xalign = 0.05f;
+            p_name.Xalign = 0.01f;
             p_amount.UseMarkup = true;
             p_amount.Markup = String.Format("<b><big>{0}</big></b>", p_amount.Text);
             p_name.SetSizeRequest(210, 30);

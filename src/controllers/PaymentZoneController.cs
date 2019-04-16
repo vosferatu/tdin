@@ -30,7 +30,11 @@ namespace Restaurant {
         [NonSerialized]
         double order_total = 0.0;
         [NonSerialized]
-        PaymentZoneWindow window;
+        PaymentZoneWindow main_window;
+        [NonSerialized]
+        StatisticsWindow stat_window;
+        [NonSerialized]
+        Gtk.Widget[] prev_window;
         [NonSerialized]
         Dictionary<string, Product> products;
         [NonSerialized]
@@ -39,6 +43,9 @@ namespace Restaurant {
         [NonSerialized]
         static ConcurrentDictionary<uint, ConcurrentBag<Order>> table_delivered_orders = 
             new ConcurrentDictionary<uint, ConcurrentBag<Order>>(2, 9);
+        [NonSerialized]
+        static ConcurrentBag<Order> paid_orders = new ConcurrentBag<Order>();
+    
     #endregion FIELDS
 
     #region NETWORK_METHODS
@@ -71,8 +78,8 @@ namespace Restaurant {
         /// </summary>
         /// <returns>Retuns on error</returns>
         public bool StartController() {
-            this.window = new PaymentZoneWindow(this.OnTableSelect, this.TablePaid);
-            Thread thr = new Thread(new ThreadStart(this.window.StartThread));
+            this.main_window = new PaymentZoneWindow(this.OnTableSelect, this.TablePaid, this.SeeStatistics);
+            Thread thr = new Thread(new ThreadStart(this.main_window.StartThread));
             try {
                 thr.Start();
                 Console.WriteLine("Server running, enter <return> to exit");
@@ -96,6 +103,7 @@ namespace Restaurant {
         public PaymentZoneController(List<Product> dishes, List<Product> drinks) {
             this.total_money = 0;
             this.products = new Dictionary<string, Product>(dishes.Count + drinks.Count);
+            this.stat_window = new StatisticsWindow(this.BackToMainWindow);
             foreach(Product dish in dishes) {
                 this.products.Add(dish.name, dish);
             }
@@ -110,15 +118,15 @@ namespace Restaurant {
         /// <param name="table_n">Number of the selected table</param>
         public void OnTableSelect(uint table_n) {
             if (this.selected_table == table_n) {
-                this.window.UntoggleButton(table_n);
+                this.main_window.UntoggleButton(table_n);
                 this.selected_table = 0;
-                this.window.ClearProductsList();
+                this.main_window.ClearProductsList();
             }
             else {
-                this.window.UntoggleButton(this.selected_table);
+                this.main_window.UntoggleButton(this.selected_table);
                 this.selected_table = table_n;
                 if (table_delivered_orders.ContainsKey(table_n)) {
-                    this.window.SetProductsList(this.CreateWidgets(table_n, ref this.order_total), this.order_total);
+                    this.main_window.SetProductsList(this.CreateWidgets(table_n, ref this.order_total), this.order_total);
                 }
             }
         }
@@ -130,7 +138,7 @@ namespace Restaurant {
         /// <param name="price">Price of the order will be calculated and stored in this variable</param>
         /// <returns>List of widgets to be shown</returns>
         private List<Gtk.Widget> CreateWidgets(uint table_n, ref double price) {
-            Dictionary<Product, uint> prods = this.MergeTableOrders(table_n);
+            Dictionary<Product, uint> prods = this.MergeOrders(table_delivered_orders[table_n]);
             List<Gtk.Widget> widgets = new List<Gtk.Widget>(prods.Count);
             price = 0.0;
             foreach(KeyValuePair<Product, uint> info in prods) {
@@ -147,22 +155,19 @@ namespace Restaurant {
         /// </summary>
         /// <param name="table_n">Number of table to merge the products</param>
         /// <returns>Dictionary with product and respective amounts</returns>
-        private Dictionary<Product, uint> MergeTableOrders(uint table_n) {
+        private Dictionary<Product, uint> MergeOrders(ConcurrentBag<Order> orders) {
             Dictionary<Product, uint> table_orders = new Dictionary<Product, uint>();
-            lock(table_delivered_orders) {
-                ConcurrentBag<Order> orders = table_delivered_orders[table_n];
-                lock (orders) {
-                    foreach(Order order in orders) {
-                        Dictionary<Product, uint> order_prods = order.GetProducts();
-                        foreach(KeyValuePair<Product, uint> order_prod in order_prods) {
-                            if (table_orders.ContainsKey(order_prod.Key)) {
-                                table_orders[order_prod.Key] = table_orders[order_prod.Key] + order_prod.Value;
-                            }
-                            else {
-                                table_orders.Add(order_prod.Key, order_prod.Value);
-                            }
-
+            lock (orders) {
+                foreach(Order order in orders) {
+                    Dictionary<Product, uint> order_prods = order.GetProducts();
+                    foreach(KeyValuePair<Product, uint> order_prod in order_prods) {
+                        if (table_orders.ContainsKey(order_prod.Key)) {
+                            table_orders[order_prod.Key] = table_orders[order_prod.Key] + order_prod.Value;
                         }
+                        else {
+                            table_orders.Add(order_prod.Key, order_prod.Value);
+                        }
+
                     }
                 }
             }
@@ -189,7 +194,7 @@ namespace Restaurant {
 
             Order new_order = Order.NewOrder(table_n, p);
             orders.AddOrUpdate(new_order.id, new_order, (k, v) => new_order);
-            this.window.NewOrderOnTable(table_n);
+            this.main_window.NewOrderOnTable(table_n);
             if (new_order.type == OrderTarget.Both && this.NewDishesOrderEvent != null && this.NewDrinksOrderEvent != null) {
                 this.NewDishesOrderEvent(new_order.GetOrder(OrderTarget.Kitchen));
                 this.NewDrinksOrderEvent(new_order.GetOrder(OrderTarget.Bar));
@@ -240,7 +245,7 @@ namespace Restaurant {
                             bag.Add(order);
                             return bag;
                     });
-                    this.window.OrderDeliveredOnTable(order.table_n);
+                    this.main_window.OrderDeliveredOnTable(order.table_n);
                 }
             }
             else {
@@ -261,16 +266,54 @@ namespace Restaurant {
                         foreach(Order order in table_orders) {
                             this.total_money += order.TotalPrice();
                             order.Paid();
+                            paid_orders.Add(order);
+                            Order o;
+                            orders.TryRemove(order.id, out o);
                         }
                         table_orders.Clear();
                     }
                 }
-                this.window.SetTotalMoney(this.total_money);
-                this.window.ClearProductsList();
+                this.main_window.SetTotalMoney(this.total_money);
+                this.main_window.ClearProductsList();
             }
             else {
                 Console.WriteLine("Table #{0} does not exist!", table_n);
             }
+        }
+
+        /// <summary>
+        /// Function called when user clicks the 'See Statistics' button
+        /// </summary>
+        /// <param name="e">Object that triggered event</param>
+        /// <param name="args">Arguments of the event</param>
+        public void SeeStatistics() {
+            Dictionary<Product, uint> prods = this.MergeOrders(paid_orders);
+            List<StatisticLine> lines = new List<StatisticLine>(prods.Keys.Count);
+            foreach (KeyValuePair<Product, uint> pair in prods) 
+                lines.Add(new StatisticLine(pair.Key.name, pair.Key.price, pair.Value));
+               
+            this.stat_window.UpdateProducts(lines);
+            this.prev_window = this.main_window.root.Children;
+            foreach(Gtk.Widget widget in this.main_window.root)
+                this.main_window.root.Remove(widget);
+
+            foreach(Gtk.Widget widget in this.stat_window.root) {
+                widget.Unparent();
+                this.main_window.root.Add(widget);
+            }
+            this.main_window.root.ShowAll();
+            
+        }
+
+        /// <summary>
+        /// Function called when user clicks the 'Back' button in the statistics window
+        /// </summary>
+        public void BackToMainWindow() {
+            foreach(Gtk.Widget widget in this.main_window.root)
+                this.main_window.root.Remove(widget);
+
+            foreach(Gtk.Widget widget in this.prev_window)
+                this.main_window.root.Add(widget);
         }
     #endregion METHODS
     }

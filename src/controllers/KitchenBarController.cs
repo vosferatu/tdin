@@ -18,6 +18,8 @@ namespace Restaurant {
     public class KitchenBarController: IController {
     #region FIELDS
         ICentralController central;
+        string prev_title;
+        Gtk.Widget[] prev_window;
         OrderDetailWindow detail_window;
         OrderListWindow list_window;
 
@@ -120,9 +122,18 @@ namespace Restaurant {
         public void ViewOrderDetails(long order_id) {
             Order order = this.FindOrder(order_id);
             if (order != null) {
-                this.detail_window = new OrderDetailWindow(this.GoBack, order.GetProductsSimplified(), order.id, order.table_n);
-                this.list_window.root.HideAll();
-                this.detail_window.root.ShowAll();
+                this.detail_window = new OrderDetailWindow(this.GoBack, order.GetProductsSimplified(), order.table_n);
+                this.prev_window = this.list_window.root.Children;
+                this.prev_title = this.list_window.root.Title;
+                this.list_window.root.Title = String.Format("Order #{0} Details", order.id);
+                foreach(Gtk.Widget widget in this.list_window.root.Children) 
+                    this.list_window.root.Remove(widget);
+                
+                foreach(Gtk.Widget widget in this.detail_window.root.Children) {
+                    widget.Unparent();
+                    this.list_window.root.Add(widget);
+                }
+                this.list_window.root.ShowAll();
             }
         }
 
@@ -162,8 +173,14 @@ namespace Restaurant {
         /// <param name="o">Object that called this function</param>
         /// <param name="args">Arguments of the event</param>
         public void GoBack(object o, EventArgs args) {
-            this.detail_window.root.HideAll();
-            this.list_window.root.ShowAll();
+            foreach(Gtk.Widget widget in this.list_window.root.Children) 
+                widget.Destroy();
+        
+            foreach(Gtk.Widget widget in this.prev_window) {
+                this.list_window.root.Add(widget);
+                widget.ShowAll();
+            }
+            this.list_window.root.Title = this.prev_title;
         }
 
         /// <summary>
