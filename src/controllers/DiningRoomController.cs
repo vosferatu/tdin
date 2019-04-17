@@ -35,6 +35,16 @@ namespace Restaurant {
         /// </summary>
         /// <returns>Whether the network was initialized or not</returns>
         public bool InitializeNetwork() {
+            Hashtable props = new Hashtable();
+            props["port"] = Constants.DINING_PORT;
+            props["name"] = Constants.DINING_CHANNEL_NAME;
+            BinaryClientFormatterSinkProvider cs = new BinaryClientFormatterSinkProvider();
+            BinaryServerFormatterSinkProvider ss = new BinaryServerFormatterSinkProvider();
+            ss.TypeFilterLevel = TypeFilterLevel.Full;
+            ChannelServices.RegisterChannel(new TcpChannel(props, cs, ss), false);
+            this.central = (ICentralController)Activator.GetObject(
+                typeof(ICentralController), Constants.FULL_CENTRAL_URI
+            );
             while (!this.TryRemoteConnection()) {
                 Thread.Sleep(Constants.CONNECT_RETRY_DELAY);
                 Console.WriteLine("Failed to connect! Retrying...");
@@ -48,24 +58,12 @@ namespace Restaurant {
         /// <returns>Whether the connection was sucessfull or not</returns>
         private bool TryRemoteConnection() {
             try {
-                Hashtable props = new Hashtable();
-                props["port"] = Constants.DINING_PORT;  
-                props["name"] = Constants.DINING_CHANNEL_NAME;
-                BinaryClientFormatterSinkProvider cs = new BinaryClientFormatterSinkProvider();
-                BinaryServerFormatterSinkProvider ss = new BinaryServerFormatterSinkProvider();
-                ss.TypeFilterLevel = TypeFilterLevel.Full;
-                ChannelServices.RegisterChannel(new TcpChannel(props, cs, ss), false);
-                this.central = (ICentralController)Activator.GetObject(
-                    typeof(ICentralController), Constants.FULL_CENTRAL_URI
-                );
                 EventRepeaterDelegate evnt_del = new EventRepeaterDelegate(this.OnOrderReady, null);
                 this.central.OrderReadyEvent += evnt_del.OrderReadyCallback;
 
                 return true;
             }
-            catch (Exception e) {
-                Console.WriteLine("{0}", e);
-            }
+            catch (Exception) {}
             return false;
         }
 

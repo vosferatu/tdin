@@ -12,7 +12,6 @@ using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
 
 namespace Restaurant {
-    [Serializable]
     /// <summary>
     /// Responsible for the Central Node of the Restaurant
     /// This controller is the one most directly connected to the 'products' dll
@@ -23,28 +22,21 @@ namespace Restaurant {
         public event NewOrderEventHandler NewDrinksOrderEvent;
         
     #region FIELDS
-        [NonSerialized]
         double total_money = 0.0;
-        [NonSerialized]
         uint selected_table = 0;
-        [NonSerialized]
         double order_total = 0.0;
-        [NonSerialized]
-        PaymentZoneWindow main_window;
-        [NonSerialized]
-        StatisticsWindow stat_window;
-        [NonSerialized]
-        Gtk.Widget[] prev_window;
-        [NonSerialized]
+        
         Dictionary<string, Product> products;
-        [NonSerialized]
         static ConcurrentDictionary<long, Order> orders = 
             new ConcurrentDictionary<long, Order>(2, 10);
-        [NonSerialized]
         static ConcurrentDictionary<uint, ConcurrentBag<Order>> table_delivered_orders = 
             new ConcurrentDictionary<uint, ConcurrentBag<Order>>(2, 9);
-        [NonSerialized]
         static ConcurrentBag<Order> paid_orders = new ConcurrentBag<Order>();
+        
+        PaymentZoneWindow main_window;
+        StatisticsWindow stat_window;
+        Gtk.Widget[] prev_window;
+        
     
     #endregion FIELDS
 

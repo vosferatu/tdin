@@ -111,7 +111,7 @@ namespace Restaurant {
             Gtk.Table table = (is_dish ? this.DishOrderList : this.DrinkOrderList);
             uint child_n = (uint)table.Children.Length;
             ProductEntry entry = new ProductEntry(name, 1, this.rem_p);
-            Console.WriteLine("Attaching to y= ({0}, {1})", 0 + child_n, 1+child_n);
+
             table.Attach(entry, 
                 0, 1, 0 + child_n, 1 + child_n,
                 Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink,
