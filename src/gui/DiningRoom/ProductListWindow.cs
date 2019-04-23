@@ -257,7 +257,7 @@ namespace Restaurant {
             this.Attach(this.order_name, 0, 1, 0, 1,
                 Gtk.AttachOptions.Expand | Gtk.AttachOptions.Fill, Gtk.AttachOptions.Shrink, 0, 0
             );
-            this.Attach(this.finish, 0, 1, 0, 1,
+            this.Attach(this.finish, 1, 2, 0, 1,
                 Gtk.AttachOptions.Shrink, Gtk.AttachOptions.Shrink, 0, 0
             );
             this.ShowAll();
