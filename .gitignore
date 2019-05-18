@@ -2,3 +2,4 @@ libs/
 *.exe
 .vscode
 bin
+.project
