@@ -1,2 +1,4 @@
 libs/
 *.exe
+.vscode
+bin
