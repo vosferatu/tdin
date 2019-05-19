@@ -28,6 +28,8 @@ public class Book {
         html += "<td>" + this.title + "</td>\n";
         html += "<td>" + this.price + "€</td>\n";
         html += "<td>" + this.stock + "</td>\n";
+        html += "<td><input tag=\"request_amount\" id=\"" 
+            + this.title + "_amount\" type=\"number\" value=\"0\" min=\"0\"></input></td>\n";
         html += "</tr>\n";
 
         return html;

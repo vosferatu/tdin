@@ -9,36 +9,6 @@ import java.sql.SQLException;
 // State = ["waiting", "dispatched", "dispatching"]
 
 public class Request {
-    class BookOrder {
-        private String title;
-        private int amount;
-        private Date disp_date;
-        private String state;
-
-        BookOrder(String title, int amount, Date date, String state) {
-            this.title = title;
-            this.amount = amount;
-            this.disp_date = date;
-            this.state = state;
-        }
-
-        public String getState() {
-            return state;
-        }
-
-        public int getAmount() {
-            return amount;
-        }
-
-        public Date getDispDate() {
-            return disp_date;
-        }
-        
-        public String getTitle() {
-            return title;
-        }
-    }
-
     private LinkedList<BookOrder> books;
 
     public Request(ResultSet res) throws SQLException {
