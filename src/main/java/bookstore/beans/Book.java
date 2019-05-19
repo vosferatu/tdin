@@ -1,0 +1,35 @@
+package bookstore.beans;
+
+public class Book {
+    private String title;
+    private double price;
+    private int stock;
+
+    public Book(String title, double price, int stock) {
+        this.title = title;
+        this.price = price;
+        this.stock = stock;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String toHTML() {
+        String html = "<tr>\n";
+        html += "<td>" + this.title + "</td>\n";
+        html += "<td>" + this.price + "€</td>\n";
+        html += "<td>" + this.stock + "</td>\n";
+        html += "</tr>\n";
+
+        return html;
+    }
+}

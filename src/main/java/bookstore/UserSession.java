@@ -8,6 +8,8 @@ package bookstore;
 import java.sql.SQLException;
 import java.util.LinkedList;
 
+import bookstore.beans.Request;
+import bookstore.beans.Book;
 /**
  *
  * @author jalmeida
@@ -50,10 +52,12 @@ public class UserSession {
         this.email = email;
     }
   
-    public LinkedList<String> getUserBooks() {
+    public String getUserBooks() {
         try {
-            if (this.server != null)
-                return this.server.getUserRequests(this.username);
+            if (this.server != null) {
+                Request req = this.server.getUserRequests(this.username);
+                return req.toHTMLTable();
+            }
         }
         catch (SQLException e) {
             System.err.println("Error!\n - " + e);
@@ -61,4 +65,22 @@ public class UserSession {
         
         return null;
     }  
+
+    public String getAllBooks() {
+        try {
+            if (this.server != null) {
+                LinkedList<Book> books = this.server.getAllBooks();
+                String html = "";
+                for (Book book : books) {
+                    html += book.toHTML();
+                }
+                return html;
+            }
+        }
+        catch (SQLException e) {
+            System.err.println("Error!\n - " + e);
+        }
+
+        return null;
+    }
 }

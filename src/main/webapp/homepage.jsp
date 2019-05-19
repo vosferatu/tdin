@@ -15,8 +15,30 @@
     <h1>Hello
         <jsp:getProperty name="user_session" property="username" />!</h1>
 
-    <h2>Requested Books: </h2>
-    <jsp:getProperty name="user_session" property="userBooks" />
+    <h2>Requested Books</h2>
+
+    
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Amount</th>
+            <th>State</th>
+            <th>Dispatched Date</th>
+        </tr>
+        <jsp:getProperty name="user_session" property="userBooks" />
+    </table>
+
+
+    <h2> Available Books </h2>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Price</th>
+            <th>Stock</th>
+        </tr>
+        <jsp:getProperty name="user_session" property="allBooks" />
+    </table>
+
 
 </body>
 

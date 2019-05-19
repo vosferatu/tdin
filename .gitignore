@@ -3,3 +3,6 @@ libs/
 .vscode
 bin
 .project
+.classpath
+target
+.settings
