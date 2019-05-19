@@ -16,3 +16,7 @@
 Recommended run command at project root:
 
     mvn tomcat7:run
+    
+Then access webapp at:
+   
+    localhost:8000/bookstore
