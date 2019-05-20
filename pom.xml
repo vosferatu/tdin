@@ -106,6 +106,16 @@
                         <classpathScope>compile</classpathScope> 
                     </configuration>
                 </execution>
+                <execution>
+                    <id>test</id>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>bookstore.store.ExampleWindow</mainClass>
+                        <classpathScope>compile</classpathScope> 
+                    </configuration>
+                </execution>
             </executions>    
         </plugin>  
       </plugins>
