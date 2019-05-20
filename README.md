@@ -2,21 +2,35 @@
 
 ## Setting Up
 
- - Tomcat9
+ - [Tomcat9](https://tomcat.apache.org/download-90.cgi)
    - Follow guide at [Install Tomcat9](https://www.osradar.com/how-to-install-tomcat-on-fedora-29/) up to step 3
    - User: 'admin', Password: 'tdin'
- - Maven
- - MySQL
+ - [Maven](http://maven.apache.org/)
+ - [MySQL](https://www.mysql.com/downloads/)
    - Setup user: 'root', password: 'Pass123!'
    - Create a database named 'bookstore'
    - Use file database/bookstore.sql to initialize database
+ - [Java-Gnome](http://java-gnome.sourceforge.net/)
+   - I have already compiled and put the files in the <i>lib</i> folder. I am unsure whether the files will work on other computers :/
+
 
 ## Running
 
-Recommended run command at project root:
+### WebApp
+
+Currently the webapp is still very undeveloped and needs further work. However the basis is there.
+In the root of the project run:
 
     mvn tomcat7:run
     
-Then access webapp at:
+To start hosting a local webapp service. Then access webapp at:
    
     localhost:8000/bookstore
+
+### Bookstore GUI
+
+Only first draft is made. Still need to add more rules to the other GUI, however the basis is also here.
+In the root of the project run:
+
+    mvn exec:java@test
+

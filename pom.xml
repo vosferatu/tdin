@@ -41,6 +41,14 @@
         <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.test.directoryhelper</groupId>
+      <artifactId>DirectoryHelper</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/gtk-4.1.jar</systemPath>      
+    </dependency>
+
     <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
     <dependency>
         <groupId>mysql</groupId>
@@ -72,6 +80,34 @@
                 <port>8000</port>
             </configuration>
         </plugin>
+
+        <plugin>  
+            <groupId>org.codehaus.mojo</groupId>  
+            <artifactId>exec-maven-plugin</artifactId>  
+            <version>1.6.0</version>
+            <executions>
+                <execution>
+                    <id>test</id>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>bookstore.store.ExampleWindow</mainClass>
+                        <classpathScope>compile</classpathScope> 
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>BookstoreServer</id>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>bookstore.store.ExampleWindow</mainClass>
+                        <classpathScope>compile</classpathScope> 
+                    </configuration>
+                </execution>
+            </executions>    
+        </plugin>  
       </plugins>
     </pluginManagement>
   </build>
