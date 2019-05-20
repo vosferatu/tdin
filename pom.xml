@@ -87,12 +87,12 @@
             <version>1.6.0</version>
             <executions>
                 <execution>
-                    <id>test</id>
+                    <id>BookstoreClient</id>
                     <goals>
                         <goal>java</goal>
                     </goals>
                     <configuration>
-                        <mainClass>bookstore.store.ExampleWindow</mainClass>
+                        <mainClass>bookstore.store.client.BookstoreClient</mainClass>
                         <classpathScope>compile</classpathScope> 
                     </configuration>
                 </execution>
@@ -102,7 +102,7 @@
                         <goal>java</goal>
                     </goals>
                     <configuration>
-                        <mainClass>bookstore.store.ExampleWindow</mainClass>
+                        <mainClass>bookstore.store.server.BookstoreServer</mainClass>
                         <classpathScope>compile</classpathScope> 
                     </configuration>
                 </execution>

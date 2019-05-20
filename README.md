@@ -16,6 +16,18 @@
 
 ## Running
 
+### Bookstore Server
+Bookstore server is the server that should always be running, it should always be started first and is where the database will be accessed. 
+Start it by running:
+
+    mvn exec:java@BookstoreServer
+
+### Bookstore Client
+Only first draft is made. Still need to add more rules to the other GUI, however the basis is also here.
+In the root of the project run:
+
+    mvn exec:java@BookstoreClient
+
 ### WebApp
 
 Currently the webapp is still very undeveloped and needs further work. However the basis is there.
@@ -26,11 +38,4 @@ In the root of the project run:
 To start hosting a local webapp service. Then access webapp at:
    
     localhost:8000/bookstore
-
-### Bookstore GUI
-
-Only first draft is made. Still need to add more rules to the other GUI, however the basis is also here.
-In the root of the project run:
-
-    mvn exec:java@test
 

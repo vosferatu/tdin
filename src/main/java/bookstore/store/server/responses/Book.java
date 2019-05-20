@@ -1,6 +1,9 @@
-package bookstore.webapp.beans;
+package bookstore.store.server.responses;
 
-public class Book {
+import java.io.Serializable;
+
+public class Book implements Serializable {
+    private static final long serialVersionUID = 5729053599256218529L;
     private String title;
     private double price;
     private int stock;

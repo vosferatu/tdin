@@ -1,14 +1,16 @@
-package bookstore.webapp.beans;
+package bookstore.store.server.responses;
 
 import java.util.Date;
 import java.text.DateFormat;
 import java.util.LinkedList;
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 // State = ["waiting", "dispatched", "dispatching"]
 
-public class Request {
+public class Request implements Serializable {
+    private static final long serialVersionUID = -593874237645144342L;
     private LinkedList<BookOrder> books;
 
     public Request(ResultSet res) throws SQLException {

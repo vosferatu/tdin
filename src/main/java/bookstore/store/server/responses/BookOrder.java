@@ -1,8 +1,10 @@
-package bookstore.webapp.beans;
+package bookstore.store.server.responses;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class BookOrder {
+public class BookOrder implements Serializable {
+    private static final long serialVersionUID = 7899496441518523626L;
     private String title;
     private int amount;
     private Date disp_date;
