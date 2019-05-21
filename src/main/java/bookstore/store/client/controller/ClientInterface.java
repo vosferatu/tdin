@@ -1,4 +1,4 @@
-package bookstore.store.client;
+package bookstore.store.client.controller;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

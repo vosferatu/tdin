@@ -2,7 +2,6 @@ package bookstore.webapp.controllers;
 
 import javax.servlet.http.*;
 
-import bookstore.webapp.beans.*;
 import bookstore.webapp.database.DBConnection;
 
 import java.io.IOException;

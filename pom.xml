@@ -13,8 +13,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -92,7 +92,7 @@
                         <goal>java</goal>
                     </goals>
                     <configuration>
-                        <mainClass>bookstore.store.client.BookstoreClient</mainClass>
+                        <mainClass>bookstore.store.client.controller.BookstoreClient</mainClass>
                         <classpathScope>compile</classpathScope> 
                     </configuration>
                 </execution>

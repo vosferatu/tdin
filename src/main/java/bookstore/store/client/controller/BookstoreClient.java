@@ -1,7 +1,8 @@
-package bookstore.store.client;
+package bookstore.store.client.controller;
 
 import java.rmi.RemoteException;
 
+import bookstore.store.client.gui.ClientWindow;
 import bookstore.BaseRMI;
 import bookstore.store.server.ServerInterface;
 import bookstore.store.server.responses.Book;

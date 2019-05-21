@@ -1,4 +1,4 @@
-package bookstore.store.client;
+package bookstore.store.client.gui;
 
 import java.util.LinkedList;
 
@@ -11,14 +11,14 @@ import org.gnome.gtk.Window;
 
 import bookstore.store.server.responses.Book;
 
-class ClientWindow extends Thread {
+public class ClientWindow extends Thread {
 
     Window window;
     Grid book_list;
     Grid book_order;
 
 
-    ClientWindow() {
+    public ClientWindow() {
         Gtk.init(new String[] {});
         Builder b = new Builder();
         try {
@@ -48,9 +48,20 @@ class ClientWindow extends Thread {
         Gtk.main();
     }
 
-    void setAvailableBooks(LinkedList<Book> books) {
-        for (Book book : books) {
-            System.out.println(book.getTitle());
+    public void setAvailableBooks(LinkedList<Book> books) {
+        for (int i = 0; i < books.size(); i++) {
+            Book book = books.get(i);
+
+            BookEntry entry = new BookEntry(book.getTitle(), book.getPrice(), book.getStock(), (String title) -> {
+                return this.addBookUnit(title);
+            });
+            System.out.println("Book_list childs = " + i);
+            this.book_list.attach(entry, 0, this.book_list.getChildren().length, 1, 1);
         }
+    }
+
+    boolean addBookUnit(String book_title) {
+        System.out.println("Adding a single unit of '" + book_title + "'");
+        return true;
     }
 }
