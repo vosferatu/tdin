@@ -2,6 +2,16 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-apply</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-clear</property>
+  </object>
   <object class="GtkWindow" id="root">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -412,7 +422,7 @@
           <object class="GtkLabel" id="OrderTotalPrice">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">0 €</property>
+            <property name="label" translatable="yes">0.0 €</property>
           </object>
           <packing>
             <property name="left_attach">8</property>
@@ -420,10 +430,31 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkButton" id="SubmitButton">
+            <property name="label" translatable="yes">Submit</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image1</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">9</property>
+          </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkButton" id="ResetButton">
+            <property name="label" translatable="yes">Reset</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image2</property>
+            <property name="image_position">right</property>
+          </object>
+          <packing>
+            <property name="left_attach">3</property>
+            <property name="top_attach">9</property>
+          </packing>
         </child>
         <child>
           <placeholder/>

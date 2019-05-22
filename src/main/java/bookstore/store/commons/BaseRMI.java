@@ -1,4 +1,4 @@
-package bookstore;
+package bookstore.store.commons;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

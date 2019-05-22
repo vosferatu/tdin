@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.rmi.RemoteException;
 import java.util.LinkedList;
 
-import bookstore.BaseRMI;
+import bookstore.store.commons.BaseRMI;
 import bookstore.store.server.responses.Request;
 import bookstore.store.server.responses.Book;
 

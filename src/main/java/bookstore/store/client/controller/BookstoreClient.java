@@ -6,10 +6,11 @@ import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import bookstore.store.client.gui.ClientWindow;
-import bookstore.store.client.gui.BookEntry.AlterBookEvent;
-import bookstore.BaseRMI;
+import bookstore.store.commons.BaseRMI;
 import bookstore.store.server.ServerInterface;
 import bookstore.store.server.responses.Book;
+import bookstore.store.commons.EventHandlers.ClickedButton;
+import bookstore.store.commons.EventHandlers.AlterBookEvent;
 
 public class BookstoreClient extends BaseRMI implements ClientInterface {
     private static final String SERVER_NAME = "BookstoreServer";
@@ -37,8 +38,12 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
 
     public BookstoreClient(ServerInterface server) {
         this.server_obj = server;
-        this.client_gui = new ClientWindow((AlterBookEvent)(String title) -> this.addBookToOrder(title),
-            (AlterBookEvent)(String title) -> this.remBookFromOrder(title));
+        this.client_gui = ClientWindow.newClient (
+            (AlterBookEvent)(String title) -> this.addBookToOrder(title),
+            (AlterBookEvent)(String title) -> this.remBookFromOrder(title),
+            (ClickedButton)() -> this.submitOrder(),
+            (ClickedButton)() -> this.resetOrder()
+        );
         this.available_books = new ConcurrentHashMap<>();
         this.books_order = new HashMap<>();
     }
@@ -83,6 +88,17 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
                 this.client_gui.remBookUnit(title, book.getPrice());
             }
         }
+    }
+
+    void submitOrder() {
+        System.out.println("Submitting order!");
+        // TODO: Send order to remote
+        
+        this.client_gui.clearOrder();
+    }
+
+    void resetOrder() {
+        this.client_gui.clearOrder();
     }
 
     @Override
