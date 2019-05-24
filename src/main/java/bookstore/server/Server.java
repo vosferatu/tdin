@@ -54,6 +54,7 @@ public class Server extends BaseRMI implements ServerInterface {
             this.queue = new BaseQueue("BookstoreQueue");
         }
         else {
+            this.queue = new BaseQueue("BookstoreQueue");
             this.queue.registerCallbacks(
                 (String tag, Delivery msg) -> this.newMessageCallback(tag, msg),
                 (String tag) -> this.cancelCallback(tag)
@@ -63,9 +64,11 @@ public class Server extends BaseRMI implements ServerInterface {
 
     @Override
     public String putRequest(Request new_request) throws RemoteException {
+        System.out.println("Putting request on db!");
         HashMap<String, Request> orders = this.db.putRequest(new_request);
         Request unfinished_req = orders.get("unfinished"), finished_req = orders.get("finished");
         if (unfinished_req.getRequestBooks().size() > 0) {
+            System.out.println("Sending request to warehouse");
             this.queue.sendObject(unfinished_req);
         }
         
@@ -95,7 +98,7 @@ public class Server extends BaseRMI implements ServerInterface {
     }
 
     void newMessageCallback(String consumer_tag, Delivery msg) {
-        System.out.println("Got msg: " + msg.getBody());
+        System.out.println("Got a new request!");
         Request req = (Request)this.queue.objFromBytes(msg.getBody());
         this.db.putRequest(req);
     }

@@ -99,14 +99,15 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
     }
 
     void finishOrder() {
-        System.out.println("Submitting order!");
         LinkedList<BookOrder> books = new LinkedList<>();
         books_order.forEach((String title, Integer amount) -> {
             books.add(new BookOrder(title, amount, null, null));
         });
         Request req = Request.fromClientData("Joao", "email@gmail.com", "Rua1", books);
         try {
+            System.out.println("Submitting order to server_obj");
             this.server_obj.putRequest(req);
+            System.out.println("Submitted order to server_obj");
         }
         catch (Exception e) {
             System.err.println("Failed to finish order!\n - " + e);
