@@ -2,8 +2,6 @@ package bookstore.webapp.controllers;
 
 import javax.servlet.http.*;
 
-import bookstore.webapp.database.DBConnection;
-
 import java.io.IOException;
 import java.util.Enumeration;
 

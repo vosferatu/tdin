@@ -1,4 +1,4 @@
-package bookstore.store.client.gui;
+package bookstore.store.gui;
 
 import java.util.LinkedList;
 
@@ -12,14 +12,14 @@ import org.gnome.gtk.Window;
 import org.gnome.gtk.Builder;
 import org.gnome.gdk.EventButton;
 
-import bookstore.store.commons.BookEntry;
-import bookstore.store.server.responses.Book;
-import bookstore.store.commons.EventHandlers.ClickedButton;
-import bookstore.store.commons.EventHandlers.AlterBookEvent;
+import bookstore.store.gui.BookEntry;
+import bookstore.server.responses.Book;
+import bookstore.commons.EventHandlers.ClickedButton;
+import bookstore.commons.EventHandlers.AlterBookEvent;
 
 public class ClientWindow extends Thread {
-
     Window window;
+    ClientPopup popup;
     Grid book_list;
     Grid book_order;
     Label order_total;
@@ -38,15 +38,20 @@ public class ClientWindow extends Thread {
 
     private ClientWindow() {}
 
-    public static ClientWindow newClient(AlterBookEvent add_handler, AlterBookEvent rem_handler, 
-        ClickedButton submit_handler, ClickedButton reset_handler)
-    {
+    /**
+     * Creates a new bookstore client window
+     * @param book_handlers     Contains all the handlers of the book buttons [AddBookHandler, RemBookHandler]
+     * @param button_handlers   Contains all the handlers of the buttons [SubmitHandler, ResetBooksHandler, FinishOrderHandler, ResetDetailsOrder]
+     * @return
+     */
+    public static ClientWindow newClient(AlterBookEvent[] book_handlers, ClickedButton[] button_handlers) {
         Gtk.init(new String[] {});
         ClientWindow window = new ClientWindow();
-        window.add_handler = add_handler;
-        window.rem_handler = rem_handler;
-        window.submit_handler = submit_handler;
-        window.reset_handler = reset_handler;
+        window.popup = new ClientPopup(button_handlers[2], button_handlers[3]);
+        window.add_handler = book_handlers[0];
+        window.rem_handler = book_handlers[1];
+        window.submit_handler = button_handlers[0];
+        window.reset_handler = button_handlers[1];
         Builder b = new Builder();
         try {
             b.addFromFile("assets/windows/BookstoreWindow.glade");
@@ -85,7 +90,7 @@ public class ClientWindow extends Thread {
         for (int i = 0; i < books.size(); i++) {
             Book book = books.get(i);
 
-            BookEntry entry = new BookEntry(book.getTitle(), book.getPrice(), book.getStock(), this.add_handler);
+            BookEntry entry = new BookEntry(book.getTitle(), book.getPrice(), this.add_handler);
             this.book_list.attach(entry, 0, this.book_list.getChildren().length, 1, 1);
         }
     }
@@ -107,7 +112,7 @@ public class ClientWindow extends Thread {
             entry.updateBookAmount(+1);
         }
         else {
-            entry = new BookEntry(book_title, price, this.rem_handler);
+            entry = new BookEntry(book_title, price, 1, this.rem_handler);
             this.book_order.add(entry);
         }
         this.updateOrderTotal(price);
@@ -128,6 +133,14 @@ public class ClientWindow extends Thread {
         this.updateOrderTotal(0);
     }
 
+    public void showPopup() {
+        this.popup.show();
+    }
+
+    public void hidePopup() {
+        this.popup.closeWindow();
+    }
+    
     private void updateOrderTotal(double inc) {
         String curr_money_raw = this.order_total.getText();
         double curr_money = Double.valueOf(curr_money_raw.substring(0, curr_money_raw.length()-1));

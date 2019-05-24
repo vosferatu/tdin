@@ -2,8 +2,11 @@ package bookstore.webapp.controllers;
 
 import javax.servlet.http.*;
 
-import bookstore.store.server.responses.*;
-import bookstore.webapp.database.DBConnection;
+import bookstore.commons.BaseRMI;
+import bookstore.server.responses.Book;
+import bookstore.server.ServerInterface;
+import bookstore.server.responses.Request;
+import bookstore.server.responses.BookOrder;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -17,6 +20,10 @@ import javax.servlet.annotation.WebServlet;
 @WebServlet(name = "ClientController", urlPatterns = "/login")
 public class ClientController extends HttpServlet {
     private static final long serialVersionUID = -7012574937926535948L;
+    private static final String OBJ_NAME = "BookstoreServer";
+    private static final int OBJ_PORT = 8005;
+
+    private ServerInterface server_obj;
 
     private static class Client {
         private final String username;
@@ -48,6 +55,10 @@ public class ClientController extends HttpServlet {
         }
     }
 
+    public ClientController() {
+        this.server_obj = (ServerInterface)BaseRMI.fetchObject(OBJ_NAME, OBJ_PORT);
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException
@@ -71,27 +82,23 @@ public class ClientController extends HttpServlet {
 
     private List<BookOrder> getUserBooks(String username) {
         try {
-            Request req = DBConnection.getUserRequests(username);
-            if (req != null) {
-                return req.getRequestBooks();
+            LinkedList<Request> reqs = this.server_obj.getUserRequests(username);
+            LinkedList<BookOrder> books = new LinkedList<>();
+            for (Request req : reqs) {
+                books.addAll(req.getRequestBooks());
             }
-            return null;
-        } catch (SQLException e) {
+            return books;
+        } catch (Exception e) {
             System.err.println("Error!\n - " + e);
         }
 
         return null;
     }
 
-    private String getAllBooks() {
+    private LinkedList<Book> getAllBooks() {
         try {
-            LinkedList<Book> books = DBConnection.getAllBooks();
-            String html = "";
-            for (Book book : books) {
-                html += book.toHTML();
-            }
-            return html;
-        } catch (SQLException e) {
+            return this.server_obj.getAllBooks();
+        } catch (Exception e) {
             System.err.println("Error!\n - " + e);
         }
 

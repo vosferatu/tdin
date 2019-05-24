@@ -50,11 +50,15 @@
             <tr>
                 <th>Title</th>
                 <th>Price</th>
-                <th>Stock</th>
                 <th>Request</th>
             </tr>
-            
-            ${all_books}
+            <c:forEach var='book' items='${all_books}'>
+                <tr>
+                    <td><c:out value='${book.title}' /></td>
+                    <td><c:out value='${book.price}' /></td>
+                    <td><button >+</button></td>
+                </tr>
+            </c:forEach>
         </table>
         
         <button onclick="submitRequest();">Request</button>

@@ -33,6 +33,14 @@
         <scope>provided</scope>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
+    <dependency>
+        <groupId>com.rabbitmq</groupId>
+        <artifactId>amqp-client</artifactId>
+        <version>5.7.0</version>
+    </dependency>
+
+
     <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
     <dependency>
         <groupId>javax.servlet</groupId>
@@ -47,13 +55,6 @@
       <version>1.0</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/gtk-4.1.jar</systemPath>      
-    </dependency>
-
-    <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-    <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>8.0.16</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/javax.servlet/jstl -->
@@ -87,12 +88,25 @@
             <version>1.6.0</version>
             <executions>
                 <execution>
+                    <id>WarehouseServer</id>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>bookstore.server.Server</mainClass>
+                        <classpathScope>compile</classpathScope>
+                        <arguments>
+                            <argument>Warehouse</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+                <execution>
                     <id>BookstoreClient</id>
                     <goals>
                         <goal>java</goal>
                     </goals>
                     <configuration>
-                        <mainClass>bookstore.store.client.controller.BookstoreClient</mainClass>
+                        <mainClass>bookstore.store.controller.BookstoreClient</mainClass>
                         <classpathScope>compile</classpathScope> 
                     </configuration>
                 </execution>
@@ -102,8 +116,11 @@
                         <goal>java</goal>
                     </goals>
                     <configuration>
-                        <mainClass>bookstore.store.server.BookstoreServer</mainClass>
+                        <mainClass>bookstore.server.Server</mainClass>
                         <classpathScope>compile</classpathScope> 
+                        <arguments>
+                            <argument>Bookstore</argument>
+                        </arguments>
                     </configuration>
                 </execution>
                 <execution>
@@ -112,7 +129,7 @@
                         <goal>java</goal>
                     </goals>
                     <configuration>
-                        <mainClass>bookstore.store.ExampleWindow</mainClass>
+                        <mainClass>bookstore.commons.BaseQueue</mainClass>
                         <classpathScope>compile</classpathScope> 
                     </configuration>
                 </execution>

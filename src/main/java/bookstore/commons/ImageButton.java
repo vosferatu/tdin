@@ -1,4 +1,4 @@
-package bookstore.store.commons;
+package bookstore.commons;
 
 import org.gnome.gtk.Image;
 import org.gnome.gtk.Widget;
@@ -7,14 +7,14 @@ import org.gnome.gtk.IconSize;
 import org.gnome.gdk.EventButton;
 import org.freedesktop.icons.Icon;
 
-import bookstore.store.commons.EventHandlers.AlterBookEvent;
+import bookstore.commons.EventHandlers.AlterBookEvent;
 
-class ImageButton extends EventBox {
+public class ImageButton extends EventBox {
     String title;
     AlterBookEvent handler;
     Image img;
 
-    ImageButton(Icon icon, IconSize size, String book_title, AlterBookEvent handler) {
+    public ImageButton(Icon icon, IconSize size, String book_title, AlterBookEvent handler) {
         this.title = book_title;
         this.handler = handler;
 

@@ -1,16 +1,18 @@
-package bookstore.store.client.controller;
+package bookstore.store.controller;
 
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.rmi.RemoteException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import bookstore.store.client.gui.ClientWindow;
-import bookstore.store.commons.BaseRMI;
-import bookstore.store.server.ServerInterface;
-import bookstore.store.server.responses.Book;
-import bookstore.store.commons.EventHandlers.ClickedButton;
-import bookstore.store.commons.EventHandlers.AlterBookEvent;
+import bookstore.commons.BaseRMI;
+import bookstore.server.responses.Book;
+import bookstore.server.responses.BookOrder;
+import bookstore.server.responses.Request;
+import bookstore.server.ServerInterface;
+import bookstore.store.gui.ClientWindow;
+import bookstore.commons.EventHandlers.ClickedButton;
+import bookstore.commons.EventHandlers.AlterBookEvent;
 
 public class BookstoreClient extends BaseRMI implements ClientInterface {
     private static final String SERVER_NAME = "BookstoreServer";
@@ -25,7 +27,7 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
     public static void main(String[] args) {
         System.out.println("Starting Bookstore client...");
         try {
-            ServerInterface server = (ServerInterface) fetchObject(SERVER_NAME, SERVER_PORT);
+            ServerInterface server = (ServerInterface)fetchObject(SERVER_NAME, SERVER_PORT);
             if (server != null) {
                 BookstoreClient obj = new BookstoreClient(server);
                 System.out.println("Started Bookstore client!");
@@ -39,10 +41,16 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
     public BookstoreClient(ServerInterface server) {
         this.server_obj = server;
         this.client_gui = ClientWindow.newClient (
-            (AlterBookEvent)(String title) -> this.addBookToOrder(title),
-            (AlterBookEvent)(String title) -> this.remBookFromOrder(title),
-            (ClickedButton)() -> this.submitOrder(),
-            (ClickedButton)() -> this.resetOrder()
+            new AlterBookEvent[] {
+                (String title) -> this.addBookToOrder(title),
+                (String title) -> this.remBookFromOrder(title)
+            },
+            new ClickedButton[] {
+                () -> this.submitOrder(),
+                () -> this.resetOrder(),
+                () -> this.finishOrder(),
+                () -> this.resetDetails()
+            }
         );
         this.available_books = new ConcurrentHashMap<>();
         this.books_order = new HashMap<>();
@@ -90,15 +98,33 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
         }
     }
 
-    void submitOrder() {
+    void finishOrder() {
         System.out.println("Submitting order!");
-        // TODO: Send order to remote
-        
+        LinkedList<BookOrder> books = new LinkedList<>();
+        books_order.forEach((String title, Integer amount) -> {
+            books.add(new BookOrder(title, amount, null, null));
+        });
+        Request req = Request.fromClientData("Joao", "email@gmail.com", "Rua1", books);
+        try {
+            this.server_obj.putRequest(req);
+        }
+        catch (Exception e) {
+            System.err.println("Failed to finish order!\n - " + e);
+        }
         this.client_gui.clearOrder();
+        this.client_gui.hidePopup();
+    }
+
+    void submitOrder() {
+        this.client_gui.showPopup();
     }
 
     void resetOrder() {
         this.client_gui.clearOrder();
+    }
+
+    void resetDetails() {
+        System.out.println("Resetting details!");
     }
 
     @Override

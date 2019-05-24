@@ -15,8 +15,10 @@
   <object class="GtkWindow" id="root">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Bookstore Window</property>
     <property name="default_width">600</property>
     <property name="default_height">400</property>
+    <property name="hide_titlebar_when_maximized">True</property>
     <child>
       <placeholder/>
     </child>
@@ -84,20 +86,6 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel">
-                                    <property name="width_request">80</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="hexpand">False</property>
-                                    <property name="label" translatable="yes">&lt;b&gt;Stock&lt;/b&gt;</property>
-                                    <property name="use_markup">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">4</property>
-                                    <property name="top_attach">0</property>
-                                  </packing>
-                                </child>
-                                <child>
                                   <object class="GtkSeparator">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
@@ -118,16 +106,6 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSeparator">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">5</property>
-                                    <property name="top_attach">0</property>
-                                  </packing>
-                                </child>
-                                <child>
                                   <object class="GtkLabel">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
@@ -137,7 +115,7 @@
                                     <property name="use_markup">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">6</property>
+                                    <property name="left_attach">4</property>
                                     <property name="top_attach">0</property>
                                   </packing>
                                 </child>
@@ -436,6 +414,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="image">image1</property>
+            <property name="always_show_image">True</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -450,6 +429,7 @@
             <property name="receives_default">True</property>
             <property name="image">image2</property>
             <property name="image_position">right</property>
+            <property name="always_show_image">True</property>
           </object>
           <packing>
             <property name="left_attach">3</property>

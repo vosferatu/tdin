@@ -1,4 +1,4 @@
-package bookstore.store.commons;
+package bookstore.commons;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -6,7 +6,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-public abstract class BaseRMI {
+public class BaseRMI {
     private static final int DEFAULT_PORT = 1099;
 
     /**
@@ -17,7 +17,7 @@ public abstract class BaseRMI {
      * @param port Port to link the object to
      * @return The registered object, null on error
      */
-    protected static Remote registerObject(Remote obj, String name, int port) {
+    public static Remote registerObject(Remote obj, String name, int port) {
         Remote stub;
         Registry reg;
 
@@ -56,7 +56,7 @@ public abstract class BaseRMI {
      * @param port  Port where the object is hosted
      * @return Remote object or null on error
      */
-    protected static Remote fetchObject(String name, int port) {
+    public static Remote fetchObject(String name, int port) {
         try {
             Registry registry = LocateRegistry.getRegistry(DEFAULT_PORT);
             Remote obj = registry.lookup(name);

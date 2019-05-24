@@ -6,10 +6,6 @@
    - Follow guide at [Install Tomcat9](https://www.osradar.com/how-to-install-tomcat-on-fedora-29/) up to step 3
    - User: 'admin', Password: 'tdin'
  - [Maven](http://maven.apache.org/)
- - [MySQL](https://www.mysql.com/downloads/)
-   - Setup user: 'root', password: 'Pass123!'
-   - Create a database named 'bookstore'
-   - Use file database/bookstore.sql to initialize database
  - [Java-Gnome](http://java-gnome.sourceforge.net/)
    - I have already compiled and put the files in the <i>lib</i> folder. I am unsure whether the files will work on other computers :/
 

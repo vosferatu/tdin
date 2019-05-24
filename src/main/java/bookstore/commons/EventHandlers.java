@@ -1,4 +1,4 @@
-package bookstore.store.commons;
+package bookstore.commons;
 
 public class EventHandlers {
     public interface AlterBookEvent {
