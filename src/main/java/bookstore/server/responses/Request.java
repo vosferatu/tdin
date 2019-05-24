@@ -69,12 +69,16 @@ public class Request implements Serializable {
     }
 
     public String toEmailString() {
+        double total_price = 0.0;
         String email = "Dear Mr. or Mrs. " + this.client_name + "\n\n";
         email += "You have made an order at our store for the following items:\n";
         for (BookOrder book : this.books) {
             int amount = book.getAmount();
-            email += "  - " + amount + (amount > 1 ? " copies" : " copy") + " of " + book.getTitle() + "\n";
+            total_price += amount * book.getPrice();
+            email += "  - " + amount + (amount > 1 ? " copies" : " copy") + 
+                " of " + book.getTitle() + " (" + String.format("%1$,.2f", book.getPrice()) + "€ each)\n";
         }
+        email += "\n   -> Total Price = " + String.format("%1$,.2f", total_price) + "€\n";
         email += "\n" + "They will all be dispatched at " + this.books.getFirst().getDisp_date().toString() + "\n\n";
         email += "Best Regards,\n João Almeida\n João Mendes";
 

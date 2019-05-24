@@ -107,7 +107,8 @@ public class BookstoreController extends BaseRMI {
             String name = popup.getInputName(), email = popup.getInputEmail(),
                 addr = popup.getInputAddr();
             books_order.forEach((String title, Integer amount) -> {
-                books.add(new BookOrder(title, amount, null, null));
+                Book book = this.available_books.get(title);
+                books.add(new BookOrder(book, amount, null, null));
             });
             Request req = Request.fromClientData(name, email, addr, books);
             
