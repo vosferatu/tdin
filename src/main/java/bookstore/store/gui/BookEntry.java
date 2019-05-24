@@ -30,7 +30,7 @@ public class BookEntry extends Grid {
         this.amount_label = new Label(String.valueOf(amount));
         this.amount_label.setSizeRequest(80, 10);
         this.attach(this.amount_label, 2, 0, 1, 1);
-        this.button = new ImageButton(ActionIcon.LIST_REMOVE, IconSize.BUTTON, title,
+        this.button = new ImageButton(ActionIcon.LIST_REMOVE, IconSize.LARGE_TOOLBAR, title,
                 (String book_title) -> this.handler.run(book_title));
         this.button.setSizeRequest(80, 10);
         this.attach(this.button, 3, 0, 1, 1);
@@ -49,7 +49,7 @@ public class BookEntry extends Grid {
         this.price_label = new Label(String.valueOf(price) + "€");
         this.price_label.setSizeRequest(120, 10);
         this.attach(this.price_label, 1, 0, 1, 1);
-        this.button = new ImageButton(ActionIcon.LIST_ADD, IconSize.BUTTON, title,
+        this.button = new ImageButton(ActionIcon.LIST_ADD, IconSize.LARGE_TOOLBAR, title,
                 (String book_title) -> this.handler.run(book_title));
         this.button.setSizeRequest(80, 10);
         this.attach(this.button, 2, 0, 1, 1);

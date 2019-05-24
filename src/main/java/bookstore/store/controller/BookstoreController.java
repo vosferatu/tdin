@@ -2,7 +2,7 @@ package bookstore.store.controller;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.rmi.RemoteException;
+import javax.mail.internet.InternetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
 import bookstore.commons.BaseRMI;
@@ -10,11 +10,12 @@ import bookstore.server.responses.Book;
 import bookstore.server.responses.BookOrder;
 import bookstore.server.responses.Request;
 import bookstore.server.ServerInterface;
+import bookstore.store.gui.ClientPopup;
 import bookstore.store.gui.ClientWindow;
 import bookstore.commons.EventHandlers.ClickedButton;
 import bookstore.commons.EventHandlers.AlterBookEvent;
 
-public class BookstoreClient extends BaseRMI implements ClientInterface {
+public class BookstoreController extends BaseRMI {
     private static final String SERVER_NAME = "BookstoreServer";
     private static final int SERVER_PORT = 8005;
 
@@ -29,7 +30,7 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
         try {
             ServerInterface server = (ServerInterface)fetchObject(SERVER_NAME, SERVER_PORT);
             if (server != null) {
-                BookstoreClient obj = new BookstoreClient(server);
+                BookstoreController obj = new BookstoreController(server);
                 System.out.println("Started Bookstore client!");
                 obj.startClient();
             }
@@ -38,7 +39,7 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
         }
     }
 
-    public BookstoreClient(ServerInterface server) {
+    public BookstoreController(ServerInterface server) {
         this.server_obj = server;
         this.client_gui = ClientWindow.newClient (
             new AlterBookEvent[] {
@@ -99,25 +100,60 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
     }
 
     void finishOrder() {
-        LinkedList<BookOrder> books = new LinkedList<>();
-        books_order.forEach((String title, Integer amount) -> {
-            books.add(new BookOrder(title, amount, null, null));
-        });
-        Request req = Request.fromClientData("Joao", "email@gmail.com", "Rua1", books);
+        ClientPopup popup = this.client_gui.getPopup();
+        popup.clearAllErrors();
+        if (detailsValid(popup.getInputName(), popup.getInputAddr(), popup.getInputEmail())) {
+            LinkedList<BookOrder> books = new LinkedList<>();
+            String name = popup.getInputName(), email = popup.getInputEmail(),
+                addr = popup.getInputAddr();
+            books_order.forEach((String title, Integer amount) -> {
+                books.add(new BookOrder(title, amount, null, null));
+            });
+            Request req = Request.fromClientData(name, email, addr, books);
+            
+            try {
+                this.server_obj.putRequest(req);
+            } catch (Exception e) {
+                System.err.println("Failed to finish order!\n - " + e);
+            }
+            this.client_gui.clearOrder();
+            this.client_gui.getPopup().closeWindow();
+        }
+    }
+    
+    private boolean detailsValid(String name, String addr, String email) {
+        boolean valid = true;
+        ClientPopup popup = this.client_gui.getPopup();
+        if (name.trim().length() < 3) {
+            popup.setNameError("Name field must have at least 3 characters!");
+            valid = false;
+        } 
+        if (addr.trim().length() < 10) {
+            popup.setAddrError("Address field must have at least 10 characters!");
+            valid = false;
+        }
+
+        boolean valid_email = true;
         try {
-            System.out.println("Submitting order to server_obj");
-            this.server_obj.putRequest(req);
-            System.out.println("Submitted order to server_obj");
+            InternetAddress email_addr = new InternetAddress(email);
+            email_addr.validate();
         }
-        catch (Exception e) {
-            System.err.println("Failed to finish order!\n - " + e);
+        catch (Exception err) {
+            valid_email = false;
         }
-        this.client_gui.clearOrder();
-        this.client_gui.hidePopup();
+        if (!valid_email) {
+            popup.setEmailError("Provided email is not valid!");
+        }
+        return valid && valid_email;
     }
 
     void submitOrder() {
-        this.client_gui.showPopup();
+        if (this.books_order.size() > 0) {
+            this.client_gui.getPopup().show();
+        }
+        else {
+            this.client_gui.setErrorMessage("At least one book must be added!");
+        }
     }
 
     void resetOrder() {
@@ -125,11 +161,6 @@ public class BookstoreClient extends BaseRMI implements ClientInterface {
     }
 
     void resetDetails() {
-        System.out.println("Resetting details!");
-    }
-
-    @Override
-    public void receiveBook(Book new_book) throws RemoteException {
-
+        this.client_gui.getPopup().resetDetails();
     }
 }

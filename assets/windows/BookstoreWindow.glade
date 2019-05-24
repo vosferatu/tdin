@@ -372,19 +372,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator">
-            <property name="name">W</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="hexpand">False</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">5</property>
-            <property name="width">9</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -417,7 +404,7 @@
             <property name="always_show_image">True</property>
           </object>
           <packing>
-            <property name="left_attach">1</property>
+            <property name="left_attach">0</property>
             <property name="top_attach">9</property>
           </packing>
         </child>
@@ -432,18 +419,22 @@
             <property name="always_show_image">True</property>
           </object>
           <packing>
-            <property name="left_attach">3</property>
+            <property name="left_attach">1</property>
             <property name="top_attach">9</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
+          <object class="GtkLabel" id="ErrorLabel">
+            <property name="width_request">250</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">3</property>
+            <property name="top_attach">9</property>
+            <property name="width">4</property>
+          </packing>
         </child>
         <child>
           <placeholder/>

@@ -2,7 +2,6 @@ package bookstore.server;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,6 +76,17 @@ class Database {
         return requests;
     }
 
+    LinkedList<Request> getWaitingRequests() {
+        LinkedList<Request> reqs = new LinkedList<Request>();
+        for (Request req : requests) {
+            if (req.isWaiting()) {
+                reqs.add(req);
+            }
+        }
+
+        return reqs;
+    }
+
     LinkedList<Book> getAllBooks() {
         System.out.println("Getting all store books");
         LinkedList<Book> books = new LinkedList<>();
@@ -85,6 +95,15 @@ class Database {
         }
 
         return books;
+    }
+
+    void bookDispatched(String title, LinkedList<Long> req_uuid) {
+        this.book_stock.compute(title, (String t, Integer a) -> (a == null ? 0 : a) + 10);
+        for (Request req : this.requests) {
+            if (req_uuid.contains(req.getID())) {
+                req.bookDispatched(title);
+            }
+        }
     }
 
     /**

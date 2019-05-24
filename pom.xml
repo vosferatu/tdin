@@ -49,6 +49,21 @@
         <scope>provided</scope>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/com.sun.mail/javax.mail -->
+    <dependency>
+        <groupId>com.sun.mail</groupId>
+        <artifactId>javax.mail</artifactId>
+        <version>1.6.2</version>
+    </dependency>
+
+
+    <!-- https://mvnrepository.com/artifact/javax.mail/javax.mail-api -->
+    <dependency>
+        <groupId>javax.mail</groupId>
+        <artifactId>javax.mail-api</artifactId>
+        <version>1.6.2</version>
+    </dependency>
+
     <dependency>
       <groupId>com.test.directoryhelper</groupId>
       <artifactId>DirectoryHelper</artifactId>
@@ -88,25 +103,22 @@
             <version>1.6.0</version>
             <executions>
                 <execution>
-                    <id>WarehouseServer</id>
-                    <goals>
-                        <goal>java</goal>
-                    </goals>
-                    <configuration>
-                        <mainClass>bookstore.server.Server</mainClass>
-                        <classpathScope>compile</classpathScope>
-                        <arguments>
-                            <argument>Warehouse</argument>
-                        </arguments>
-                    </configuration>
-                </execution>
-                <execution>
                     <id>BookstoreClient</id>
                     <goals>
                         <goal>java</goal>
                     </goals>
                     <configuration>
-                        <mainClass>bookstore.store.controller.BookstoreClient</mainClass>
+                        <mainClass>bookstore.store.controller.BookstoreController</mainClass>
+                        <classpathScope>compile</classpathScope> 
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>WarehouseClient</id>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>bookstore.warehouse.controller.WarehouseController</mainClass>
                         <classpathScope>compile</classpathScope> 
                     </configuration>
                 </execution>
@@ -124,13 +136,16 @@
                     </configuration>
                 </execution>
                 <execution>
-                    <id>test</id>
+                    <id>WarehouseServer</id>
                     <goals>
                         <goal>java</goal>
                     </goals>
                     <configuration>
-                        <mainClass>bookstore.commons.BaseQueue</mainClass>
-                        <classpathScope>compile</classpathScope> 
+                        <mainClass>bookstore.server.Server</mainClass>
+                        <classpathScope>compile</classpathScope>
+                        <arguments>
+                            <argument>Warehouse</argument>
+                        </arguments>
                     </configuration>
                 </execution>
             </executions>    

@@ -88,7 +88,7 @@ public class BaseQueue {
 
     public boolean registerCallbacks(DeliverCallback deliver, CancelCallback cancel) {
         try {
-            this.channel.basicConsume(this.QUEUE_NAME, deliver, cancel);
+            this.channel.basicConsume(this.QUEUE_NAME, true, deliver, cancel);
             return true;
         }
         catch (Exception e) {

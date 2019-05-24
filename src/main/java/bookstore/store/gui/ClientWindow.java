@@ -6,11 +6,13 @@ import org.gnome.gtk.Gtk;
 import org.gnome.gtk.Grid;
 import org.gnome.gdk.Event;
 import org.gnome.gtk.Label;
+import org.gnome.gtk.StateFlags;
 import org.gnome.gtk.Button;
 import org.gnome.gtk.Widget;
 import org.gnome.gtk.Window;
 import org.gnome.gtk.Builder;
 import org.gnome.gdk.EventButton;
+import org.gnome.gdk.RGBA;
 
 import bookstore.store.gui.BookEntry;
 import bookstore.server.responses.Book;
@@ -23,12 +25,15 @@ public class ClientWindow extends Thread {
     Grid book_list;
     Grid book_order;
     Label order_total;
+    Label error_label;
     Button reset_button;
     Button submit_button;
     AlterBookEvent add_handler;
     AlterBookEvent rem_handler;
     ClickedButton submit_handler;
     ClickedButton reset_handler;
+
+    private boolean error = false;
 
     @Override
     public void run() {
@@ -61,14 +66,14 @@ public class ClientWindow extends Thread {
             window.order_total = (Label)b.getObject("OrderTotalPrice");
             window.reset_button = (Button)b.getObject("ResetButton");
             window.submit_button = (Button)b.getObject("SubmitButton");
+            window.error_label = (Label)b.getObject("ErrorLabel");
             window.finishConnections();
+            return window;
         }
         catch (Exception e) {
             System.err.println(e);
             return null;
         }
-        
-        return window;
     }
 
     private void finishConnections() {
@@ -116,6 +121,9 @@ public class ClientWindow extends Thread {
             this.book_order.add(entry);
         }
         this.updateOrderTotal(price);
+        if (error) {
+            this.clearErrorMessage();
+        }
     }
 
     public void remBookUnit(String title, double price) {
@@ -131,14 +139,11 @@ public class ClientWindow extends Thread {
             this.book_order.remove(widget);
         }
         this.updateOrderTotal(0);
+        this.clearErrorMessage();
     }
 
-    public void showPopup() {
-        this.popup.show();
-    }
-
-    public void hidePopup() {
-        this.popup.closeWindow();
+    public ClientPopup getPopup() {
+        return this.popup;
     }
     
     private void updateOrderTotal(double inc) {
@@ -150,5 +155,17 @@ public class ClientWindow extends Thread {
         else {
             this.order_total.setLabel(String.format("%1$,.2f €", curr_money + inc));
         }
+    }
+
+    public void setErrorMessage(String err) {
+        this.error_label.setLabel(err);
+        this.error_label.overrideColor(StateFlags.NORMAL, RGBA.RED);
+        error = true;
+    }
+
+    public void clearErrorMessage() {
+        error = false;
+        this.error_label.setLabel("");
+        this.error_label.overrideColor(StateFlags.NORMAL, RGBA.BLACK);
     }
 }

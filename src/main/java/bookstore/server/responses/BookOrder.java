@@ -5,6 +5,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class BookOrder implements Serializable {
+    public static final String WAITING = "Waiting Expedition";
+    public static final String DISPATCHED = "Dispatched at";
+    public static final String DISPATCHING = "Dispatch should occur at";
     private static final long serialVersionUID = 7899496441518523626L;
     private String title;
     private int amount;
@@ -35,12 +38,15 @@ public class BookOrder implements Serializable {
     }
 
     public void setAwaitingState() {
-        this.state = "Waiting Expedition";
+        this.state = WAITING;
+    }
+
+    public boolean isWaiting() {
+        return this.state.equals(WAITING);
     }
 
     public void setDispatchedAt(boolean dispatched, int n_days) {
-        this.state = (dispatched ? "Dispatched at" : "Dispatch will occur at");
-        Date dt = new Date();
+        this.state = (dispatched ? DISPATCHED : DISPATCHING);
         Calendar c = Calendar.getInstance();
         c.add(Calendar.DATE, n_days);
         this.disp_date = c.getTime();

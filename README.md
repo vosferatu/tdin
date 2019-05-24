@@ -8,9 +8,14 @@
  - [Maven](http://maven.apache.org/)
  - [Java-Gnome](http://java-gnome.sourceforge.net/)
    - I have already compiled and put the files in the <i>lib</i> folder. I am unsure whether the files will work on other computers :/
+ - [RabbitMQ](https://www.rabbitmq.com/)
 
 
 ## Running
+
+Before starting any of the servers you need to start the rabbitmq service with
+
+    sudo rabbitmq-server
 
 ### Bookstore Server
 Bookstore server is the server that should always be running, it should always be started first and is where the database will be accessed. 
