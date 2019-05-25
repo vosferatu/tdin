@@ -28,19 +28,22 @@ public class ClientController extends HttpServlet {
     private static class Client {
         private final String username;
         private final String email;
+        private final String addr;
 
-        private Client(String user, String email) {
+        private Client(String user, String email, String address) {
             this.username = user;
             this.email = email;
+            this.addr = address;
         }
 
         public static Client fromReqAttributes(HttpServletRequest req) {
-            return new Client(req.getParameter("username"), req.getParameter("email"));
+            return new Client(req.getParameter("username"), req.getParameter("email"), req.getParameter("address"));
         }
 
         public void setAsReqAttributes(HttpServletRequest req) {
             req.setAttribute("username", this.username);
             req.setAttribute("email", this.email);
+            req.setAttribute("address", this.addr);
         }
 
         public List<String> validate() {
@@ -80,26 +83,13 @@ public class ClientController extends HttpServlet {
             url = "/";
         }
         else {
-            req.setAttribute("requested_books", this.getUserBooks(req.getParameter("username")));
+            String username = req.getParameter("username");
+            LinkedList<Request> requests = this.server_obj.getUserRequests(username);
+            req.setAttribute("requests", requests);
             req.setAttribute("all_books", this.getAllBooks());
         }
 
         req.getRequestDispatcher(url).forward(req, res);
-    }
-
-    private List<BookOrder> getUserBooks(String username) {
-        try {
-            LinkedList<Request> reqs = this.server_obj.getUserRequests(username);
-            LinkedList<BookOrder> books = new LinkedList<>();
-            for (Request req : reqs) {
-                books.addAll(req.getRequestBooks());
-            }
-            return books;
-        } catch (Exception e) {
-            System.err.println("Error!\n - " + e);
-        }
-
-        return null;
     }
 
     private LinkedList<Book> getAllBooks() {

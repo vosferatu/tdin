@@ -17,6 +17,11 @@ Before starting any of the servers you need to start the rabbitmq service with
 
     sudo rabbitmq-server
 
+### Bookstore Printer
+Printer should be the first program to be started since Bookstore Server will try to connect to it. Bookstore Server will still work if it cannot connect, but it only tries to connect at startup. Run with command:
+
+    mvn exec:java@Printer
+
 ### Bookstore Server
 Bookstore server is the server that should always be running, it should always be started first and is where the database will be accessed. 
 Start it by running:
@@ -24,14 +29,24 @@ Start it by running:
     mvn exec:java@BookstoreServer
 
 ### Bookstore Client
-Only first draft is made. Still need to add more rules to the other GUI, however the basis is also here.
 In the root of the project run:
 
     mvn exec:java@BookstoreClient
 
-### WebApp
+### Warehouse Server
+Warehouse server should not need to be running to accept orders from Bookstore Server
+Start it by running:
 
-Currently the webapp is still very undeveloped and needs further work. However the basis is there.
+    mvn exec:java@WarehouseServer
+
+### Warehouse Client
+In the root of the project run:
+
+    mvn exec:java@WarehouseClient
+
+### WebApp
+Webapp is probably the most unsafe web application I have ever seen, but give me a break!
+
 In the root of the project run:
 
     mvn tomcat7:run
@@ -40,3 +55,7 @@ To start hosting a local webapp service. Then access webapp at:
    
     localhost:8000/bookstore
 
+## Possible Improvements
+
+ - Make Servers communicate directly with GUI when new information arrives through RMI.
+   - This will probably cause some race conditions so it will be left for the latest stage of the project since it is not absolutely necessary.

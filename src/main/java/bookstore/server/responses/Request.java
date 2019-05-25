@@ -71,6 +71,10 @@ public class Request implements Serializable {
         return this.email;
     }
 
+    public long getID() {
+        return this.uuid;
+    }
+
     public String toEmailString() {
         double total_price = 0.0;
         String email = "Dear Mr. or Mrs. " + this.client_name + "\n\n";
@@ -160,10 +164,6 @@ public class Request implements Serializable {
             }
         }
         return false;
-    }
-
-    public long getID() {
-        return this.uuid;
     }
 
     @Override

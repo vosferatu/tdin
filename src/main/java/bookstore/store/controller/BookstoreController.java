@@ -125,19 +125,13 @@ public class BookstoreController extends BaseRMI {
         String name = this.details_window.getInputName(), email = this.details_window.getInputEmail(),
             addr = this.details_window.getInputAddr();
         if (detailsValid(name, addr, email)) {
-            LinkedList<BookOrder> books = new LinkedList<>();
-            order.forEach((String title, Integer amount) -> {
-                Book book = this.books.get(title);
-                books.add(new BookOrder(book, amount, null, null));
-            });
-
-            Request req = Request.fromClientData(name, email, addr, books);
             try {
-                this.server_obj.putRequest(req);
+                this.server_obj.putRequest(name, email, addr, order);
             } catch (Exception e) {
                 System.err.println("Failed to finish order!\n - " + e.getMessage());
                 e.printStackTrace();
             }
+            this.order.clear();
             this.creator_window.clearOrder();
             this.details_window.getWindow().hide();
         }

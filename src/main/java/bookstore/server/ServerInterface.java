@@ -13,7 +13,7 @@ public interface ServerInterface extends Remote {
     //Bookstore functions
     LinkedList<Request> getUserRequests(String username) throws RemoteException;
     LinkedList<Book> getAllBooks() throws RemoteException;
-    void putRequest(Request new_request) throws RemoteException;
+    void putRequest(String name, String addr, String email, HashMap<String, Integer> books) throws RemoteException;
     LinkedList<BookRequests> getArrivedBooks() throws RemoteException;
     void booksStored(LinkedList<BookRequests> books) throws RemoteException;
     

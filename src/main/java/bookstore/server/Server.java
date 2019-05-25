@@ -5,6 +5,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.Delivery;
@@ -12,6 +13,7 @@ import com.rabbitmq.client.Delivery;
 import bookstore.commons.BaseRMI;
 import bookstore.commons.BaseQueue;
 import bookstore.server.responses.Book;
+import bookstore.server.responses.BookOrder;
 import bookstore.server.responses.BookRequests;
 import bookstore.server.responses.Request;
 import bookstore.store.PrinterInterface;
@@ -69,13 +71,12 @@ public class Server extends BaseRMI implements ServerInterface {
     }
 
     @Override
-    public void putRequest(Request new_request) throws RemoteException {
-        new_request.assignID();
+    public void putRequest(String name, String addr, String email, HashMap<String, Integer> books) throws RemoteException {
+        Request new_request = this.createRequest(name, addr, email, books);
         printer.printRequest(new_request);
         HashMap<String, Request> orders = this.db.putRequest(new_request);
         Request unfinished_req = orders.get("unfinished"), finished_req = orders.get("finished");
         if (unfinished_req.getRequestBooks().size() > 0) {
-            System.out.println("Sending request to warehouse");
             this.queue.sendObject(unfinished_req);
         }
         if (finished_req.hasBooks()) { // Only send email if a request can be satisfied
@@ -83,6 +84,19 @@ public class Server extends BaseRMI implements ServerInterface {
             long id = new_request.getID();
             EmailDispatcher.sendEmail(to, "Order #" + id + " will be dispatched", finished_req.toEmailString());
         }
+    }
+
+    private Request createRequest(String name, String addr, String email, HashMap<String, Integer> books_amount) {
+        LinkedList<BookOrder> books_order = new LinkedList<>();
+        Map<String, Book> books = this.db.getBooks();
+
+        books_amount.forEach((String title, Integer amount) -> {
+            Book book = books.get(title);
+            books_order.add(new BookOrder(book, amount, null, null));
+        });
+        Request req = Request.fromClientData(name, email, addr, books_order);
+        req.assignID();
+        return req;
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -99,6 +100,10 @@ class Database {
         }
 
         return books;
+    }
+
+    Map<String, Book> getBooks() {
+        return this.books;
     }
 
     /**
