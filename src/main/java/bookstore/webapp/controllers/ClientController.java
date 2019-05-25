@@ -6,7 +6,6 @@ import bookstore.commons.BaseRMI;
 import bookstore.server.responses.Book;
 import bookstore.server.ServerInterface;
 import bookstore.server.responses.Request;
-import bookstore.server.responses.BookOrder;
 
 import java.io.IOException;
 import java.util.ArrayList;

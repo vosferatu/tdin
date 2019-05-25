@@ -92,8 +92,8 @@ public class WarehouseController extends BaseRMI {
                         amount += req.getBookAmount(title);
                     }
                 }
-                this.server_obj.bookDispatched(title, amount, req_uuids);
             }
+            this.server_obj.bookDispatched(title, amount, req_uuids);
             this.bookstore_obj.bookDispatched(title, amount, req_uuids);
             this.window.clearOrder(title);
         }
@@ -111,11 +111,8 @@ public class WarehouseController extends BaseRMI {
                     req_uuids.add(req.getID());
                 }
                 books_amount = this.mergeRequests(this.reqs);
-                this.server_obj.allBooksDispatched(books_amount, req_uuids);
             }
-            books_amount.forEach((String title, Integer amount) -> {
-                books_amount.compute(title, (String t, Integer a) -> a + 10); 
-            });
+            this.server_obj.allBooksDispatched(books_amount, req_uuids);
             this.bookstore_obj.allBooksDispatched(books_amount, req_uuids);
             this.window.clearOrders();
         }

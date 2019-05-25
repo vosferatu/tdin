@@ -129,6 +129,7 @@ public class Server extends BaseRMI implements ServerInterface {
         System.out.println("Got a new request!");
         Request req = (Request)this.queue.objFromBytes(msg.getBody());
         this.db.putRequest(req);
+        //TODO: Warn Warehouse client GUI it got new request!
     }
 
     void cancelCallback(String consumer_tag) {
@@ -159,7 +160,7 @@ public class Server extends BaseRMI implements ServerInterface {
     }
 
     private void warnClientGUI() {
-        // TODO: Warn client that book has been dispatched
+        //TODO: Warn Bookstore client GUI that there are arriving books
         System.out.println("There are arriving books!");
     }
     

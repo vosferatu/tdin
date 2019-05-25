@@ -14,10 +14,13 @@ import bookstore.server.responses.BookRequests;
 import bookstore.server.responses.Request;
 
 class Database {
+    //Used in both servers
     private ConcurrentHashMap<String, Book> books;
+    //Used only in bookstore server
     private ConcurrentHashMap<String, Integer> book_stock;
+    // Used only in bookstore server
     private ConcurrentHashMap<String, LinkedList<Long>> arrived_books;
-
+    //USed in both servers
     private LinkedList<Request> requests;
 
 

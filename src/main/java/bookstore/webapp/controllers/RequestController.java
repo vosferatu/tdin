@@ -4,16 +4,13 @@ import javax.servlet.http.*;
 
 import bookstore.commons.BaseRMI;
 import bookstore.server.ServerInterface;
-import bookstore.server.responses.Request;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
@@ -34,7 +31,6 @@ public class RequestController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        HashMap<String, Integer> book_amounts = new HashMap<>();
         JsonReader json_reader = Json.createReader(new ByteArrayInputStream(req.getParameter("books").getBytes()));
         HashMap<String, Integer> books = jsonToMap(json_reader.readObject());
         String name = req.getParameter("username"), email = req.getParameter("email"), addr = req.getParameter("address");

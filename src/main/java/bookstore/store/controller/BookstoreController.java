@@ -12,9 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import bookstore.commons.BaseRMI;
 import bookstore.server.responses.Book;
-import bookstore.server.responses.BookOrder;
 import bookstore.server.responses.BookRequests;
-import bookstore.server.responses.Request;
 import bookstore.server.ServerInterface;
 import bookstore.store.gui.ArrivingBooksWindow;
 import bookstore.store.gui.ClientDetailsPopup;
