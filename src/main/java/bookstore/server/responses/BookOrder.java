@@ -76,6 +76,11 @@ public class BookOrder implements Serializable {
     public String toPrinterString() {
         int a = this.amount;
         return "" + a + (a > 1 ? " copies" : " copy") + " of '" + this.book.getTitle() + "' ("
-            + String.format("%1$,.2f€", this.book.getPrice()) + " each)\n"; 
+            + String.format("%1$.2f€", this.book.getPrice()) + " each)\n"; 
+    }
+
+    @Override
+    public String toString() {
+        return String.format("BookOrder: title: '%s', amount: %d, state: %s\n", this.book.getTitle(), this.amount, this.state);
     }
 }

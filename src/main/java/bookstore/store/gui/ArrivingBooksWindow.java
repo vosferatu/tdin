@@ -33,11 +33,20 @@ public class ArrivingBooksWindow extends GenericWindow {
         }
     }
 
+    private void reloadFromFile() {
+        this.reloadFromFile(true);
+        this.arrived_list = (Grid)this.builder.getObject("ArrivingBooksList");
+    }
+
     public Widget[] getWindowChildren() {
         return this.window.getChildren();
     }
 
     public void setArrivingBooks(HashMap<String, Integer> books) {
+        if (this.arrived_list == null) {
+            this.reloadFromFile();
+        }
+        this.removeAllBooks();
         books.forEach((String title, Integer amount) -> {
             BookEntry entry = new BookEntry(title, amount, this.arrived_handler);
             this.arrived_list.attach(entry, 0, this.arrived_list.getChildren().length, 1, 1);

@@ -17,15 +17,9 @@ import bookstore.server.responses.BookOrder;
 import bookstore.server.responses.BookRequests;
 import bookstore.server.responses.Request;
 import bookstore.store.PrinterInterface;
+import bookstore.store.controller.BookstoreInterface;
 
 public class Server extends BaseRMI implements ServerInterface {
-    private static final String PR_OBJ_NAME="BookstorePrinter";
-    private static final int PR_OBJ_PORT = 8001;
-    private static final String BS_OBJ_NAME="BookstoreServer";
-    private static final int    BS_OBJ_PORT=8005;
-    private static final String WH_OBJ_NAME="WarehouseServer";
-    private static final int    WH_OBJ_PORT=8007;
-
     private boolean is_bookstore;
     private BaseQueue queue;
     private Database db;
@@ -33,24 +27,24 @@ public class Server extends BaseRMI implements ServerInterface {
 
     public static void main(String[] args) {
         if (args.length == 1) {
+            ServerInterface stub = null;
             try {
                 boolean is_bookstore = args[0].equals("Bookstore");
                 Server server = new Server(is_bookstore);
-                ServerInterface stub;
                 if (is_bookstore) {
-                    stub = (ServerInterface)registerObject((Remote) server, BS_OBJ_NAME, BS_OBJ_PORT);
-                    server.printer = (PrinterInterface)fetchObject(PR_OBJ_NAME, PR_OBJ_PORT);
+                    stub = (ServerInterface)registerObject((Remote) server, BS_SERVER_OBJ_NAME, BS_SERVER_OBJ_PORT);
+                    server.printer = (PrinterInterface)fetchObject(PRINTER_OBJ_NAME, PRINTER_OBJ_PORT);
                 }
                 else
-                    stub = (ServerInterface)registerObject((Remote) server, WH_OBJ_NAME, WH_OBJ_PORT);
+                    stub = (ServerInterface)registerObject((Remote) server, WH_SERVER_OBJ_NAME, WH_SERVER_OBJ_PORT);
 
-                if (stub != null) {
-                    System.out.println(args[0] + " server is up!");
-                    System.in.read();
-                }
             } catch (Exception e) {
                 System.err.println("Bookstore server exception:");
                 e.printStackTrace();
+            }
+            if (stub != null) {
+                System.out.println(args[0] + " server is up!");
+                try {System.in.read();} catch (Exception e) {}
             }
         }
     }
@@ -73,7 +67,9 @@ public class Server extends BaseRMI implements ServerInterface {
     @Override
     public void putRequest(String name, String addr, String email, HashMap<String, Integer> books) throws RemoteException {
         Request new_request = this.createRequest(name, addr, email, books);
-        printer.printRequest(new_request);
+        if (this.printer != null) {
+            printer.printRequest(new_request);
+        }
         HashMap<String, Request> orders = this.db.putRequest(new_request);
         Request unfinished_req = orders.get("unfinished"), finished_req = orders.get("finished");
         if (unfinished_req.getRequestBooks().size() > 0) {
@@ -149,9 +145,7 @@ public class Server extends BaseRMI implements ServerInterface {
     public void allBooksDispatched(HashMap<String, Integer> book_amount, LinkedList<Long> req_uuids)
             throws RemoteException 
     {
-        System.out.println("All requested books will be dispatched");
         book_amount.forEach((String title, Integer amount) -> {
-            System.out.println("    Book " + title);
             this.db.bookDispatched(title, req_uuids);
         });
         if (this.is_bookstore) {
@@ -160,8 +154,15 @@ public class Server extends BaseRMI implements ServerInterface {
     }
 
     private void warnClientGUI() {
-        //TODO: Warn Bookstore client GUI that there are arriving books
-        System.out.println("There are arriving books!");
+        try {
+            BookstoreInterface gui_obj = (BookstoreInterface)fetchObject(BS_CLIENT_OBJ_NAME, BS_CLIENT_OBJ_PORT);
+            gui_obj.booksArriving();
+            System.out.println("GUI warned!");
+        }
+        catch (Exception e) {
+            System.err.println("Failed to warn Bookstore client GUI of arriving books!\n - " + e);
+            e.printStackTrace();
+        }
     }
     
     @Override

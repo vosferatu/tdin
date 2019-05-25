@@ -31,6 +31,16 @@ public class Request implements Serializable {
         return req;
     }
 
+    public static Request fromOtherRequest(Request req, LinkedList<BookOrder> books) {
+        Request new_req = new Request();
+        new_req.client_name = req.client_name;
+        new_req.address = req.address;
+        new_req.email = req.email;
+        new_req.uuid = req.uuid;
+        new_req.books = books;
+        return new_req;
+    }
+
     public void assignID() {
         this.uuid = ID;
         ID+=1;
@@ -83,9 +93,9 @@ public class Request implements Serializable {
             int amount = book.getAmount();
             total_price += amount * book.getPrice();
             email += "  - " + amount + (amount > 1 ? " copies" : " copy") + 
-                " of " + book.getTitle() + " (" + String.format("%1$,.2f", book.getPrice()) + "€ each)\n";
+                " of " + book.getTitle() + " (" + String.format("%1$.2f", book.getPrice()) + "€ each)\n";
         }
-        email += "\n  -> Total Price = " + String.format("%1$,.2f", total_price) + "€\n";
+        email += "\n  -> Total Price = " + String.format("%1$.2f", total_price) + "€\n";
         email += "\n" + "They will all be dispatched at " + this.books.getFirst().getDisp_date().toString() + "\n\n";
         email += "Best Regards,\n João Almeida\n João Mendes";
 
@@ -104,7 +114,7 @@ public class Request implements Serializable {
             txt += "  -> " + order.toPrinterString();
             total_price += order.getPrice() * order.getAmount();
         }
-        txt += String.format("\n -> Total Price = %1$,.2f€\n--- END ---", total_price); 
+        txt += String.format("\n -> Total Price = %1$.2f€\n--- END ---", total_price); 
         return txt;
     }
 
@@ -150,7 +160,7 @@ public class Request implements Serializable {
 
     public boolean hasDispatchingBook(String title) {
         for (BookOrder order : this.books) {
-            if (order.isDispatching()) {
+            if (order.getTitle().equals(title) && order.isDispatching()) {
                 return true;
             }
         }
@@ -159,7 +169,7 @@ public class Request implements Serializable {
 
     public boolean hasDispatchedBook(String title) {
         for (BookOrder order : this.books) {
-            if (order.isDispatched()) {
+            if (order.getTitle().equals(title) && order.isDispatched()) {
                 return true;
             }
         }
@@ -173,5 +183,10 @@ public class Request implements Serializable {
             return this.uuid == req.uuid;
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("RequestObj: ID %d, Books = " + this.books.toString(), this.uuid);
     }
 }

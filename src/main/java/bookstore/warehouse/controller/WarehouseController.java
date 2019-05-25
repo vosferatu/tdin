@@ -12,11 +12,6 @@ import bookstore.server.responses.Request;
 import bookstore.warehouse.gui.WarehouseWindow;
 
 public class WarehouseController extends BaseRMI {
-    private static final String SERVER_NAME = "WarehouseServer";
-    private static final int    SERVER_PORT = 8007;
-    private static final String BOOKSTORE_NAME = "BookstoreServer";
-    private static final int    BOOKSTORE_PORT = 8005;
-
     private ServerInterface server_obj;
     private ServerInterface bookstore_obj;
     private WarehouseWindow window;
@@ -26,8 +21,8 @@ public class WarehouseController extends BaseRMI {
     public static void main(String[] args) {
         System.out.println("Starting Warehouse client...");
         try {
-            ServerInterface server = (ServerInterface)fetchObject(SERVER_NAME, SERVER_PORT);
-            ServerInterface bookstore_obj = (ServerInterface)fetchObject(BOOKSTORE_NAME, BOOKSTORE_PORT);
+            ServerInterface server = (ServerInterface)fetchObject(WH_SERVER_OBJ_NAME, WH_SERVER_OBJ_PORT);
+            ServerInterface bookstore_obj = (ServerInterface)fetchObject(BS_SERVER_OBJ_NAME, BS_SERVER_OBJ_PORT);
             Gtk.init(new String[] {});
             WarehouseController obj = new WarehouseController(server, bookstore_obj);
             System.out.println("Started Bookstore client!");
@@ -89,6 +84,7 @@ public class WarehouseController extends BaseRMI {
                 for (Request req : this.reqs) {
                     if (req.hasWaitingBook(title)) {
                         req_uuids.add(req.getID());
+                        req.setBookDispatched(title);
                         amount += req.getBookAmount(title);
                     }
                 }
@@ -111,6 +107,7 @@ public class WarehouseController extends BaseRMI {
                     req_uuids.add(req.getID());
                 }
                 books_amount = this.mergeRequests(this.reqs);
+                this.reqs.clear();
             }
             this.server_obj.allBooksDispatched(books_amount, req_uuids);
             this.bookstore_obj.allBooksDispatched(books_amount, req_uuids);

@@ -10,23 +10,31 @@ import org.gnome.gdk.EventButton;
 import bookstore.commons.EventHandlers.ClickedButton;
 
 public abstract class GenericWindow {
+    protected String FILE_NAME;
+    protected String ROOT;
     protected Window window;
     protected Builder builder;
 
     protected GenericWindow(String file_name, String root, boolean top_level) {
+        this.FILE_NAME = file_name;
+        this.ROOT = root;
         this.builder = new Builder();
         try {
             this.builder.addFromFile(file_name);
-            this.window = (Window)this.builder.getObject(root);
-            if (top_level) {
-                this.window.connect((Window.DeleteEvent) (Widget arg0, Event arg1) -> {
-                    Gtk.mainQuit();
-                    return false;
-                });
-            }
+            this.reloadFromFile(top_level);
         }
         catch (Exception e) {
             System.err.println("Failed to read '" + file_name + "' file!\n - " + e);
+        }
+    }
+
+    protected void reloadFromFile(boolean top_level) {
+        this.window = (Window)this.builder.getObject(ROOT);
+        if (top_level) {
+            this.window.connect((Window.DeleteEvent) (Widget arg0, Event arg1) -> {
+                Gtk.mainQuit();
+                return false;
+            });
         }
     }
 

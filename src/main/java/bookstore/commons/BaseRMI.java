@@ -7,6 +7,16 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class BaseRMI {
+    protected static final String PRINTER_OBJ_NAME = "BookstorePrinter";
+    protected static final int PRINTER_OBJ_PORT = 8001;
+    protected static final String BS_SERVER_OBJ_NAME = "BookstoreServer";
+    protected static final int BS_SERVER_OBJ_PORT = 8005;
+    protected static final String BS_CLIENT_OBJ_NAME = "BookstoreClient";
+    protected static final int BS_CLIENT_OBJ_PORT = 8006;
+    protected static final String WH_SERVER_OBJ_NAME = "WarehouseServer";
+    protected static final int WH_SERVER_OBJ_PORT = 8007;
+    protected static final String WH_CLIENT_OBJ_NAME = "WarehouseClient";
+    protected static final int WH_CLIENT_OBJ_PORT = 8008;
     private static final int DEFAULT_PORT = 1099;
 
     /**

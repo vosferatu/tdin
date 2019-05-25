@@ -26,4 +26,9 @@ public class BookRequests implements Serializable {
     public LinkedList<Long> getReqsID() {
         return this.reqs;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Title = %s, Amount = %d, IDS=" + reqs.toString(), this.title, this.amount);
+    }
 }

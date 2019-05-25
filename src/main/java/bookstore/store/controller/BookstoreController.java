@@ -1,5 +1,7 @@
 package bookstore.store.controller;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import javax.mail.internet.InternetAddress;
@@ -18,10 +20,11 @@ import bookstore.store.gui.ArrivingBooksWindow;
 import bookstore.store.gui.ClientDetailsPopup;
 import bookstore.store.gui.OrderCreatorWindow;
 
-public class BookstoreController extends BaseRMI {
-    private static final String SERVER_NAME = "BookstoreServer";
-    private static final int SERVER_PORT = 8005;
+public class BookstoreController extends BaseRMI implements BookstoreInterface {
     private ServerInterface server_obj;
+
+    private boolean on_creator = true;
+    private Boolean refreshing = new Boolean(false); //Value irrelevant, only want the mutex ability
 
     private Window window;
     private Widget[] prev_window;
@@ -37,10 +40,11 @@ public class BookstoreController extends BaseRMI {
     public static void main(String[] args) {
         System.out.println("Starting Bookstore client...");
         try {
-            ServerInterface server = (ServerInterface)fetchObject(SERVER_NAME, SERVER_PORT);
+            ServerInterface server = (ServerInterface) fetchObject(BS_SERVER_OBJ_NAME, BS_SERVER_OBJ_PORT);
             if (server != null) {
                 Gtk.init(new String[] {});
                 BookstoreController obj = new BookstoreController(server);
+                BookstoreInterface stub = (BookstoreInterface)registerObject((Remote)obj, BS_CLIENT_OBJ_NAME, BS_CLIENT_OBJ_PORT);
                 System.out.println("Started Bookstore client!");
                 obj.startClient();
             }
@@ -53,11 +57,10 @@ public class BookstoreController extends BaseRMI {
         this.server_obj = server;
         this.books = new ConcurrentHashMap<>();
         this.order = new HashMap<>();
+        this.book_requests = new LinkedList<>();
 
-        this.creator_window = OrderCreatorWindow.newWindow (
-            (String title) -> this.addBookToOrder(title),
-            (String title) -> this.remBookFromOrder(title)
-        );
+        this.creator_window = OrderCreatorWindow.newWindow((String title) -> this.addBookToOrder(title),
+                (String title) -> this.remBookFromOrder(title));
         this.window = this.creator_window.getWindow();
         this.creator_window.connectHandler("SubmitButton", () -> this.submitOrder());
         this.creator_window.connectHandler("ArrivedButton", () -> this.switchToArriving());
@@ -85,22 +88,20 @@ public class BookstoreController extends BaseRMI {
                 this.books.put(book.getTitle(), book);
             }
             this.creator_window.setAvailableBooks(this.server_obj.getAllBooks());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println("Error!\n - " + e.getMessage());
         }
     }
 
     void addBookToOrder(String title) {
         if (this.books.containsKey(title)) {
-            Integer new_amount = this.order.computeIfPresent(title, (String key, Integer value) -> value+1);
-            if (new_amount == null) { //Book Entry not present
+            Integer new_amount = this.order.computeIfPresent(title, (String key, Integer value) -> value + 1);
+            if (new_amount == null) { // Book Entry not present
                 this.order.put(title, 1);
             }
             Book book = this.books.get(title);
             this.creator_window.addBookUnit(book.getTitle(), book.getPrice());
-        }
-        else {
+        } else {
             System.err.println("Warning: No book named '" + title + "'");
         }
     }
@@ -121,7 +122,7 @@ public class BookstoreController extends BaseRMI {
     void finishOrder() {
         this.details_window.clearAllErrors();
         String name = this.details_window.getInputName(), email = this.details_window.getInputEmail(),
-            addr = this.details_window.getInputAddr();
+                addr = this.details_window.getInputAddr();
         if (detailsValid(name, addr, email)) {
             try {
                 this.server_obj.putRequest(name, email, addr, order);
@@ -134,7 +135,7 @@ public class BookstoreController extends BaseRMI {
             this.details_window.getWindow().hide();
         }
     }
-    
+
     void bookStored(String title) {
         BookRequests reqs = this.getBookRequests(title);
         if (reqs != null) {
@@ -144,12 +145,10 @@ public class BookstoreController extends BaseRMI {
                 this.server_obj.booksStored(book_reqs);
                 this.arriving_window.removeArrivingBook(title);
                 this.book_requests.remove(reqs);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 System.err.println("Failed to store book '" + title + "' in server!\n - " + e);
             }
-        }
-        else {
+        } else {
             System.err.println("No book '" + title + "' in book_requests :o");
         }
     }
@@ -159,8 +158,7 @@ public class BookstoreController extends BaseRMI {
             this.server_obj.booksStored(this.book_requests);
             this.arriving_window.removeAllBooks();
             this.book_requests.clear();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println("Failed to store all books in server!\n - " + e);
         }
     }
@@ -170,7 +168,7 @@ public class BookstoreController extends BaseRMI {
         if (name.trim().length() < 3) {
             this.details_window.setNameError("Name field must have at least 3 characters!");
             valid = false;
-        } 
+        }
         if (addr.trim().length() < 10) {
             this.details_window.setAddrError("Address field must have at least 10 characters!");
             valid = false;
@@ -180,8 +178,7 @@ public class BookstoreController extends BaseRMI {
         try {
             InternetAddress email_addr = new InternetAddress(email);
             email_addr.validate();
-        }
-        catch (Exception err) {
+        } catch (Exception err) {
             valid_email = false;
         }
         if (!valid_email) {
@@ -193,8 +190,7 @@ public class BookstoreController extends BaseRMI {
     void submitOrder() {
         if (this.order.size() > 0) {
             this.details_window.getWindow().showAll();
-        }
-        else {
+        } else {
             this.creator_window.setErrorMessage("At least one book must be added!");
         }
     }
@@ -208,13 +204,22 @@ public class BookstoreController extends BaseRMI {
     }
 
     void switchToNormalView() {
-        this.arriving_window.removeAllBooks();
-        for (Widget widget : this.window.getChildren()) {
-            this.window.remove(widget);
-            this.arriving_window.getWindow().add(widget);
+        synchronized (this.refreshing) {
+            this.arriving_window.removeAllBooks();
+            for (Widget widget : this.window.getChildren()) {
+                this.window.remove(widget);
+                this.arriving_window.getWindow().add(widget);
+            }
+            this.on_creator = true;
         }
-        for (Widget widget : this.prev_window)
-            this.window.add(widget);
+        try {
+            this.creator_window.setAvailableBooks(this.server_obj.getAllBooks());
+            for (Widget widget : this.prev_window)
+                this.window.add(widget);
+        }
+        catch (Exception e) {
+            System.err.println("Failed to fetch all books from server when switching to normal view!\n - " + e);
+        }
     }
 
     void switchToArriving() {
@@ -222,18 +227,15 @@ public class BookstoreController extends BaseRMI {
         for (Widget widget : this.window.getChildren()) {
             this.window.remove(widget);
         }
-        
-        try {
-            this.book_requests = this.server_obj.getArrivedBooks();
-            this.arriving_window.setArrivingBooks(this.toBookAmounts(book_requests));
+
+        synchronized (this.refreshing) {
+            this.refreshArrivingWindow();
+            this.creator_window.cancelAnimation();
             for (Widget widget : this.arriving_window.getWindow().getChildren()) {
                 this.arriving_window.getWindow().remove(widget);
                 this.window.add(widget);
             }
-        }
-        catch (Exception e) {
-            System.err.println("Failed to fetch arriving books from server!\n - " + e);
-            e.printStackTrace();
+            this.on_creator = false;
         }
     }
 
@@ -254,5 +256,47 @@ public class BookstoreController extends BaseRMI {
         }
 
         return null;
+    }
+
+    private void refreshArrivingWindow() {
+        try {
+            LinkedList<BookRequests> arrived = this.server_obj.getArrivedBooks();
+            synchronized (this.book_requests) {
+                synchronized (arrived) {
+                    this.book_requests = arrived;
+                    this.arriving_window.setArrivingBooks(this.toBookAmounts(arrived));
+                }
+            } 
+        }
+        catch (Exception e) {
+            System.err.println("Failed to fetch arriving books from server!\n - " + e);
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void booksArriving() throws RemoteException {
+        synchronized (this.refreshing) {
+            if (this.on_creator) {
+                this.refreshArrivingWindow();
+                this.creator_window.startAnimation();
+            }
+            else {
+                this.arriving_window.removeAllBooks();
+                for (Widget widget : this.window.getChildren()) {
+                    this.window.remove(widget);
+                    this.arriving_window.getWindow().add(widget);
+                }
+                this.refreshArrivingWindow();
+                Widget[] children = this.arriving_window.getWindow().getChildren();
+                System.out.println("Children len = " + children.length + ", childs = " + children.toString());
+                for (Widget widget : children) {
+                    System.out.println("Adding arriving widget!");
+                    this.arriving_window.getWindow().remove(widget);
+                    this.window.add(widget);
+                }
+                System.out.println("Finished adding widgets!");
+            }
+        }
     }
 }

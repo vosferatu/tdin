@@ -29,8 +29,8 @@ class Database {
     Database(boolean is_bookstore) {
         this.is_bookstore = is_bookstore;
         this.books = new ConcurrentHashMap<>();
-        this.readBooksFile();
         this.book_stock = new ConcurrentHashMap<>();
+        this.readBooksFile();
         this.arrived_books = new ConcurrentHashMap<>();
         if (this.is_bookstore) {
             this.readStockFile();
@@ -43,13 +43,15 @@ class Database {
             stream.forEach((String line) -> {
                 String[] parts = line.split(";");
                 if (parts.length == 2) {
-                    this.books.put(parts[0], new Book(parts[0], Double.parseDouble(parts[1])));
+                    this.books.put(parts[0], new Book(parts[0], Double.parseDouble(parts[1]), Integer.MIN_VALUE));
+                    this.book_stock.put(parts[0], 0);
                 }
                 else throw new RuntimeException("books.csv is malformed on line:\n " + line);
             });
         }
         catch (Exception e) {
             System.err.println("Failed to process books.csv!\n - " + e);
+            e.printStackTrace();
         }
     }
 
@@ -59,7 +61,7 @@ class Database {
                 String[] parts = line.split(";");
                 if (parts.length == 2) {
                     if (this.books.containsKey(parts[0])) {
-                        this.book_stock.put(parts[0], Integer.parseInt(parts[1]));
+                        this.book_stock.compute(parts[0], (String t, Integer a) -> Integer.parseInt(parts[1]));
                     }
                     else throw new RuntimeException("Book title '" + parts[0] + "' does not exist in books.csv!");
                     
@@ -99,7 +101,10 @@ class Database {
         System.out.println("Getting all store books");
         LinkedList<Book> books = new LinkedList<>();
         synchronized (this.books) {
-            this.books.forEach((String title, Book book) -> books.add(book));
+            this.books.forEach((String title, Book book) -> {
+                book.setStock(this.book_stock.get(title));
+                books.add(book);
+            });
         }
 
         return books;
@@ -115,33 +120,35 @@ class Database {
      * @param ids   ID's of the orders that had that book
      */
     void bookDispatched(String title, LinkedList<Long> ids) {
-        synchronized (this.requests) {
-            for (Request req : this.requests) {
-                if (req.hasWaitingBook(title) && ids.contains(req.getID())) {
-                    req.setBookDispatching(title);
+        synchronized (this.arrived_books) {
+            synchronized (this.requests) {
+                for (Request req : this.requests) {
+                    if (req.hasWaitingBook(title) && ids.contains(req.getID())) {
+                        req.setBookDispatching(title);
+                    }
                 }
             }
-        }
-
-        if (this.arrived_books.containsKey(title)) {
-            LinkedList<Long> req_uuids = this.arrived_books.get(title);
-            synchronized (req_uuids) {
-                for (Long id : ids) {
-                    if (!req_uuids.contains(id)) req_uuids.add(id);
+    
+            if (this.arrived_books.containsKey(title)) {
+                LinkedList<Long> req_uuids = this.arrived_books.get(title);
+                synchronized (req_uuids) {
+                    for (Long id : ids) {
+                        if (!req_uuids.contains(id)) req_uuids.add(id);
+                    }
                 }
             }
-        }
-        else {
-            this.arrived_books.put(title, ids);
+            else {
+                this.arrived_books.put(title, ids);
+            }
         }
     }
 
     LinkedList<BookRequests> getArrivedBooks() {
         LinkedList<BookRequests> books_requests = new LinkedList<>();
-        synchronized (this.requests) {
-            synchronized (this.arrived_books) {
+        synchronized (this.arrived_books) {
+            synchronized (this.requests) {
                 this.arrived_books.forEach((String title, LinkedList<Long> ids) -> {
-                    int amount = 0;
+                    int amount = 10;
                     synchronized (ids) {
                         for (Request req : this.requests) {
                             if (ids.contains(req.getID()) && req.hasDispatchingBook(title)) {
@@ -149,13 +156,12 @@ class Database {
                             }
                         }
                     }
-                    if (amount > 0) {
+                    if (amount > 10) {
                         books_requests.add(new BookRequests(title, amount, ids));
                     }
                 });
             }
         }
-
         return books_requests;
     }
 
@@ -164,10 +170,16 @@ class Database {
             String title = reqs.getTitle();
             LinkedList<Long> req_ids = reqs.getReqsID();
 
-            synchronized (this.requests) {
-                for (Request req : this.requests) {
-                    if (req_ids.contains(req.getID()) && req.hasDispatchingBook(title)) {
-                        req.setBookDispatched(title);
+            synchronized (this.arrived_books) {
+                synchronized (this.requests) {
+                    for (Request req : this.requests) {
+                        long req_id = req.getID();
+                        if (req_ids.contains(req_id) && req.hasDispatchingBook(title)) {
+                            req.setBookDispatched(title);
+                            if (this.arrived_books.containsKey(req_id)) {
+                                this.arrived_books.get(title).remove(req_id);
+                            }
+                        }
                     }
                 }
             }
@@ -192,7 +204,7 @@ class Database {
             for (BookOrder order : new_req.getRequestBooks()) {
                 String title = order.getTitle();
                 if (this.book_stock.containsKey(title) && this.book_stock.get(title) >= order.getAmount()) {
-                    order.setDispatchedAt(true, 1);
+                    order.setDispatchedAt(false, 1);
                     this.book_stock.computeIfPresent(title, 
                         (String book_title, Integer amount) -> amount - order.getAmount());                     
                     orders.get("finished").add(order);
@@ -203,7 +215,7 @@ class Database {
             }
         }
         synchronized (this.requests) { this.requests.add(new_req); }
-        return this.ordersToRequest(new_req.getClientName(), new_req.getAddress(), new_req.getEmail(), orders);
+        return this.ordersToRequest(new_req, orders);
     }
 
     public HashMap<String, Request> putRequest(Request new_req) {
@@ -218,12 +230,10 @@ class Database {
         }
     }
 
-    private HashMap<String, Request> ordersToRequest(String c_name, String c_email, String c_addr, 
-        HashMap<String, LinkedList<BookOrder>> orders) 
-    {
+    private HashMap<String, Request> ordersToRequest(Request new_req, HashMap<String, LinkedList<BookOrder>> orders) {
         HashMap<String, Request> requests = new HashMap<>(2);
-        requests.put("finished", Request.fromClientData(c_name, c_email, c_addr, orders.get("finished")));
-        requests.put("unfinished", Request.fromClientData(c_name, c_email, c_addr, orders.get("unfinished")));
+        requests.put("finished", Request.fromOtherRequest(new_req, orders.get("finished")));
+        requests.put("unfinished", Request.fromOtherRequest(new_req, orders.get("unfinished")));
     
         return requests;
     }
