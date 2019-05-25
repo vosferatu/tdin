@@ -15,7 +15,6 @@ public class ArrivingBooksWindow extends GenericWindow {
 
     Grid arrived_list;
     AlterBookEvent arrived_handler;
-    HashMap<String, Integer> books;
 
     private ArrivingBooksWindow(AlterBookEvent arrived_handler) {
         super(FILE_NAME, ROOT);
@@ -39,7 +38,6 @@ public class ArrivingBooksWindow extends GenericWindow {
     }
 
     public void setArrivingBooks(HashMap<String, Integer> books) {
-        this.books = books;
         books.forEach((String title, Integer amount) -> {
             BookEntry entry = new BookEntry(title, amount, this.arrived_handler);
             this.arrived_list.attach(entry, 0, this.arrived_list.getChildren().length, 1, 1);
@@ -59,9 +57,5 @@ public class ArrivingBooksWindow extends GenericWindow {
         for (Widget widget : this.arrived_list.getChildren()) {
             this.arrived_list.remove(widget);
         }
-    }
-
-    public HashMap<String, Integer> getAllBooks() {
-        return this.books;
     }
 }

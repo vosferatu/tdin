@@ -1,25 +1,18 @@
 package bookstore.warehouse.gui;
 
-import org.gnome.gtk.Gtk;
 import org.gnome.gtk.Grid;
 
 import java.util.HashMap;
 
-import org.gnome.gdk.Event;
 import org.gnome.gtk.Widget;
-import org.gnome.gtk.Button;
-import org.gnome.gtk.Window;
-import org.gnome.gtk.Builder;
-import org.gnome.gdk.EventButton;
 
-import bookstore.commons.EventHandlers.ClickedButton;
 import bookstore.commons.GenericWindow;
 import bookstore.commons.EventHandlers.AlterBookEvent;
 
 public class WarehouseWindow extends GenericWindow {
     private static final String FILE_NAME = "assets/windows/WarehouseWindow.glade";
     private static final String ROOT = "root";
-    
+
     private Grid order_list;
 
     private AlterBookEvent send_handler;

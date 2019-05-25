@@ -5,7 +5,6 @@ import org.gnome.gtk.Label;
 import org.gnome.gtk.IconSize;
 import org.freedesktop.icons.ActionIcon;
 import org.freedesktop.icons.DeviceIcon;
-import org.freedesktop.icons.Helper;
 
 import bookstore.commons.ImageButton;
 import bookstore.commons.EventHandlers.AlterBookEvent;

@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import bookstore.server.responses.Book;
 import bookstore.server.responses.BookOrder;
+import bookstore.server.responses.BookRequests;
 import bookstore.server.responses.Request;
 
 class Database {
@@ -100,7 +101,20 @@ class Database {
         return books;
     }
 
+    /**
+     * Function called by the warehouse client to both the warehouse server and bookstore server
+     * @param title Title of book dispatched
+     * @param ids   ID's of the orders that had that book
+     */
     void bookDispatched(String title, LinkedList<Long> ids) {
+        synchronized (this.requests) {
+            for (Request req : this.requests) {
+                if (req.hasWaitingBook(title) && ids.contains(req.getID())) {
+                    req.setBookDispatching(title);
+                }
+            }
+        }
+
         if (this.arrived_books.containsKey(title)) {
             LinkedList<Long> req_uuids = this.arrived_books.get(title);
             synchronized (req_uuids) {
@@ -114,29 +128,40 @@ class Database {
         }
     }
 
-    HashMap<String, Integer> getArrivedBooks() {
-        HashMap<String, Integer> books = new HashMap<>();
+    LinkedList<BookRequests> getArrivedBooks() {
+        LinkedList<BookRequests> books_requests = new LinkedList<>();
         synchronized (this.requests) {
             synchronized (this.arrived_books) {
                 this.arrived_books.forEach((String title, LinkedList<Long> ids) -> {
                     int amount = 0;
                     synchronized (ids) {
                         for (Request req : this.requests) {
-                            System.out.println("Req_id = " + req.getID());
-                            System.out.println("IDS = " + ids.toString());
-                            if (ids.contains(req.getID()) && req.hasWaitingBook(title)) {
+                            if (ids.contains(req.getID()) && req.hasDispatchingBook(title)) {
                                 amount += req.getBookAmount(title);
                             }
                         }
                     }
                     if (amount > 0) {
-                        books.put(title, amount);
+                        books_requests.add(new BookRequests(title, amount, ids));
                     }
                 });
             }
         }
 
-        return books;
+        return books_requests;
+    }
+
+    void booksStored(HashMap<String, Integer> book_amounts, LinkedList<Long> req_ids) {
+        book_amounts.forEach((String title, Integer amount) -> {
+            synchronized (this.requests) {
+                for (Request req : this.requests) {
+                    if (req_ids.contains(req.getID()) && req.hasDispatchingBook(title)) {
+                        req.setBookDispatched(title);
+                    }
+                }
+            }
+        });
+        // TODO: Send user email
     }
 
     /**

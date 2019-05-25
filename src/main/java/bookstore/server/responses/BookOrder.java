@@ -57,6 +57,14 @@ public class BookOrder implements Serializable {
 
     }
 
+    public boolean isDispatching() {
+        return this.state == DISPATCHING;
+    }
+
+    public boolean isDispatched() {
+        return this.state == DISPATCHED;
+    }
+
     public void setDate(Date date) {
         this.disp_date = date;
     }

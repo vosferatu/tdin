@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import bookstore.commons.BaseRMI;
 import bookstore.server.responses.Book;
 import bookstore.server.responses.BookOrder;
+import bookstore.server.responses.BookRequests;
 import bookstore.server.responses.Request;
 import bookstore.server.ServerInterface;
 import bookstore.store.gui.ArrivingBooksWindow;
@@ -32,6 +33,8 @@ public class BookstoreController extends BaseRMI {
 
     private ConcurrentHashMap<String, Book> books;
     private HashMap<String, Integer> order;
+
+    private LinkedList<BookRequests> book_requests;
 
     public static void main(String[] args) {
         System.out.println("Starting Bookstore client...");
@@ -129,11 +132,11 @@ public class BookstoreController extends BaseRMI {
             });
 
             Request req = Request.fromClientData(name, email, addr, books);
-            req.assignID();
             try {
                 this.server_obj.putRequest(req);
             } catch (Exception e) {
-                System.err.println("Failed to finish order!\n - " + e);
+                System.err.println("Failed to finish order!\n - " + e.getMessage());
+                e.printStackTrace();
             }
             this.creator_window.clearOrder();
             this.details_window.getWindow().hide();
@@ -141,7 +144,13 @@ public class BookstoreController extends BaseRMI {
     }
     
     void bookAccepted(String title) {
+        BookRequests reqs = this.getBookRequests(title);
+        if (reqs != null) {
 
+        }
+        else {
+            System.err.println("No book '" + title + "' in book_requests :o");
+        }
     }
 
     void acceptAllBooks() {
@@ -207,9 +216,8 @@ public class BookstoreController extends BaseRMI {
         }
         
         try {
-            HashMap<String, Integer> books = this.server_obj.getArrivedBooks();
-            System.out.println(books.toString());
-            this.arriving_window.setArrivingBooks(books);
+            this.book_requests = this.server_obj.getArrivedBooks();
+            this.arriving_window.setArrivingBooks(this.toBookAmounts(book_requests));
             for (Widget widget : this.arriving_window.getWindow().getChildren()) {
                 this.arriving_window.getWindow().remove(widget);
                 this.window.add(widget);
@@ -219,5 +227,24 @@ public class BookstoreController extends BaseRMI {
             System.err.println("Failed to fetch arriving books from server!\n - " + e);
             e.printStackTrace();
         }
+    }
+
+    private HashMap<String, Integer> toBookAmounts(LinkedList<BookRequests> book_reqs) {
+        HashMap<String, Integer> amounts = new HashMap<>();
+        for (BookRequests book_req : book_reqs) {
+            amounts.put(book_req.getTitle(), book_req.getAmount());
+        }
+
+        return amounts;
+    }
+
+    private BookRequests getBookRequests(String title) {
+        for (BookRequests req : this.book_requests) {
+            if (req.getTitle().equals(title)) {
+                return req;
+            }
+        }
+
+        return null;
     }
 }

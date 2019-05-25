@@ -12,6 +12,7 @@ import com.rabbitmq.client.Delivery;
 import bookstore.commons.BaseRMI;
 import bookstore.commons.BaseQueue;
 import bookstore.server.responses.Book;
+import bookstore.server.responses.BookRequests;
 import bookstore.server.responses.Request;
 
 public class Server extends BaseRMI implements ServerInterface {
@@ -62,18 +63,22 @@ public class Server extends BaseRMI implements ServerInterface {
     }
 
     @Override
-    public String putRequest(Request new_request) throws RemoteException {
+    public void putRequest(Request new_request) throws RemoteException {
         System.out.println("Putting request on db!");
+        new_request.assignID();
         HashMap<String, Request> orders = this.db.putRequest(new_request);
         Request unfinished_req = orders.get("unfinished"), finished_req = orders.get("finished");
         if (unfinished_req.getRequestBooks().size() > 0) {
             System.out.println("Sending request to warehouse");
             this.queue.sendObject(unfinished_req);
         }
-        
-        System.out.println(finished_req.toEmailString());
-        // TODO: Send email to user
-        return null;
+        if (finished_req.hasBooks()) { // Only send email if a request can be satisfied
+            String to = new_request.getEmail();
+            long id = new_request.getID();
+            EmailDispatcher.sendEmail(to, "Order #" + id + " will be dispatched", finished_req.toEmailString());
+            System.out.println("Email: \n" + finished_req.toEmailString() + "\n");
+            // TODO: Send email to user
+        }
     }
 
     @Override
@@ -141,8 +146,13 @@ public class Server extends BaseRMI implements ServerInterface {
     }
     
     @Override
-    public HashMap<String, Integer> getArrivedBooks() throws RemoteException {
+    public LinkedList<BookRequests> getArrivedBooks() throws RemoteException {
         return this.db.getArrivedBooks();
         
+    }
+
+    @Override
+    public void booksStored(HashMap<String, Integer> book_amounts, LinkedList<Long> req_ids) throws RemoteException {
+        this.db.booksStored(book_amounts, req_ids);
     }
 }

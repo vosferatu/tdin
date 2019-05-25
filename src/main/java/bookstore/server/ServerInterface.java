@@ -7,13 +7,15 @@ import java.util.LinkedList;
 
 import bookstore.server.responses.Request;
 import bookstore.server.responses.Book;
+import bookstore.server.responses.BookRequests;
 
 public interface ServerInterface extends Remote {
     //Bookstore functions
     LinkedList<Request> getUserRequests(String username) throws RemoteException;
     LinkedList<Book> getAllBooks() throws RemoteException;
-    String putRequest(Request new_request) throws RemoteException;
-    HashMap<String, Integer> getArrivedBooks() throws RemoteException;
+    void putRequest(Request new_request) throws RemoteException;
+    LinkedList<BookRequests> getArrivedBooks() throws RemoteException;
+    void booksStored(HashMap<String, Integer> book_amounts, LinkedList<Long> req_ids) throws RemoteException;
     
     //Warehouse functions
     LinkedList<Request> getWaitingRequests() throws RemoteException;

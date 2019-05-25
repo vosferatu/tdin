@@ -81,11 +81,15 @@ public class Request implements Serializable {
             email += "  - " + amount + (amount > 1 ? " copies" : " copy") + 
                 " of " + book.getTitle() + " (" + String.format("%1$,.2f", book.getPrice()) + "€ each)\n";
         }
-        email += "\n   -> Total Price = " + String.format("%1$,.2f", total_price) + "€\n";
+        email += "\n  -> Total Price = " + String.format("%1$,.2f", total_price) + "€\n";
         email += "\n" + "They will all be dispatched at " + this.books.getFirst().getDisp_date().toString() + "\n\n";
         email += "Best Regards,\n João Almeida\n João Mendes";
 
         return email;
+    }
+
+    public boolean hasBooks() {
+        return this.books.size() > 0;
     }
 
     public boolean hasWaitingBook(String title) {
@@ -106,13 +110,40 @@ public class Request implements Serializable {
         return 0;
     }
 
-    public void bookDispatched(String title) {
+    public void setBookDispatching(String title) {
         for (BookOrder order : this.books) {
             if (order.getTitle().equals(title)) {
                 order.setDispatchedAt(false, 2);
                 return;
             }
         }
+    }
+
+    public void setBookDispatched(String title) {
+        for (BookOrder order : this.books) {
+            if (order.getTitle().equals(title)) {
+                order.setDispatchedAt(true, 0);
+                return;
+            }
+        }
+    }
+
+    public boolean hasDispatchingBook(String title) {
+        for (BookOrder order : this.books) {
+            if (order.isDispatching()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasDispatchedBook(String title) {
+        for (BookOrder order : this.books) {
+            if (order.isDispatched()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public long getID() {
