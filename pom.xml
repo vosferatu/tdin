@@ -148,6 +148,16 @@
                         </arguments>
                     </configuration>
                 </execution>
+                <execution>
+                    <id>Printer</id>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>bookstore.store.BookstorePrinter</mainClass>
+                        <classpathScope>compile</classpathScope>        System.out.println("Putting request on db!");
+                    </configuration>
+                </execution>
             </executions>    
         </plugin>  
       </plugins>

@@ -72,4 +72,10 @@ public class BookOrder implements Serializable {
     public void setState(String state) {
         this.state = state;
     }
+
+    public String toPrinterString() {
+        int a = this.amount;
+        return "" + a + (a > 1 ? " copies" : " copy") + " of '" + this.book.getTitle() + "' ("
+            + String.format("%1$,.2f€", this.book.getPrice()) + " each)\n"; 
+    }
 }

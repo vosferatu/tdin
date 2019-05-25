@@ -88,6 +88,22 @@ public class Request implements Serializable {
         return email;
     }
 
+    public String toPrinterString() {
+        double total_price = 0.0;
+        String txt = "--- BEGIN ---\n";
+        txt += "Receipt for order #" + this.uuid + "\n";
+        txt += " - Client name: '" + this.client_name + "'\n";
+        txt += " - Client email: '" + this.email + "'\n";
+        txt += " - Client address: '" + this.address + "'\n";
+        txt += " - Books sold: \n";
+        for (BookOrder order : this.books) {
+            txt += "  -> " + order.toPrinterString();
+            total_price += order.getPrice() * order.getAmount();
+        }
+        txt += String.format("\n -> Total Price = %1$,.2f€\n--- END ---", total_price); 
+        return txt;
+    }
+
     public boolean hasBooks() {
         return this.books.size() > 0;
     }

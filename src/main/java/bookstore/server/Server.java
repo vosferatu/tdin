@@ -14,16 +14,20 @@ import bookstore.commons.BaseQueue;
 import bookstore.server.responses.Book;
 import bookstore.server.responses.BookRequests;
 import bookstore.server.responses.Request;
+import bookstore.store.PrinterInterface;
 
 public class Server extends BaseRMI implements ServerInterface {
-    private static final int    BS_OBJ_PORT=8005;
+    private static final String PR_OBJ_NAME="BookstorePrinter";
+    private static final int PR_OBJ_PORT = 8001;
     private static final String BS_OBJ_NAME="BookstoreServer";
-    private static final int    WH_OBJ_PORT=8007;
+    private static final int    BS_OBJ_PORT=8005;
     private static final String WH_OBJ_NAME="WarehouseServer";
+    private static final int    WH_OBJ_PORT=8007;
 
     private boolean is_bookstore;
     private BaseQueue queue;
     private Database db;
+    private PrinterInterface printer;
 
     public static void main(String[] args) {
         if (args.length == 1) {
@@ -31,8 +35,10 @@ public class Server extends BaseRMI implements ServerInterface {
                 boolean is_bookstore = args[0].equals("Bookstore");
                 Server server = new Server(is_bookstore);
                 ServerInterface stub;
-                if (is_bookstore)
+                if (is_bookstore) {
                     stub = (ServerInterface)registerObject((Remote) server, BS_OBJ_NAME, BS_OBJ_PORT);
+                    server.printer = (PrinterInterface)fetchObject(PR_OBJ_NAME, PR_OBJ_PORT);
+                }
                 else
                     stub = (ServerInterface)registerObject((Remote) server, WH_OBJ_NAME, WH_OBJ_PORT);
 
@@ -64,8 +70,8 @@ public class Server extends BaseRMI implements ServerInterface {
 
     @Override
     public void putRequest(Request new_request) throws RemoteException {
-        System.out.println("Putting request on db!");
         new_request.assignID();
+        printer.printRequest(new_request);
         HashMap<String, Request> orders = this.db.putRequest(new_request);
         Request unfinished_req = orders.get("unfinished"), finished_req = orders.get("finished");
         if (unfinished_req.getRequestBooks().size() > 0) {
