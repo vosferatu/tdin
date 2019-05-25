@@ -18,6 +18,7 @@ import bookstore.server.responses.BookRequests;
 import bookstore.server.responses.Request;
 import bookstore.store.PrinterInterface;
 import bookstore.store.controller.BookstoreInterface;
+import bookstore.warehouse.controller.WarehouseInterface;
 
 public class Server extends BaseRMI implements ServerInterface {
     private boolean is_bookstore;
@@ -125,7 +126,14 @@ public class Server extends BaseRMI implements ServerInterface {
         System.out.println("Got a new request!");
         Request req = (Request)this.queue.objFromBytes(msg.getBody());
         this.db.putRequest(req);
-        //TODO: Warn Warehouse client GUI it got new request!
+        try {
+            WarehouseInterface gui_obj = (WarehouseInterface)fetchObject(WH_CLIENT_OBJ_NAME, WH_CLIENT_OBJ_PORT);
+            gui_obj.newBookRequest();
+            System.out.println("Gui warned");
+        }
+        catch (Exception e) {
+            System.err.println("Failed to warn Warehouse client GUI of arriving books!\n - " + e);
+        }
     }
 
     void cancelCallback(String consumer_tag) {
@@ -161,7 +169,6 @@ public class Server extends BaseRMI implements ServerInterface {
         }
         catch (Exception e) {
             System.err.println("Failed to warn Bookstore client GUI of arriving books!\n - " + e);
-            e.printStackTrace();
         }
     }
     
