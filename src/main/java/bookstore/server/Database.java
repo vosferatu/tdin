@@ -14,8 +14,10 @@ import bookstore.server.responses.Request;
 class Database {
     private ConcurrentHashMap<String, Book> books;
     private ConcurrentHashMap<String, Integer> book_stock;
+    private ConcurrentHashMap<String, LinkedList<Long>> arrived_books;
 
     private LinkedList<Request> requests;
+
 
     private boolean is_bookstore;
 
@@ -24,6 +26,7 @@ class Database {
         this.books = new ConcurrentHashMap<>();
         this.readBooksFile();
         this.book_stock = new ConcurrentHashMap<>();
+        this.arrived_books = new ConcurrentHashMap<>();
         if (this.is_bookstore) {
             this.readStockFile();
         }
@@ -97,13 +100,43 @@ class Database {
         return books;
     }
 
-    void bookDispatched(String title, LinkedList<Long> req_uuid) {
-        this.book_stock.compute(title, (String t, Integer a) -> (a == null ? 0 : a) + 10);
-        for (Request req : this.requests) {
-            if (req_uuid.contains(req.getID())) {
-                req.bookDispatched(title);
+    void bookDispatched(String title, LinkedList<Long> ids) {
+        if (this.arrived_books.containsKey(title)) {
+            LinkedList<Long> req_uuids = this.arrived_books.get(title);
+            synchronized (req_uuids) {
+                for (Long id : ids) {
+                    if (!req_uuids.contains(id)) req_uuids.add(id);
+                }
             }
         }
+        else {
+            this.arrived_books.put(title, ids);
+        }
+    }
+
+    HashMap<String, Integer> getArrivedBooks() {
+        HashMap<String, Integer> books = new HashMap<>();
+        synchronized (this.requests) {
+            synchronized (this.arrived_books) {
+                this.arrived_books.forEach((String title, LinkedList<Long> ids) -> {
+                    int amount = 0;
+                    synchronized (ids) {
+                        for (Request req : this.requests) {
+                            System.out.println("Req_id = " + req.getID());
+                            System.out.println("IDS = " + ids.toString());
+                            if (ids.contains(req.getID()) && req.hasWaitingBook(title)) {
+                                amount += req.getBookAmount(title);
+                            }
+                        }
+                    }
+                    if (amount > 0) {
+                        books.put(title, amount);
+                    }
+                });
+            }
+        }
+
+        return books;
     }
 
     /**

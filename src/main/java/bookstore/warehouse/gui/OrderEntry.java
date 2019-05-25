@@ -26,7 +26,7 @@ class OrderEntry extends Grid {
         this.title_label.setAlignment(0.01f, 0.5f);
         this.attach(this.title_label, 0, 0, 1, 1);
         this.amount_label = new Label(String.valueOf(amount));
-        this.amount_label.setSizeRequest(80, 10);
+        this.amount_label.setSizeRequest(100, 10);
         this.attach(this.amount_label, 1, 0, 1, 1);
         this.button = new ImageButton(ActionIcon.GO_LAST, IconSize.BUTTON, title,
                 (String book_title) -> this.handler.run(book_title));

@@ -3,6 +3,8 @@ package bookstore.warehouse.controller;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import org.gnome.gtk.Gtk;
+
 import bookstore.commons.BaseRMI;
 import bookstore.server.ServerInterface;
 import bookstore.server.responses.BookOrder;
@@ -17,7 +19,7 @@ public class WarehouseController extends BaseRMI {
 
     private ServerInterface server_obj;
     private ServerInterface bookstore_obj;
-    private WarehouseWindow client_gui;
+    private WarehouseWindow window;
 
     private LinkedList<Request> reqs;
 
@@ -26,6 +28,7 @@ public class WarehouseController extends BaseRMI {
         try {
             ServerInterface server = (ServerInterface)fetchObject(SERVER_NAME, SERVER_PORT);
             ServerInterface bookstore_obj = (ServerInterface)fetchObject(BOOKSTORE_NAME, BOOKSTORE_PORT);
+            Gtk.init(new String[] {});
             WarehouseController obj = new WarehouseController(server, bookstore_obj);
             System.out.println("Started Bookstore client!");
             obj.startClient();
@@ -38,18 +41,22 @@ public class WarehouseController extends BaseRMI {
     WarehouseController(ServerInterface server, ServerInterface bs_obj) {
         this.server_obj = server;
         this.bookstore_obj = bs_obj;
-        this.client_gui = WarehouseWindow.newWindow(
-            (String title) -> this.sendBook(title), 
-            () -> this.sendAllBooks(),
-            () -> this.refreshInterface()
-        );
+        this.window = WarehouseWindow.newWindow((String title) -> this.sendBook(title));
+        this.window.connectHandler("RefreshButton", () -> this.refreshInterface());
+        this.window.connectHandler("DispatchAllButton", () -> this.sendAllBooks());
     }
 
     public void startClient() {
-        this.client_gui.start();
+        Thread gui_thr = new Thread() {
+            public void run() {
+                Gtk.main();
+            }
+        };
+        gui_thr.start();
         try {
             this.reqs = server_obj.getWaitingRequests();
-            this.client_gui.setOrderList(this.mergeRequests(this.reqs));
+            this.window.setOrderList(this.mergeRequests(this.reqs));
+            this.window.getWindow().showAll();
         }
         catch (Exception e) {
             System.err.println("Failed to fetch all requests!\n - " + e);
@@ -88,7 +95,7 @@ public class WarehouseController extends BaseRMI {
                 this.server_obj.bookDispatched(title, amount, req_uuids);
             }
             this.bookstore_obj.bookDispatched(title, amount, req_uuids);
-            this.client_gui.clearOrder(title);
+            this.window.clearOrder(title);
         }
         catch (Exception e) {
             System.err.println("Failed to send book dispatched msg!\n - " + e);
@@ -110,7 +117,7 @@ public class WarehouseController extends BaseRMI {
                 books_amount.compute(title, (String t, Integer a) -> a + 10); 
             });
             this.bookstore_obj.allBooksDispatched(books_amount, req_uuids);
-            this.client_gui.clearOrders();
+            this.window.clearOrders();
         }
         catch (Exception e) {
             System.err.println("Failed to dispatch all books to bookstore!\n - " + e);
@@ -121,8 +128,8 @@ public class WarehouseController extends BaseRMI {
         synchronized (this.reqs) {
             try {
                 this.reqs = server_obj.getWaitingRequests();
-                this.client_gui.clearOrders();
-                this.client_gui.setOrderList(this.mergeRequests(this.reqs));
+                this.window.clearOrders();
+                this.window.setOrderList(this.mergeRequests(this.reqs));
             }
             catch (Exception e) {
                 System.err.println("Failed to fetch all requests at refresh!\n - " + e);

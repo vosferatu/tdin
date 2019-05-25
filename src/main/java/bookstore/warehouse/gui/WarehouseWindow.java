@@ -13,62 +13,31 @@ import org.gnome.gtk.Builder;
 import org.gnome.gdk.EventButton;
 
 import bookstore.commons.EventHandlers.ClickedButton;
+import bookstore.commons.GenericWindow;
 import bookstore.commons.EventHandlers.AlterBookEvent;
 
-public class WarehouseWindow extends Thread {
-    private Window window;
-    private Button send_all_button;
-    private Button refresh_button;
+public class WarehouseWindow extends GenericWindow {
+    private static final String FILE_NAME = "assets/windows/WarehouseWindow.glade";
+    private static final String ROOT = "root";
+    
     private Grid order_list;
 
     private AlterBookEvent send_handler;
-    private ClickedButton send_all_handler;
-    private ClickedButton refresh_handler;
 
-    @Override
-    public void run() {
-        this.window.showAll();
-        Gtk.main();
+    private WarehouseWindow(AlterBookEvent send_handler) {
+        super(FILE_NAME, ROOT);
+        this.send_handler = send_handler;
     }
 
-    public static WarehouseWindow newWindow(
-        AlterBookEvent send_handler, 
-        ClickedButton send_all_handler,
-        ClickedButton refresh_handler) 
-    {
-        Gtk.init(new String[] {});
-        WarehouseWindow window = new WarehouseWindow();
-        window.send_handler = send_handler;
-        window.send_all_handler = send_all_handler;
-        window.refresh_handler = refresh_handler;
-        Builder b = new Builder();
+    public static WarehouseWindow newWindow(AlterBookEvent send_handler) {
+        WarehouseWindow window = new WarehouseWindow(send_handler);
         try {
-            b.addFromFile("assets/windows/WarehouseWindow.glade");
-            window.window = (Window)b.getObject("root");
-            window.order_list = (Grid)b.getObject("BookOrderList");
-            window.send_all_button = (Button)b.getObject("DispatchAllButton");
-            window.refresh_button = (Button)b.getObject("RefreshButton");
-            window.finishConnections();
+            window.order_list = (Grid)window.builder.getObject("BookOrderList");
             return window;
         }
         catch (Exception e) {
             return null;
         }
-    }
-
-    private void finishConnections() {
-        this.window.connect((Window.DeleteEvent) (Widget arg0, Event arg1) -> {
-            Gtk.mainQuit();
-            return false;
-        });
-        this.send_all_button.connect((Widget.ButtonReleaseEvent) (Widget arg0, EventButton arg1) -> {
-            this.send_all_handler.clicked();
-            return true;
-        });
-        this.refresh_button.connect((Widget.ButtonReleaseEvent) (Widget a, EventButton b) -> {
-            this.refresh_handler.clicked();
-            return true;
-        });
     }
 
     public void setOrderList(HashMap<String, Integer> orders) {

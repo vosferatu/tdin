@@ -137,5 +137,12 @@ public class Server extends BaseRMI implements ServerInterface {
 
     private void warnClientGUI() {
         // TODO: Warn client that book has been dispatched
+        System.out.println("There are arriving books!");
+    }
+    
+    @Override
+    public HashMap<String, Integer> getArrivedBooks() throws RemoteException {
+        return this.db.getArrivedBooks();
+        
     }
 }

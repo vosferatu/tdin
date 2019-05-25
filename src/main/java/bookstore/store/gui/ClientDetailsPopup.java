@@ -1,20 +1,17 @@
 package bookstore.store.gui;
 
-import org.gnome.gtk.Window;
 import org.gnome.gtk.Entry;
 import org.gnome.gtk.Label;
 import org.gnome.gtk.StateFlags;
-import org.gnome.gtk.Widget;
-import org.gnome.gtk.Button;
 import org.gnome.gtk.Editable;
-import org.gnome.gtk.Builder;
-import org.gnome.gdk.EventButton;
 import org.gnome.gdk.RGBA;
 
-import bookstore.commons.EventHandlers.ClickedButton;
+import bookstore.commons.GenericWindow;
 
-public class ClientPopup {
-    Window window;
+public class ClientDetailsPopup extends GenericWindow {
+    private static final String FILE_NAME = "assets/windows/BookstorePopup.glade";
+    private static final String ROOT = "root";
+
     Entry name_field;
     Entry email_field;
     Entry addr_field;
@@ -22,43 +19,29 @@ public class ClientPopup {
     Label email_label;
     Label addr_label;
 
-    Button reset_button;
-    Button finish_button;
+    private ClientDetailsPopup() {
+        super(FILE_NAME, ROOT);
+    }
 
-    ClickedButton finish_handler;
-    ClickedButton reset_handler;
-
-    public ClientPopup(ClickedButton finish_handler, ClickedButton reset_handler) {
-        this.finish_handler = finish_handler;
-        this.reset_handler = reset_handler;
-        Builder b = new Builder();
+    public static ClientDetailsPopup newWindow() {
+        ClientDetailsPopup obj = new ClientDetailsPopup();
         try {
-            b.addFromFile("assets/windows/BookstorePopup.glade");
-            this.window = (Window)b.getObject("root");
-            this.name_field = (Entry)b.getObject("ClientNameField");
-            this.email_field = (Entry)b.getObject("ClientEmailField");
-            this.addr_field = (Entry)b.getObject("ClientAddressField");
-            this.finish_button = (Button)b.getObject("FinishButton");
-            this.reset_button = (Button)b.getObject("ResetButton");
-            this.name_label = (Label)b.getObject("ClientNameLabel");
-            this.email_label = (Label) b.getObject("ClientEmailLabel");
-            this.addr_label = (Label) b.getObject("ClientAddressLabel");
-            this.finishConnections();
+            obj.name_field = (Entry)obj.builder.getObject("ClientNameField");
+            obj.email_field = (Entry)obj.builder.getObject("ClientEmailField");
+            obj.addr_field = (Entry)obj.builder.getObject("ClientAddressField");
+            obj.name_label = (Label)obj.builder.getObject("ClientNameLabel");
+            obj.email_label = (Label)obj.builder.getObject("ClientEmailLabel");
+            obj.addr_label = (Label)obj.builder.getObject("ClientAddressLabel");
+            obj.finishConnections();
+            return obj;
         }
         catch (Exception e) {
-            System.err.println(e);
+            System.err.println("Failed to create Client Details window!\n - " + e);
+            return null;
         }
     }
-    
+
     private void finishConnections() {
-        this.finish_button.connect((Widget.ButtonReleaseEvent)(Widget arg0, EventButton arg1) -> {
-            this.finish_handler.clicked();
-            return true;
-        });
-        this.reset_button.connect((Widget.ButtonReleaseEvent)(Widget arg0, EventButton arg1) -> {
-            this.reset_handler.clicked();
-            return true;
-        });
         this.name_field.connect((Editable.Changed)(Editable widget) -> {
             this.clearErrorMessage(this.name_label);
         });
@@ -68,10 +51,6 @@ public class ClientPopup {
         this.addr_field.connect((Editable.Changed) (Editable widget) -> {
             this.clearErrorMessage(this.addr_label);
         });
-    }
-
-    public void show() {
-        this.window.showAll();
     }
 
     public void closeWindow() {
@@ -113,8 +92,6 @@ public class ClientPopup {
     public void clearErrorMessage(Label label) {
         String curr_text = label.getLabel();
         int prev_i = curr_text.indexOf(" : ");
-        System.err.println("Curr = " + curr_text);
-        System.err.println("':' -> " + curr_text.indexOf(':'));
         if (prev_i != -1) {
             label.setLabel(curr_text.substring(0, curr_text.indexOf(" : ")));
             label.overrideColor(StateFlags.NORMAL, RGBA.BLACK);

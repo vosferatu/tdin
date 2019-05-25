@@ -15,8 +15,6 @@ public class Request implements Serializable {
     private long uuid;
 
     private Request() {
-        this.uuid = ID;
-        ID = ID + 1;
         this.books = new LinkedList<>();
         this.client_name = null;
         this.address = null;
@@ -31,6 +29,11 @@ public class Request implements Serializable {
         req.books = books;
 
         return req;
+    }
+
+    public void assignID() {
+        this.uuid = ID;
+        ID+=1;
     }
 
     public LinkedList<BookOrder> getRequestBooks() {
@@ -114,5 +117,14 @@ public class Request implements Serializable {
 
     public long getID() {
         return this.uuid;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Request) {
+            Request req = (Request)obj;
+            return this.uuid == req.uuid;
+        }
+        return false;
     }
 }
