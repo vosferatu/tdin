@@ -13,15 +13,17 @@ public abstract class GenericWindow {
     protected Window window;
     protected Builder builder;
 
-    protected GenericWindow(String file_name, String root) {
+    protected GenericWindow(String file_name, String root, boolean top_level) {
         this.builder = new Builder();
         try {
             this.builder.addFromFile(file_name);
             this.window = (Window)this.builder.getObject(root);
-            this.window.connect((Window.DeleteEvent) (Widget arg0, Event arg1) -> {
-                Gtk.mainQuit();
-                return false;
-            });
+            if (top_level) {
+                this.window.connect((Window.DeleteEvent) (Widget arg0, Event arg1) -> {
+                    Gtk.mainQuit();
+                    return false;
+                });
+            }
         }
         catch (Exception e) {
             System.err.println("Failed to read '" + file_name + "' file!\n - " + e);

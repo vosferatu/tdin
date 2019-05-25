@@ -13,7 +13,6 @@ import javax.mail.internet.MimeMessage;
 class EmailDispatcher {
     private static final String USERNAME = "bookstoreproj2@gmail.com";
     private static final String PASSWORD = "Pass123!";
-    private static final String HOST = "localhost";
 
 
     private static Properties setupProperties() {

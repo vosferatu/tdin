@@ -18,7 +18,7 @@ public class WarehouseWindow extends GenericWindow {
     private AlterBookEvent send_handler;
 
     private WarehouseWindow(AlterBookEvent send_handler) {
-        super(FILE_NAME, ROOT);
+        super(FILE_NAME, ROOT, true);
         this.send_handler = send_handler;
     }
 

@@ -17,7 +17,7 @@ public class ArrivingBooksWindow extends GenericWindow {
     AlterBookEvent arrived_handler;
 
     private ArrivingBooksWindow(AlterBookEvent arrived_handler) {
-        super(FILE_NAME, ROOT);
+        super(FILE_NAME, ROOT, true);
         this.arrived_handler = arrived_handler;
     }
 

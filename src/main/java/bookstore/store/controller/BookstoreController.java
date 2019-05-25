@@ -67,8 +67,8 @@ public class BookstoreController extends BaseRMI {
         this.details_window = ClientDetailsPopup.newWindow();
         this.details_window.connectHandler("FinishButton", () -> this.finishOrder());
         this.details_window.connectHandler("ResetButton", () -> this.resetDetails());
-        this.arriving_window = ArrivingBooksWindow.newWindow((String title) -> this.bookAccepted(title));
-        this.arriving_window.connectHandler("AcceptAllButton", () -> this.acceptAllBooks());
+        this.arriving_window = ArrivingBooksWindow.newWindow((String title) -> this.bookStored(title));
+        this.arriving_window.connectHandler("AcceptAllButton", () -> this.storeAllBooks());
         this.arriving_window.connectHandler("GoBackButton", () -> this.switchToNormalView());
     }
 
@@ -143,18 +143,34 @@ public class BookstoreController extends BaseRMI {
         }
     }
     
-    void bookAccepted(String title) {
+    void bookStored(String title) {
         BookRequests reqs = this.getBookRequests(title);
         if (reqs != null) {
-
+            LinkedList<BookRequests> book_reqs = new LinkedList<>();
+            book_reqs.add(reqs);
+            try {
+                this.server_obj.booksStored(book_reqs);
+                this.arriving_window.removeArrivingBook(title);
+                this.book_requests.remove(reqs);
+            }
+            catch (Exception e) {
+                System.err.println("Failed to store book '" + title + "' in server!\n - " + e);
+            }
         }
         else {
             System.err.println("No book '" + title + "' in book_requests :o");
         }
     }
 
-    void acceptAllBooks() {
-        
+    void storeAllBooks() {
+        try {
+            this.server_obj.booksStored(this.book_requests);
+            this.arriving_window.removeAllBooks();
+            this.book_requests.clear();
+        }
+        catch (Exception e) {
+            System.err.println("Failed to store all books in server!\n - " + e);
+        }
     }
 
     private boolean detailsValid(String name, String addr, String email) {

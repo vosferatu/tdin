@@ -151,8 +151,11 @@ class Database {
         return books_requests;
     }
 
-    void booksStored(HashMap<String, Integer> book_amounts, LinkedList<Long> req_ids) {
-        book_amounts.forEach((String title, Integer amount) -> {
+    void booksStored(LinkedList<BookRequests> books_req) {
+        books_req.forEach((BookRequests reqs) -> {
+            String title = reqs.getTitle();
+            LinkedList<Long> req_ids = reqs.getReqsID();
+
             synchronized (this.requests) {
                 for (Request req : this.requests) {
                     if (req_ids.contains(req.getID()) && req.hasDispatchingBook(title)) {
@@ -160,6 +163,7 @@ class Database {
                     }
                 }
             }
+            this.book_stock.compute(title, (String t, Integer a) -> (a == null ? 0 : a) + 10);
         });
         // TODO: Send user email
     }

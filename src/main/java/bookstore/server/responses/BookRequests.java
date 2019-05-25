@@ -1,8 +1,10 @@
 package bookstore.server.responses;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class BookRequests {
+public class BookRequests implements Serializable {
+    private static final long serialVersionUID = -3951350722254221596L;
     private String title;
     private int amount;
     private LinkedList<Long> reqs;

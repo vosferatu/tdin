@@ -20,7 +20,7 @@ public class ClientDetailsPopup extends GenericWindow {
     Label addr_label;
 
     private ClientDetailsPopup() {
-        super(FILE_NAME, ROOT);
+        super(FILE_NAME, ROOT, false);
     }
 
     public static ClientDetailsPopup newWindow() {

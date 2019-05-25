@@ -38,7 +38,7 @@
                 <td><c:out value="${book.title}" /></td>
                 <td><c:out value="${book.amount}" /></td>
                 <td><c:out value="${book.state}" /></td>
-                <td><c:out value="${book.disp_date}" />No Date</td>
+                <td><c:out value="${book.disp_date}">No Date</c:out></td>
             </tr>
         </c:forEach>
     </table>

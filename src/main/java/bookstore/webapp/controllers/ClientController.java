@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
@@ -47,7 +48,14 @@ public class ClientController extends HttpServlet {
             if (this.username.length() == 0) {
                 errors.add("Username not valid!");
             }
-            if (this.email.length() == 0) { // TODO: add better validation
+            boolean valid_email = true;
+            try {
+                InternetAddress email_addr = new InternetAddress(this.email);
+                email_addr.validate();
+            } catch (Exception err) {
+                valid_email = false;
+            }
+            if (!valid_email) {
                 errors.add("Email not valid!");
             }
             return errors;

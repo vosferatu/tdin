@@ -42,7 +42,7 @@ public class OrderCreatorWindow extends GenericWindow {
     }
 
     private OrderCreatorWindow(AlterBookEvent add_handler, AlterBookEvent rem_handler) {
-        super(FILE_NAME, ROOT);
+        super(FILE_NAME, ROOT, true);
         this.add_handler = add_handler;
         this.rem_handler = rem_handler;
     }

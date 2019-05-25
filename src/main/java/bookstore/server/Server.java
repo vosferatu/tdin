@@ -76,8 +76,6 @@ public class Server extends BaseRMI implements ServerInterface {
             String to = new_request.getEmail();
             long id = new_request.getID();
             EmailDispatcher.sendEmail(to, "Order #" + id + " will be dispatched", finished_req.toEmailString());
-            System.out.println("Email: \n" + finished_req.toEmailString() + "\n");
-            // TODO: Send email to user
         }
     }
 
@@ -152,7 +150,7 @@ public class Server extends BaseRMI implements ServerInterface {
     }
 
     @Override
-    public void booksStored(HashMap<String, Integer> book_amounts, LinkedList<Long> req_ids) throws RemoteException {
-        this.db.booksStored(book_amounts, req_ids);
+    public void booksStored(LinkedList<BookRequests> books) throws RemoteException {
+        this.db.booksStored(books);
     }
 }

@@ -15,7 +15,7 @@ public interface ServerInterface extends Remote {
     LinkedList<Book> getAllBooks() throws RemoteException;
     void putRequest(Request new_request) throws RemoteException;
     LinkedList<BookRequests> getArrivedBooks() throws RemoteException;
-    void booksStored(HashMap<String, Integer> book_amounts, LinkedList<Long> req_ids) throws RemoteException;
+    void booksStored(LinkedList<BookRequests> books) throws RemoteException;
     
     //Warehouse functions
     LinkedList<Request> getWaitingRequests() throws RemoteException;
