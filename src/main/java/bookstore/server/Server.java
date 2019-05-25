@@ -66,8 +66,8 @@ public class Server extends BaseRMI implements ServerInterface {
     }
 
     @Override
-    public void putRequest(String name, String addr, String email, HashMap<String, Integer> books) throws RemoteException {
-        Request new_request = this.createRequest(name, addr, email, books);
+    public void putRequest(String name, String email, String addr, HashMap<String, Integer> books) throws RemoteException {
+        Request new_request = this.createRequest(name, email, addr, books);
         if (this.printer != null) {
             printer.printRequest(new_request);
         }
@@ -83,7 +83,7 @@ public class Server extends BaseRMI implements ServerInterface {
         }
     }
 
-    private Request createRequest(String name, String addr, String email, HashMap<String, Integer> books_amount) {
+    private Request createRequest(String name, String email, String addr, HashMap<String, Integer> books_amount) {
         LinkedList<BookOrder> books_order = new LinkedList<>();
         Map<String, Book> books = this.db.getBooks();
 

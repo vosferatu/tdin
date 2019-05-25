@@ -166,26 +166,44 @@ class Database {
     }
 
     void booksStored(LinkedList<BookRequests> books_req) {
-        books_req.forEach((BookRequests reqs) -> {
-            String title = reqs.getTitle();
-            LinkedList<Long> req_ids = reqs.getReqsID();
+        synchronized (this.arrived_books) {
+            synchronized (this.requests) {
+                for (Request req : this.requests) {
+                    long id = req.getID();
+                    HashMap<String, Integer> dispatched_books = new HashMap<>();
+                    for (BookRequests book_req : books_req) {
+                        String title = book_req.getTitle();
+                        LinkedList<Long> req_ids = book_req.getReqsID();
 
-            synchronized (this.arrived_books) {
-                synchronized (this.requests) {
-                    for (Request req : this.requests) {
-                        long req_id = req.getID();
-                        if (req_ids.contains(req_id) && req.hasDispatchingBook(title)) {
+                        if (req_ids.contains(id) && req.hasDispatchingBook(title)) {
                             req.setBookDispatched(title);
-                            if (this.arrived_books.containsKey(req_id)) {
-                                this.arrived_books.get(title).remove(req_id);
+                            dispatched_books.put(title, req.getBookAmount(title));
+                            if (this.arrived_books.containsKey(title)) {
+                                this.arrived_books.get(title).remove(id);
                             }
                         }
+                        this.book_stock.compute(title, (String t, Integer a) -> (a == null ? 0 : a) + 10);
                     }
+                    this.sendBooksDispatchedEmail(req.getClientName(), req.getEmail(), req.getAddress(), req.getID(), dispatched_books);
                 }
             }
-            this.book_stock.compute(title, (String t, Integer a) -> (a == null ? 0 : a) + 10);
-        });
-        // TODO: Send user email
+        }
+    }
+
+    private void sendBooksDispatchedEmail(String name, String email, String addr, long id, HashMap<String, Integer> dispatched_books) {
+        String txt = "";
+        for (Map.Entry<String, Integer> entry : dispatched_books.entrySet()) {
+            String title = entry.getKey();
+            int amount = entry.getValue();
+
+            txt += String.format(" -> %d " + (amount > 1 ? "copies" : "copy") 
+                + " of '%s'\n", amount, title);
+        }
+        String body = String.format("Dear Mr. or Mrs. %s\n\n" 
+            + "We are pleased to inform you that the previously requested books:\n"
+            + txt + "\nAre being dispatched today so they should arrive briefly at your home address '%s'"
+            + "\n\nBest Regards,\nJoao Almeida\nJoao Mendes", name, addr);
+        EmailDispatcher.sendEmail(email, String.format("Dispatched Order #%d Books", id), body);
     }
 
     /**

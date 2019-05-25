@@ -27,6 +27,10 @@ public class BookRequests implements Serializable {
         return this.reqs;
     }
 
+    public boolean hasID(long id) {
+        return this.reqs.contains(id);
+    }
+
     @Override
     public String toString() {
         return String.format("Title = %s, Amount = %d, IDS=" + reqs.toString(), this.title, this.amount);
