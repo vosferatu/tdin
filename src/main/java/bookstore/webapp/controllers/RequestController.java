@@ -34,10 +34,14 @@ public class RequestController extends HttpServlet {
         JsonReader json_reader = Json.createReader(new ByteArrayInputStream(req.getParameter("books").getBytes()));
         HashMap<String, Integer> books = jsonToMap(json_reader.readObject());
         String name = req.getParameter("username"), email = req.getParameter("email"), addr = req.getParameter("address");
-
-        this.server_obj.putRequest(name, addr, email, books);
-
-        res.setStatus(HttpServletResponse.SC_OK);
+        
+        if (books.size() > 0) {
+            this.server_obj.putRequest(name, addr, email, books);
+            res.setStatus(HttpServletResponse.SC_OK);
+        }
+        else {
+            res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        }
     }
 
     public static HashMap<String, Integer> jsonToMap(JsonObject json) throws JsonException {
