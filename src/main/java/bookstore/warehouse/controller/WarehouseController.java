@@ -4,6 +4,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.gnome.gtk.Gtk;
 
@@ -94,8 +95,10 @@ public class WarehouseController extends BaseRMI implements WarehouseInterface {
                     }
                 }
             }
-            this.server_obj.bookDispatched(title, amount, req_uuids);
-            this.bookstore_obj.bookDispatched(title, amount, req_uuids);
+            Map<String, Integer> book_amounts = new HashMap<String, Integer>();
+            book_amounts.put(title, amount);
+            this.server_obj.booksDispatched(book_amounts, req_uuids);
+            this.bookstore_obj.booksDispatched(book_amounts, req_uuids);
             this.window.clearOrder(title);
         } catch (Exception e) {
             System.err.println("Failed to send book dispatched msg!\n - " + e);
@@ -115,8 +118,8 @@ public class WarehouseController extends BaseRMI implements WarehouseInterface {
                     this.reqs.clear();
                 }
             }
-            this.server_obj.allBooksDispatched(books_amount, req_uuids);
-            this.bookstore_obj.allBooksDispatched(books_amount, req_uuids);
+            this.server_obj.booksDispatched(books_amount, req_uuids);
+            this.bookstore_obj.booksDispatched(books_amount, req_uuids);
             this.window.clearOrders();
         } catch (Exception e) {
             System.err.println("Failed to dispatch all books to bookstore!\n - " + e);

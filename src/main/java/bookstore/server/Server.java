@@ -66,7 +66,7 @@ public class Server extends BaseRMI implements ServerInterface {
     }
 
     @Override
-    public void putRequest(String name, String email, String addr, HashMap<String, Integer> books) throws RemoteException {
+    public void putRequest(String name, String email, String addr, Map<String, Integer> books) throws RemoteException {
         Request new_request = this.createRequest(name, email, addr, books);
         if (this.printer != null) {
             printer.printRequest(new_request);
@@ -83,7 +83,7 @@ public class Server extends BaseRMI implements ServerInterface {
         }
     }
 
-    private Request createRequest(String name, String email, String addr, HashMap<String, Integer> books_amount) {
+    private Request createRequest(String name, String email, String addr, Map<String, Integer> books_amount) {
         LinkedList<BookOrder> books_order = new LinkedList<>();
         Map<String, Book> books = this.db.getBooks();
 
@@ -141,16 +141,7 @@ public class Server extends BaseRMI implements ServerInterface {
     }
 
     @Override
-    public void bookDispatched(String title, int amount, LinkedList<Long> req_uuids) throws RemoteException {
-        this.db.bookDispatched(title, req_uuids);
-        System.out.println("Book " + title + " will be dispatched");
-        if (this.is_bookstore) {
-            this.warnClientGUI();
-        }
-    }
-
-    @Override
-    public void allBooksDispatched(HashMap<String, Integer> book_amount, LinkedList<Long> req_uuids)
+    public void booksDispatched(Map<String, Integer> book_amount, LinkedList<Long> req_uuids)
             throws RemoteException 
     {
         book_amount.forEach((String title, Integer amount) -> {

@@ -54,8 +54,3 @@ In the root of the project run:
 To start hosting a local webapp service. Then access webapp at:
    
     localhost:8000/bookstore
-
-## Possible Improvements
-
- - Make Servers communicate directly with GUI when new information arrives through RMI.
-   - This will probably cause some race conditions so it will be left for the latest stage of the project since it is not absolutely necessary.

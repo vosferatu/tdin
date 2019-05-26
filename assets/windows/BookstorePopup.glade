@@ -14,7 +14,6 @@
   </object>
   <object class="GtkWindow" id="root">
     <property name="can_focus">False</property>
-    <property name="type">popup</property>
     <property name="title" translatable="yes">Client Details Window</property>
     <property name="window_position">center</property>
     <property name="hide_titlebar_when_maximized">True</property>
