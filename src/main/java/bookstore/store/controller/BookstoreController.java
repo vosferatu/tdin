@@ -126,6 +126,7 @@ public class BookstoreController extends BaseRMI implements BookstoreInterface {
         if (detailsValid(name, addr, email)) {
             try {
                 this.server_obj.putRequest(name, email, addr, order);
+                this.creator_window.setAvailableBooks(this.server_obj.getAllBooks());
             } catch (Exception e) {
                 System.err.println("Failed to finish order!\n - " + e.getMessage());
                 e.printStackTrace();

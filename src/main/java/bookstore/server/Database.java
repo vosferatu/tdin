@@ -188,6 +188,7 @@ class Database {
                 }
             }
         }
+        FileWriter.writeStocksToFile(this.book_stock);
     }
 
     private void sendBooksDispatchedEmail(String name, String email, String addr, long id, HashMap<String, Integer> dispatched_books) {
@@ -232,6 +233,7 @@ class Database {
                 orders.get("unfinished").add(order);
             }
         }
+        FileWriter.writeStocksToFile(this.book_stock);
         synchronized (this.requests) { this.requests.add(new_req); }
         return this.ordersToRequest(new_req, orders);
     }
