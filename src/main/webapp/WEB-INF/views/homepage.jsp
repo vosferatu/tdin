@@ -30,10 +30,10 @@
             
             <c:forEach var='book' items='${request.requestBooks}'>
                 <tr>
-                    <td><c:out value="${book.title}" /></td>
-                    <td><c:out value="${book.amount}" /></td>
-                    <td><c:out value="${book.state}" /></td>
-                    <td><c:out value="${book.disp_date}">No Date</c:out></td>
+                    <td align="center"><c:out value="${book.title}" /></td>
+                    <td align="center"><c:out value="${book.amount}" /></td>
+                    <td align="center"><c:out value="${book.state}" /></td>
+                    <td align="center"><c:out value="${book.disp_date}">No Date</c:out></td>
                 </tr>
             </c:forEach>
         </table>
@@ -45,14 +45,16 @@
             <tr>
                 <th>Title</th>
                 <th>Price</th>
+                <th>Stock</th>
                 <th>Amount</th>
                 
             </tr>
             <c:forEach var='book' items='${all_books}'>
                 <tr>
                     <td><c:out value='${book.title}' /></td>
-                    <td><c:out value='${book.price}' /></td>
-                    <td class="BookAmount" id="${book.title}">0</td>
+                    <td align="center"><c:out value='${book.price}' /></td>
+                    <td align="center"><c:out value='${book.stock}' /></td>
+                    <td align="center" class="BookAmount" id="${book.title}">0</td>
                     <td><button onclick='addBook("${book.title}");'>+</button></td>
                     <td><button onclick='removeBook("${book.title}");'>-</button></td>
                 </tr>

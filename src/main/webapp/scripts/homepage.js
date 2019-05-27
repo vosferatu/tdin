@@ -40,6 +40,7 @@ function submitRequest() {
         },
         success: function(msg) {
             resetRequest();
+            location.reload();
         }
     });
 }

@@ -36,7 +36,7 @@ public class RequestController extends HttpServlet {
         String name = req.getParameter("username"), email = req.getParameter("email"), addr = req.getParameter("address");
         
         if (books.size() > 0) {
-            this.server_obj.putRequest(name, addr, email, books);
+            this.server_obj.putRequest(name, email, addr, books);
             res.setStatus(HttpServletResponse.SC_OK);
         }
         else {
